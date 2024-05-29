@@ -2,10 +2,6 @@ import React, { useState, useCallback, useContext } from "react";
 import { toast } from "react-toastify";
 import { format, parseISO } from "date-fns";
 
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-
 import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import {
@@ -47,7 +43,6 @@ import toastError from "../../errors/toastError";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
-import formatSerializedId from '../../utils/formatSerializedId';
 
 const useStyles = makeStyles(theme => ({
 	mainPaper: {
@@ -160,9 +155,6 @@ const Connections = () => {
 		setSelectedWhatsApp(whatsApp);
 		setWhatsAppModalOpen(true);
 	};
-	const openInNewTab = url => {
-		window.open(url, '_blank', 'noopener,noreferrer');
-	  };
 
 	const handleOpenConfirmationModal = (action, whatsAppId) => {
 		if (action === "disconnect") {
@@ -301,18 +293,6 @@ const Connections = () => {
 		);
 	};
 
-	
-	const restartWhatsapps = async () => {
-
-		try {
-		  await api.post(`/whatsapp-restart/`);
-		  toast.success(i18n.t("connections.waitConnection"));
-		} catch (err) {
-		  toastError(err);
-		}
-	  }
-	
-
 	return (
 		<MainContainer>
 			<ConfirmationModal
@@ -336,21 +316,6 @@ const Connections = () => {
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
 				<MainHeaderButtonsWrapper>
-				<Button
-            variant="contained"
-            color="primary"
-            onClick={() => openInNewTab("https://wa.me/556196080740")}
-          >
-            {i18n.t("connections.callSupport")}
-          </Button>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={restartWhatsapps}
-          >
-            {i18n.t("connections.restartConnections")}
-          </Button>
 					<Can
 						role={user.profile}
 						perform="connections-page:addConnection"

@@ -37,7 +37,6 @@ import Files from "../pages/Files/";
 import Prompts from "../pages/Prompts";
 import QueueIntegration from "../pages/QueueIntegration";
 import ForgetPassword from "../pages/ForgetPassWord/"; // Reset PassWd
-import Typebot from "../pages/Typebot";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -56,7 +55,7 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
-            <Route exact path="/forgetpsw"    component={ForgetPassword} />  {/* Reset Password */}
+			<Route exact path="/forgetpsw" component={ForgetPassword} /> 
             {/* <Route exact path="/create-company" component={Companies} /> */}
             <WhatsAppsProvider>
               <LoggedInLayout>
@@ -98,7 +97,6 @@ const Routes = () => {
                 <Route exact path="/files" component={Files} isPrivate />
                 <Route exact path="/prompts" component={Prompts} isPrivate />
                 <Route exact path="/queue-integration" component={QueueIntegration} isPrivate />
-                <Route exact path="/typebot" component={Typebot} isPrivate />
 
                 <Route
                   exact

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 
@@ -8,7 +8,9 @@ import { Button, CircularProgress, Grid, TextField, Typography } from "@material
 import { Field, Form, Formik } from "formik";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
-import api from "../../services/api";
+// import api from "../../services/api";
+import axios from "axios";
+import usePlans from "../../hooks/usePlans";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -20,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
   },
   elementMargin: {
-    marginTop: theme.spacing(2),
+    padding: theme.spacing(2),
   },
   formContainer: {
     maxWidth: 500,
@@ -32,10 +34,28 @@ const useStyles = makeStyles((theme) => ({
 
 const MessagesAPI = () => {
   const classes = useStyles();
+  const history = useHistory();
 
-  const [formMessageTextData,] = useState({ token: '',number: '', body: '' })
+  const [formMessageTextData,] = useState({ token: '', number: '', body: '' })
   const [formMessageMediaData,] = useState({ token: '', number: '', medias: '' })
   const [file, setFile] = useState({})
+
+  const { getPlanCompany } = usePlans();
+
+  useEffect(() => {
+    async function fetchData() {
+      const companyId = localStorage.getItem("companyId");
+      const planConfigs = await getPlanCompany(undefined, companyId);
+      if (!planConfigs.plan.useExternalApi) {
+        toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
+        setTimeout(() => {
+          history.push(`/`)
+        }, 1000);
+      }
+    }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getEndpoint = () => {
     return process.env.REACT_APP_BACKEND_URL + '/api/messages/send'
@@ -44,45 +64,39 @@ const MessagesAPI = () => {
   const handleSendTextMessage = async (values) => {
     const { number, body } = values;
     const data = { number, body };
-    var options = {
-      method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/api/messages/send`,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${values.token}`
-      },
-      data
-    };
-    
-    axios.request(options).then(function (response) {
+    try {
+      await axios.request({
+        url: getEndpoint(),
+        method: 'POST',
+        data,
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${values.token}`
+        }
+      })
       toast.success('Mensagem enviada com sucesso');
-    }).catch(function (error) {
-      toastError(error);
-    });    
+    } catch (err) {
+      toastError(err);
+    }
   }
 
-  const handleSendMediaMessage = async (values) => { 
+  const handleSendMediaMessage = async (values) => {
     try {
-      const firstFile =  file[0];
+      const firstFile = file[0];
       const data = new FormData();
       data.append('number', values.number);
       data.append('body', firstFile.name);
       data.append('medias', firstFile);
-      var options = {
+      await axios.request({
+        url: getEndpoint(),
         method: 'POST',
-        url: `${process.env.REACT_APP_BACKEND_URL}/api/messages/send`,
+        data,
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${values.token}`
-        },
-        data
-      };
-      
-      axios.request(options).then(function (response) {
-        toast.success('Mensagem enviada com sucesso');
-      }).catch(function (error) {
-        toastError(error);
-      });      
+          'Content-type': 'multipart/form-data',
+          'Authorization': `Bearer ${values.token}`
+        }
+      })
+      toast.success('Mensagem enviada com sucesso');
     } catch (err) {
       toastError(err);
     }
@@ -146,18 +160,18 @@ const MessagesAPI = () => {
               </Grid>
               <Grid item xs={12} className={classes.textRight}>
                 <Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									className={classes.btnWrapper}
-								>
-									{isSubmitting ? (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
-									) : i18n.t("messagesAPI.buttons.submit")}
-								</Button>
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  className={classes.btnWrapper}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
+                  ) : 'Enviar'}
+                </Button>
               </Grid>
             </Grid>
           </Form>
@@ -173,7 +187,6 @@ const MessagesAPI = () => {
         enableReinitialize={true}
         onSubmit={(values, actions) => {
           setTimeout(async () => {
-           
             await handleSendMediaMessage(values);
             actions.setSubmitting(false);
             actions.resetForm()
@@ -217,18 +230,18 @@ const MessagesAPI = () => {
               </Grid>
               <Grid item xs={12} className={classes.textRight}>
                 <Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									className={classes.btnWrapper}
-								>
-									{isSubmitting ? (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
-									) : i18n.t("messagesAPI.buttons.submit")}
-								</Button>
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  className={classes.btnWrapper}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
+                  ) : 'Enviar'}
+                </Button>
               </Grid>
             </Grid>
           </Form>
@@ -240,71 +253,73 @@ const MessagesAPI = () => {
   return (
     <Paper
       className={classes.mainPaper}
+      style={{marginLeft: "5px"}}
+      // className={classes.elementMargin}
       variant="outlined"
     >
       <Typography variant="h5">
-        {i18n.t("messagesAPI.doc")}
+        Documentação para envio de mensagens
       </Typography>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
-        {i18n.t("messagesAPI.formMethod")}
+        Métodos de Envio
       </Typography>
       <Typography component="div">
         <ol>
-          <li>{i18n.t("messagesAPI.helpTexts.textMsg.title")}</li>
-          <li>{i18n.t("messagesAPI.helpTexts.mediaMsg.title")}</li>
+          <li>Mensagens de Texto</li>
+          <li>Mensagens de Media</li>
         </ol>
       </Typography>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
-      {i18n.t("messagesAPI.helpTexts.instructions")}
+        Instruções
       </Typography>
       <Typography className={classes.elementMargin} component="div">
-        <b>{i18n.t("messagesAPI.helpTexts.notes.title")}</b><br />
+        <b>Observações importantes</b><br />
         <ul>
-          <li>{i18n.t("messagesAPI.helpTexts.notes.textA")}</li>
+          <li>Antes de enviar mensagens, é necessário o cadastro do token vinculado à conexão que enviará as mensagens. <br />Para realizar o cadastro acesse o menu "Conexões", clique no botão editar da conexão e insira o token no devido campo.</li>
           <li>
-          {i18n.t("messagesAPI.helpTexts.notes.textB.title")}
-              <ul>
-                <li>{i18n.t("messagesAPI.helpTexts.notes.textB.partA")}</li>
-                <li>{i18n.t("messagesAPI.helpTexts.notes.textB.partB")}</li>
-                <li>{i18n.t("messagesAPI.helpTexts.notes.textB.partC")}</li>
-              </ul>
+            O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:
+            <ul>
+              <li>Código do país</li>
+              <li>DDD</li>
+              <li>Número</li>
+            </ul>
           </li>
         </ul>
       </Typography>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
-        1. {i18n.t("messagesAPI.helpTexts.textMsg.title")}
+        1. Mensagens de Texto
       </Typography>
       <Grid container>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin} component="div">
-            <p>{i18n.t("messagesAPI.helpTexts.textMsg.info")}</p>
-            <b>{i18n.t("messagesAPI.helpTexts.textMsg.endpoint")} </b> {getEndpoint()} <br />
-            <b>{i18n.t("messagesAPI.helpTexts.textMsg.method")} </b> POST <br />
-            <b>{i18n.t("messagesAPI.helpTexts.textMsg.headers")} </b> X_TOKEN (token cadastrado) e Content-Type (application/json) <br />
-            <b>{i18n.t("messagesAPI.helpTexts.textMsg.body")} </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\" }"}
+            <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
+            <b>Endpoint: </b> {getEndpoint()} <br />
+            <b>Método: </b> POST <br />
+            <b>Headers: </b> Authorization (Bearer token) e Content-Type (application/json) <br />
+            <b>Body: </b> {"{ \"number\": \"595985523065\", \"body\": \"Sua mensagem\" }"}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin}>
-            <b>{i18n.t("messagesAPI.helpTexts.textMsg.test")}</b>
+            <b>Teste de Envio</b>
           </Typography>
           {renderFormMessageText()}
         </Grid>
       </Grid>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
-        2. {i18n.t("messagesAPI.helpTexts.mediaMsg.title")}
+        2. Mensagens de Media
       </Typography>
       <Grid container>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin} component="div">
-            <p>{i18n.t("messagesAPI.helpTexts.mediaMsg.info")}</p>
-            <b>{i18n.t("messagesAPI.helpTexts.mediaMsg.endpoint")} </b> {getEndpoint()} <br />
-            <b>{i18n.t("messagesAPI.helpTexts.mediaMsg.method")} </b> POST <br />
-            <b>{i18n.t("messagesAPI.helpTexts.mediaMsg.headers")} </b> X_TOKEN (token cadastrado) e Content-Type (multipart/form-data) <br />
-            <b>{i18n.t("messagesAPI.helpTexts.mediaMsg.formData")}</b> <br />
+            <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
+            <b>Endpoint: </b> {getEndpoint()} <br />
+            <b>Método: </b> POST <br />
+            <b>Headers: </b> Authorization (Bearer token) e Content-Type (multipart/form-data) <br />
+            <b>FormData: </b> <br />
             <ul>
               <li>
-                <b>number: </b> 558599999999
+                <b>number: </b> 5599999999999
               </li>
               <li>
                 <b>medias: </b> arquivo
@@ -314,7 +329,7 @@ const MessagesAPI = () => {
         </Grid>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin}>
-            <b>{i18n.t("messagesAPI.helpTexts.test")}</b>
+            <b>Teste de Envio</b>
           </Typography>
           {renderFormMessageMedia()}
         </Grid>

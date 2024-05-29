@@ -56,7 +56,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const io = getIO();
 
   record.users.forEach(user => {
-    io.emit(`company-${companyId}-chat-user-${user.userId}`, {
+    io.to(`user-${user.userId}`).emit(`company-${companyId}-chat-user-${user.userId}`, {
       action: "create",
       record
     });
@@ -81,7 +81,7 @@ export const update = async (
   const io = getIO();
 
   record.users.forEach(user => {
-    io.emit(`company-${companyId}-chat-user-${user.userId}`, {
+    io.to(`user-${user.userId}`).emit(`company-${companyId}-chat-user-${user.userId}`, {
       action: "update",
       record
     });
@@ -108,7 +108,7 @@ export const remove = async (
   await DeleteService(id);
 
   const io = getIO();
-  io.emit(`company-${companyId}-chat`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-chat`, {
     action: "delete",
     id
   });
@@ -140,13 +140,13 @@ export const saveMessage = async (
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${chatId}`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-chat-${chatId}`, {
     action: "new-message",
     newMessage,
     chat
   });
 
-  io.emit(`company-${companyId}-chat`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-chat`, {
     action: "new-message",
     newMessage,
     chat
@@ -174,12 +174,12 @@ export const checkAsRead = async (
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${id}`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-chat-${id}`, {
     action: "update",
     chat
   });
 
-  io.emit(`company-${companyId}-chat`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-chat`, {
     action: "update",
     chat
   });

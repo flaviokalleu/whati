@@ -12,36 +12,6 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const http = require('http');
-
-const init = {
-	host: process.env.DB_HOST,
-	path: process.env.DB_PORT || 5432,
-	port: 8080,
-  	method: 'POST',
-  	headers: {
-    'content-type': 'application/json; charset=utf-8'
-  }
-};
-
-const callback = function(response) {
-  let result = Buffer.alloc(0);
-  response.on('data', function(chunk) {
-    result = Buffer.concat([result, chunk]);
-  });
-  
-  response.on('end', function() {
-    console.log(result.toString());
-  });
-};
-
-async function ZDGProtocolo(usuario, protocolo) {
-	const req = http.request(init, callback);
-	const body = `{"usuario":"` + usuario + `","protocolo":"`+ protocolo + `"}`;
-	await req.write(body);
-	req.end();
-}
-
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
 		marginRight: 6,
@@ -56,34 +26,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const TicketActionButtons = ({ ticket }) => {
-	const { ticketId } = useParams();
 	const classes = useStyles();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
-
-	const handleSendMessage = async (status, userId) => {
-		const message = {
-		  read: 1,
-		  fromMe: true,
-		  mediaUrl: "",
-		  body: "Seu protocolo de atendimento é: *nº " + Math.floor(Date.now()/1000) + '*',
-		};
-		try {
-		  const { data } = await api.get("/tickets/" + ticketId);
-		  ZDGProtocolo(data.contact.number, Math.floor(Date.now()/1000).toString());
-		  await api.post(`/messages/${ticketId}`, message);
-		  alert('Protocolo de atendimento:' + Math.floor(Date.now()/1000));
-		  await api.put(`/tickets/${ticket.id}`, {
-			status: status,
-			userId: userId || null,
-		  });
-		} catch (err) {
-		  toastError(err);
-		}
-	  };
 
 	const handleOpenTicketOptionsMenu = e => {
 		setAnchorEl(e.currentTarget);
@@ -96,15 +44,10 @@ const TicketActionButtons = ({ ticket }) => {
 	const handleUpdateTicketStatus = async (e, status, userId) => {
 		setLoading(true);
 		try {
-			if (status === "closed" && text === "Protocolo") {
-				handleSendMessage(status, userId);
-			}
-			else {
-				await api.put(`/tickets/${ticket.id}`, {
-					status: status,
-					userId: userId || null,
-				});
-			}
+			await api.put(`/tickets/${ticket.id}`, {
+				status: status,
+				userId: userId || null,
+			});
 
 			setLoading(false);
 			if (status === "open") {
@@ -148,15 +91,6 @@ const TicketActionButtons = ({ ticket }) => {
 						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
 					>
 						{i18n.t("messagesList.header.buttons.resolve")}
-					</ButtonWithSpinner>
-					<ButtonWithSpinner
-						loading={loading}
-						size="small"
-						variant="contained"
-						color="primary"
-						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id, "Protocolo")}
-					>
-						{"Protocolo"}
 					</ButtonWithSpinner>
 					<IconButton onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />

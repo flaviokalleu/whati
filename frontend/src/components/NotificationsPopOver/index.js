@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 
 import { useHistory } from "react-router-dom";
 import { format } from "date-fns";
+import { SocketContext } from "../../context/Socket/SocketContext";
+
 import useSound from "use-sound";
 
 import Popover from "@material-ui/core/Popover";
@@ -11,263 +13,258 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
 import Badge from "@material-ui/core/Badge";
-//import ChatIcon from "@material-ui/icons/Chat";
-import WhatsAppIcon from '@material-ui/icons/WhatsApp';
+import ChatIcon from "@material-ui/icons/Chat";
 
-import TicketListItem from "../TicketListItem";
-import { i18n } from "../../translate/i18n";
+import TicketListItem from "../TicketListItemCustom";
 import useTickets from "../../hooks/useTickets";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { socketConnection } from "../../services/socket";
+import { i18n } from "../../translate/i18n";
+import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
-  tabContainer: {
-    overflowY: "auto",
-    maxHeight: 350,
-    ...theme.scrollbarStyles,
-  },
-  popoverPaper: {
-    width: "100%",
-    maxWidth: 350,
-    marginLeft: theme.spacing(2),
-    marginRight: theme.spacing(1),
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: 270,
-    },
-  },
-  noShadow: {
-    boxShadow: "none !important",
-  },
-  icons: {
-    color: "#fff",
-  },
-  customBadge: {
-    backgroundColor: "#34E23C",
-    color: "#fff",
-  },
+const useStyles = makeStyles(theme => ({
+	tabContainer: {
+		overflowY: "auto",
+		maxHeight: 350,
+		...theme.scrollbarStyles,
+	},
+	popoverPaper: {
+		width: "100%",
+		maxWidth: 350,
+		marginLeft: theme.spacing(2),
+		marginRight: theme.spacing(1),
+		[theme.breakpoints.down("sm")]: {
+			maxWidth: 270,
+		},
+	},
+	noShadow: {
+		boxShadow: "none !important",
+	},
 }));
 
-const NotificationsPopOver = ({ volume }) => {
-  const classes = useStyles();
+const NotificationsPopOver = (volume) => {
+	const classes = useStyles();
 
-  const history = useHistory();
-  const { user } = useContext(AuthContext);
-  const ticketIdUrl = +history.location.pathname.split("/")[2];
-  const ticketIdRef = useRef(ticketIdUrl);
-  const anchorEl = useRef();
-  const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const { profile, queues } = user;
+	const history = useHistory();
+	const { user } = useContext(AuthContext);
+	const ticketIdUrl = +history.location.pathname.split("/")[2];
+	const ticketIdRef = useRef(ticketIdUrl);
+	const anchorEl = useRef();
+	const [isOpen, setIsOpen] = useState(false);
+	const [notifications, setNotifications] = useState([]);
 
-  const [, setDesktopNotifications] = useState([]);
+	const [showPendingTickets, setShowPendingTickets] = useState(false);
 
-  const { tickets } = useTickets({ withUnreadMessages: "true" });
-  const [play] = useSound(alertSound, { volume, });
-  const soundAlertRef = useRef();
+	const [, setDesktopNotifications] = useState([]);
 
-  const historyRef = useRef(history);
+	const { tickets } = useTickets({ withUnreadMessages: "true" });
 
-  useEffect(() => {
-    soundAlertRef.current = play;
+	const [play] = useSound(alertSound, volume);
+	const soundAlertRef = useRef();
 
-    if (!("Notification" in window)) {
-      console.log("This browser doesn't support notifications");
-    } else {
-      Notification.requestPermission();
-    }
-  }, [play]);
+	const historyRef = useRef(history);
 
-  useEffect(() => {
-    const queueIds = queues.map((q) => q.id);
-    const filteredTickets = tickets.filter(
-      (t) => queueIds.indexOf(t.queueId) > -1
-    );
+  const socketManager = useContext(SocketContext);
 
-    if (profile === "user") {
-      setNotifications(filteredTickets);
-    } else {
-      setNotifications(tickets);
-    }
-  }, [tickets, queues, profile]);
+	useEffect(() => {
+		const fetchSettings = async () => {
+			try {
 
-  useEffect(() => {
-    ticketIdRef.current = ticketIdUrl;
-  }, [ticketIdUrl]);
+				if (user.allTicket === "enable") {
+					setShowPendingTickets(true);
+				}
+			} catch (err) {
+			  	toastError(err);
+			}
+		}
+	  
+		fetchSettings();
+	}, []);
 
-  useEffect(() => {
-    const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+	useEffect(() => {
+		soundAlertRef.current = play;
 
-    const queueIds = queues.map((q) => q.id);
+		if (!("Notification" in window)) {
+			console.log("This browser doesn't support notifications");
+		} else {
+			Notification.requestPermission();
+		}
+	}, [play]);
 
-    socket.on("connect", () => socket.emit("joinNotification"));
+	useEffect(() => {
+		const processNotifications = () => {
+			if (showPendingTickets) {
+				setNotifications(tickets);
+			} else {
+				const newNotifications = tickets.filter(ticket => ticket.status !== "pending");
 
-    socket.on(`company-${companyId}-ticket`, (data) => {
-      if (data.action === "updateUnread" || data.action === "delete") {
-        setNotifications((prevState) => {
-          const ticketIndex = prevState.findIndex(
-            (t) => t.id === data.ticketId
-          );
-          if (ticketIndex !== -1) {
-            prevState.splice(ticketIndex, 1);
-            return [...prevState];
-          }
-          return prevState;
-        });
+				setNotifications(newNotifications);
+			}
+		}
 
-        setDesktopNotifications((prevState) => {
-          const notfiticationIndex = prevState.findIndex(
-            (n) => n.tag === String(data.ticketId)
-          );
-          if (notfiticationIndex !== -1) {
-            prevState[notfiticationIndex].close();
-            prevState.splice(notfiticationIndex, 1);
-            return [...prevState];
-          }
-          return prevState;
-        });
-      }
-    });
+		processNotifications();
+	}, [tickets]);
 
-    socket.on(`company-${companyId}-appMessage`, (data) => {
-      if (
-        data.action === "create" &&
-        !data.message.read &&
-        (data.ticket.userId === user?.id || !data.ticket.userId)
-      ) {
-        if (
-          profile === "user" &&
-          (queueIds.indexOf(data.ticket.queue?.id) === -1 ||
-            data.ticket.queue === null)
-        ) {
-          return;
-        }
+	useEffect(() => {
+		ticketIdRef.current = ticketIdUrl;
+	}, [ticketIdUrl]);
 
-        setNotifications((prevState) => {
-          const ticketIndex = prevState.findIndex(
-            (t) => t.id === data.ticket.id
-          );
-          if (ticketIndex !== -1) {
-            prevState[ticketIndex] = data.ticket;
-            return [...prevState];
-          }
-          return [data.ticket, ...prevState];
-        });
+	useEffect(() => {
+    const socket = socketManager.getSocket(user.companyId);
 
-        const shouldNotNotificate =
-          (data.message.ticketId === ticketIdRef.current &&
-            document.visibilityState === "visible") ||
-          (data.ticket.userId && data.ticket.userId !== user?.id) ||
-          data.ticket.isGroup ||
-          data.ticket.isBot;
+		socket.on("ready", () => socket.emit("joinNotification"));
 
-        if (shouldNotNotificate) return;
+		socket.on(`company-${user.companyId}-ticket`, data => {
+			if (data.action === "updateUnread" || data.action === "delete") {
+				setNotifications(prevState => {
+					const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
+					if (ticketIndex !== -1) {
+						prevState.splice(ticketIndex, 1);
+						return [...prevState];
+					}
+					return prevState;
+				});
 
-        handleNotifications(data);
-      }
-    });
+				setDesktopNotifications(prevState => {
+					const notfiticationIndex = prevState.findIndex(
+						n => n.tag === String(data.ticketId)
+					);
+					if (notfiticationIndex !== -1) {
+						prevState[notfiticationIndex].close();
+						prevState.splice(notfiticationIndex, 1);
+						return [...prevState];
+					}
+					return prevState;
+				});
+			}
+		});
 
-    return () => {
-      socket.disconnect();
-    };
-  }, [user, profile, queues]);
+		socket.on(`company-${user.companyId}-appMessage`, data => {
+			if (
+				data.action === "create" && !data.message.fromMe && 
+				(data.ticket.status !== "pending" ) &&
+				(!data.message.read || data.ticket.status === "pending") &&
+				(data.ticket.userId === user?.id || !data.ticket.userId) &&
+				(user?.queues?.some(queue => (queue.id === data.ticket.queueId)) || !data.ticket.queueId)
+			) {
+				setNotifications(prevState => {
+					const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
+					if (ticketIndex !== -1) {
+						prevState[ticketIndex] = data.ticket;
+						return [...prevState];
+					}
+					return [data.ticket, ...prevState];
+				});
 
-  const handleNotifications = (data) => {
-    const { message, contact, ticket } = data;
+				const shouldNotNotificate =
+					(data.message.ticketId === ticketIdRef.current &&
+						document.visibilityState === "visible") ||
+					(data.ticket.userId && data.ticket.userId !== user?.id) ||
+					data.ticket.isGroup;
 
-    const options = {
-      body: `${message.body} - ${format(new Date(), "HH:mm")}`,
-      icon: contact.profilePicUrl,
-      tag: ticket.id,
-      renotify: true,
-    };
+				if (shouldNotNotificate) return;
 
-    const notification = new Notification(
-      `${i18n.t("tickets.notification.message")} ${contact.name}`,
-      options
-    );
+				handleNotifications(data);
+			}
+		});
 
-    notification.onclick = (e) => {
-      e.preventDefault();
-      window.focus();
-      historyRef.current.push(`/tickets/${ticket.uuid}`);
-    };
+		return () => {
+			socket.disconnect();
+		};
+	}, [user, showPendingTickets, socketManager]);
 
-    setDesktopNotifications((prevState) => {
-      const notfiticationIndex = prevState.findIndex(
-        (n) => n.tag === notification.tag
-      );
-      if (notfiticationIndex !== -1) {
-        prevState[notfiticationIndex] = notification;
-        return [...prevState];
-      }
-      return [notification, ...prevState];
-    });
+	const handleNotifications = data => {
+		const { message, contact, ticket } = data;
 
-    soundAlertRef.current();
-  };
+		const options = {
+			body: `${message.body} - ${format(new Date(), "HH:mm")}`,
+			icon: contact.urlPicture,
+			tag: ticket.id,
+			renotify: true,
+		};
 
-  const handleClick = () => {
-    setIsOpen((prevState) => !prevState);
-  };
+		const notification = new Notification(
+			`${i18n.t("tickets.notification.message")} ${contact.name}`,
+			options
+		);
 
-  const handleClickAway = () => {
-    setIsOpen(false);
-  };
+		notification.onclick = e => {
+			e.preventDefault();
+			window.focus();
+			historyRef.current.push(`/tickets/${ticket.uuid}`);
+			// handleChangeTab(null, ticket.isGroup? "group" : "open");
+		};
 
-  const NotificationTicket = ({ children }) => {
-    return <div onClick={handleClickAway}>{children}</div>;
-  };
+		setDesktopNotifications(prevState => {
+			const notfiticationIndex = prevState.findIndex(
+				n => n.tag === notification.tag
+			);
+			if (notfiticationIndex !== -1) {
+				prevState[notfiticationIndex] = notification;
+				return [...prevState];
+			}
+			return [notification, ...prevState];
+		});
 
-  return (
-    <>
-      <IconButton
-        className={classes.icons}
-        onClick={handleClick}
-        ref={anchorEl}
-        aria-label="Open Notifications"
-        variant="contained"
-      >
-        <Badge
-          overlap="rectangular"
-          badgeContent={notifications.length}
-          classes={{ badge: classes.customBadge }}
-        >
-          <WhatsAppIcon />
-        </Badge>
-      </IconButton>
-      <Popover
-        disableScrollLock
-        open={isOpen}
-        anchorEl={anchorEl.current}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        classes={{ paper: classes.popoverPaper }}
-        onClose={handleClickAway}
-      >
-        <List dense className={classes.tabContainer}>
-          {notifications.length === 0 ? (
-            <ListItem>
-              <ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>
-            </ListItem>
-          ) : (
-            notifications.map((ticket) => (
-              <NotificationTicket key={ticket.id}>
-                <TicketListItem ticket={ticket} />
-              </NotificationTicket>
-            ))
-          )}
-        </List>
-      </Popover>
-    </>
-  );
+		soundAlertRef.current();
+	};
+
+	const handleClick = () => {
+		setIsOpen(prevState => !prevState);
+	};
+
+	const handleClickAway = () => {
+		setIsOpen(false);
+	};
+
+	const NotificationTicket = ({ children }) => {
+		return <div onClick={handleClickAway}>{children}</div>;
+	};
+
+	return (
+		<>
+			<IconButton
+				onClick={handleClick}
+				ref={anchorEl}
+				aria-label="Open Notifications"
+				color="inherit"
+				style={{color:"white"}}
+			>
+				<Badge overlap="rectangular" badgeContent={notifications.length} color="secondary">
+					<ChatIcon />
+				</Badge>
+			</IconButton>
+			<Popover
+				disableScrollLock
+				open={isOpen}
+				anchorEl={anchorEl.current}
+				anchorOrigin={{
+					vertical: "bottom",
+					horizontal: "right",
+				}}
+				transformOrigin={{
+					vertical: "top",
+					horizontal: "right",
+				}}
+				classes={{ paper: classes.popoverPaper }}
+				onClose={handleClickAway}
+			>
+				<List dense className={classes.tabContainer}>
+					{notifications.length === 0 ? (
+						<ListItem>
+							<ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>
+						</ListItem>
+					) : (
+						notifications.map(ticket => (
+							<NotificationTicket key={ticket.id}>
+								<TicketListItem ticket={ticket} />
+							</NotificationTicket>
+						))
+					)}
+				</List>
+			</Popover>
+		</>
+	);
 };
 
 export default NotificationsPopOver;

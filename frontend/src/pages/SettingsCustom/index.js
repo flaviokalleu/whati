@@ -164,11 +164,11 @@ const SettingsCustom = () => {
           onChange={handleTabChange}
           className={classes.tab}
         >
-          <Tab label={i18n.t("settings.settings.tabs.options")} value={"options"} />
-          {schedulesEnabled && <Tab label={i18n.t("settings.settings.tabs.schedules")} value={"schedules"} />}
-          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.companies")} value={"companies"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.plans")} value={"plans"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.helps")} value={"helps"} /> : null}
+          <Tab label="Opções" value={"options"} />
+          {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
+          {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
+          {isSuper() ? <Tab label="Planos" value={"plans"} /> : null}
+          {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel

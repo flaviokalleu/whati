@@ -1,36 +1,31 @@
 import * as Sentry from "@sentry/node";
 import BullQueue from "bull";
-import { MessageData, SendMessage } from "./helpers/SendMessage";
-import Whatsapp from "./models/Whatsapp";
-import { logger } from "./utils/logger";
+import { addSeconds, differenceInSeconds } from "date-fns";
+import { isArray, isEmpty, isNil } from "lodash";
 import moment from "moment";
-import Schedule from "./models/Schedule";
-import Contact from "./models/Contact";
-import { Op, QueryTypes, Sequelize } from "sequelize";
+import path from "path";
+import { Op, QueryTypes } from "sequelize";
+import sequelize from "./database";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
+import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
+import formatBody from "./helpers/Mustache";
+import { MessageData, SendMessage } from "./helpers/SendMessage";
+import { getIO } from "./libs/socket";
 import Campaign from "./models/Campaign";
-import ContactList from "./models/ContactList";
-import ContactListItem from "./models/ContactListItem";
-import { isEmpty, isNil, isArray } from "lodash";
 import CampaignSetting from "./models/CampaignSetting";
 import CampaignShipping from "./models/CampaignShipping";
-import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
-import sequelize from "./database";
-import { getMessageOptions } from "./services/WbotServices/SendWhatsAppMedia";
-import { getIO } from "./libs/socket";
-import path from "path";
-import User from "./models/User";
 import Company from "./models/Company";
+import Contact from "./models/Contact";
+import ContactList from "./models/ContactList";
+import ContactListItem from "./models/ContactListItem";
 import Plan from "./models/Plan";
-import Ticket from "./models/Ticket";
+import Schedule from "./models/Schedule";
+import User from "./models/User";
+import Whatsapp from "./models/Whatsapp";
 import ShowFileService from "./services/FileServices/ShowService";
-import FilesOptions from './models/FilesOptions';
-import { addSeconds, differenceInSeconds } from "date-fns";
-import formatBody from "./helpers/Mustache";
+import { getMessageOptions } from "./services/WbotServices/SendWhatsAppMedia";
 import { ClosedAllOpenTickets } from "./services/WbotServices/wbotClosedTickets";
-import FindOrCreateTicketService from "./services/TicketServices/FindOrCreateTicketService";
-import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
-import { verifyMessage } from "./services/WbotServices/wbotMessageListener";
+import { logger } from "./utils/logger";
 
 
 const nodemailer = require('nodemailer');
@@ -97,7 +92,7 @@ async function handleSendMessage(job) {
   }
 }
 
-async function handleVerifyQueue(job) {
+{/*async function handleVerifyQueue(job) {
   logger.info("Buscando atendimentos perdidos nas filas");
   try {
     const companies = await Company.findAll({
@@ -117,9 +112,9 @@ async function handleVerifyQueue(job) {
           }
         },
       ]
-    });
+    }); */}
 
-    companies.map(async c => {
+{/*    companies.map(async c => {
       c.whatsapps.map(async w => {
 
         if (w.status === "CONNECTED") {
@@ -199,7 +194,7 @@ async function handleVerifyQueue(job) {
     logger.error("SearchForQueue -> VerifyQueue: error", e.message);
     throw e;
   }
-};
+}; */}
 
 async function handleCloseTicketsAutomatic() {
   const job = new CronJob('*/1 * * * *', async () => {
@@ -267,46 +262,18 @@ async function handleSendScheduledMessage(job) {
   }
 
   try {
-    let whatsapp
-
-    if (!isNil(schedule.whatsappId)) {
-      whatsapp = await Whatsapp.findByPk(schedule.whatsappId);
-    }
-
-    if (!whatsapp)
-      whatsapp = await GetDefaultWhatsApp(schedule.companyId);
-
-    let ticket = null
-
-    if (schedule.openTicket === "enabled") {
-      ticket = await FindOrCreateTicketService(schedule.contact, whatsapp.id, 0, schedule.companyId, null);
-    }
+    const whatsapp = await GetDefaultWhatsApp(schedule.companyId);
 
     let filePath = null;
     if (schedule.mediaPath) {
       filePath = path.resolve("public", schedule.mediaPath);
     }
-    const sentMessage = await SendMessage(whatsapp, {
+
+    await SendMessage(whatsapp, {
       number: schedule.contact.number,
-      body: `\u200e ${formatBody(schedule.body, schedule.contact)}`,
+      body: formatBody(schedule.body, schedule.contact),
       mediaPath: filePath
     });
-
-    if (schedule.openTicket === "enabled") {
-      await verifyMessage(sentMessage, ticket, ticket.concat);
-    }
-    
-    if (ticket) {
-      await UpdateTicketService({
-        ticketData: {
-          status: schedule.statusTicket,
-          userId: schedule.ticketUserId || null,
-          queueId: schedule.queueId || null
-        },
-        ticketId: ticket.id,
-        companyId: ticket.companyId
-      })
-    }
 
     await scheduleRecord?.update({
       sentAt: moment().format("YYYY-MM-DD HH:mm"),
@@ -568,7 +535,7 @@ async function verifyAndFinalizeCampaign(campaign) {
   }
 
   const io = getIO();
-  io.emit(`company-${campaign.companyId}-campaign`, {
+  io.to(`company-${campaign.companyId}-mainchannel`).emit(`company-${campaign.companyId}-campaign`, {
     action: "update",
     record: campaign
   });
@@ -627,6 +594,7 @@ async function handleProcessCampaign(job) {
   }
 }
 
+let ultima_msg = 0;
 async function handlePrepareContact(job) {
   try {
     const { contactId, campaignId, delay, variables }: PrepareContactData =
@@ -641,7 +609,12 @@ async function handlePrepareContact(job) {
 
     const messages = getCampaignValidMessages(campaign);
     if (messages.length) {
-      const radomIndex = randomValue(0, messages.length);
+      const radomIndex = ultima_msg;
+      console.log('ultima_msg:', ultima_msg);
+      ultima_msg++;
+      if (ultima_msg >= messages.length) {
+        ultima_msg = 0;
+      }
       const message = getProcessedMessage(
         messages[radomIndex],
         variables,
@@ -789,7 +762,7 @@ async function handleDispatchCampaign(job) {
     await verifyAndFinalizeCampaign(campaign);
 
     const io = getIO();
-    io.emit(`company-${campaign.companyId}-campaign`, {
+    io.to(`company-${campaign.companyId}-mainchannel`).emit(`company-${campaign.companyId}-campaign`, {
       action: "update",
       record: campaign
     });
@@ -919,7 +892,7 @@ export async function startQueueProcess() {
 
   userMonitor.process("VerifyLoginStatus", handleLoginStatus);
 
-  queueMonitor.process("VerifyQueueStatus", handleVerifyQueue);
+  //queueMonitor.process("VerifyQueueStatus", handleVerifyQueue);
 
 
 

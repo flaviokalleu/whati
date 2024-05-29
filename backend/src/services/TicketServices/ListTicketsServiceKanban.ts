@@ -82,8 +82,7 @@ const ListTicketsServiceKanban = async ({
   ];
 
   if (showAll === "true") {
-    //whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
-    whereCondition = {queueId: {[Op.or]: [queueIds, null]}, userId}; // Busca com o queueId ou null e com o userId
+    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
   }
 
   whereCondition = {

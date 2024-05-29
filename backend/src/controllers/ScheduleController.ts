@@ -9,7 +9,6 @@ import UpdateService from "../services/ScheduleServices/UpdateService";
 import ShowService from "../services/ScheduleServices/ShowService";
 import DeleteService from "../services/ScheduleServices/DeleteService";
 import Schedule from "../models/Schedule";
-
 import path from "path";
 import fs from "fs";
 import { head } from "lodash";
@@ -41,12 +40,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     body,
     sendAt,
     contactId,
-    userId,
-    ticketUserId,
-    queueId,
-    openTicket,
-    statusTicket,
-    whatsappId
+    userId
   } = req.body;
   const { companyId } = req.user;
 
@@ -55,16 +49,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendAt,
     contactId,
     companyId,
-    userId,
-    ticketUserId,
-    queueId,
-    openTicket,
-    statusTicket,
-    whatsappId
+    userId
   });
 
   const io = getIO();
-  io.emit("schedule", {
+  io.to(`company-${companyId}-mainchannel`).emit("schedule", {
     action: "create",
     schedule
   });
@@ -96,7 +85,7 @@ export const update = async (
   const schedule = await UpdateService({ scheduleData, id: scheduleId, companyId });
 
   const io = getIO();
-  io.emit("schedule", {
+  io.to(`company-${companyId}-mainchannel`).emit("schedule", {
     action: "update",
     schedule
   });
@@ -114,7 +103,7 @@ export const remove = async (
   await DeleteService(scheduleId, companyId);
 
   const io = getIO();
-  io.emit("schedule", {
+  io.to(`company-${companyId}-mainchannel`).emit("schedule", {
     action: "delete",
     scheduleId
   });

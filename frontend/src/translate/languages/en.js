@@ -179,8 +179,6 @@ const messages = {
 					email: "Email",
 					password: "Password",
 					profile: "Profile",
-					startWork: "Start Work",
-					endWork: "End Work",
 				},
 				buttons: {
 					okAdd: "Add",
@@ -192,12 +190,6 @@ const messages = {
 			chat: {
 				noTicketMessage: "Select a ticket to start chatting.",
 			},
-			uploads: {
-				titles: {
-				  titleUploadMsgDragDrop: "DRAG AND DROP FILES INTO THE FIELD BELOW",
-				  titleFileList: "List of file(s)"
-				},
-			  },
 			ticketsManager: {
 				buttons: {
 					newTicket: "New",
@@ -300,8 +292,6 @@ const messages = {
 					email: "Email",
 					profile: "Profile",
 					actions: "Actions",
-					startWork: "Start Work",
-					endWork: "End Work",
 				},
 				buttons: {
 					add: "Add user",

@@ -44,7 +44,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-queueIntegration`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-queueIntegration`, {
     action: "create",
     queueIntegration
   });
@@ -72,7 +72,7 @@ export const update = async (
   const queueIntegration = await UpdateQueueIntegrationService({ integrationData, integrationId, companyId });
 
   const io = getIO();
-  io.emit(`company-${companyId}-queueIntegration`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-queueIntegration`, {
     action: "update",
     queueIntegration
   });
@@ -90,7 +90,7 @@ export const remove = async (
   await DeleteQueueIntegrationService(integrationId);
 
   const io = getIO();
-  io.emit(`company-${companyId}-queueIntegration`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-queueIntegration`, {
     action: "delete",
     integrationId: +integrationId
   });

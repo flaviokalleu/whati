@@ -35,6 +35,9 @@ class User extends Model<User> {
 
   @Column
   email: string;
+  
+  @Column
+  allTicket: string;
 
   @Column(DataType.VIRTUAL)
   password: string;
@@ -49,14 +52,6 @@ class User extends Model<User> {
   @Default("admin")
   @Column
   profile: string;
-
-  @Default("00:00")
-  @Column
-  startWork: string;
-
-  @Default("23:59")
-  @Column
-  endWork: string;
 
   @Column
   super: boolean;

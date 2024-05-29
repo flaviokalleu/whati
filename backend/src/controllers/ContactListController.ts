@@ -63,7 +63,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-ContactList`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ContactList`, {
     action: "create",
     record
   });
@@ -104,7 +104,7 @@ export const update = async (
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-ContactList`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ContactList`, {
     action: "update",
     record
   });
@@ -122,7 +122,7 @@ export const remove = async (
   await DeleteService(id);
 
   const io = getIO();
-  io.emit(`company-${companyId}-ContactList`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ContactList`, {
     action: "delete",
     id
   });
@@ -150,7 +150,7 @@ export const upload = async (req: Request, res: Response) => {
 
   const io = getIO();
 
-  io.emit(`company-${companyId}-ContactListItem-${+id}`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ContactListItem-${+id}`, {
     action: "reload",
     records: response
   });

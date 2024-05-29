@@ -65,7 +65,7 @@ const Filters = ({
                         <TextField
                             fullWidth
                             name="dateStart"
-                            label="Desde"
+                            label="De"
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -78,7 +78,7 @@ const Filters = ({
                         <TextField
                             fullWidth
                             name="dateEnd"
-                            label="Hasta"
+                            label="Até"
                             InputLabelProps={{
                                 shrink: true,
                             }}

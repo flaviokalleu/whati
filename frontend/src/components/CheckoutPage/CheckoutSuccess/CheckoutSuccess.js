@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from "react-router-dom";
 import QRCode from 'react-qr-code';
 import { SuccessContent, Total } from './style';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { FaCopy, FaCheckCircle } from 'react-icons/fa';
-import { socketConnection } from "../../../services/socket";
+import { SocketContext } from "../../../context/Socket/SocketContext";
 import { useDate } from "../../../hooks/useDate";
 import { toast } from "react-toastify";
 
@@ -17,9 +17,12 @@ function CheckoutSuccess(props) {
 
   const { dateToClient } = useDate();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.getSocket(companyId);
+    
     socket.on(`company-${companyId}-payment`, (data) => {
 
       if (data.action === "CONCLUIDA") {
@@ -29,7 +32,7 @@ function CheckoutSuccess(props) {
         }, 4000);
       }
     });
-  }, [history]);
+  }, [history, socketManager]);
 
   const handleCopyQR = () => {
     setTimeout(() => {

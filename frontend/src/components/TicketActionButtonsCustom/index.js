@@ -16,7 +16,6 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
 import Tooltip from '@material-ui/core/Tooltip';
 import { green } from '@material-ui/core/colors';
-import { BiSend, BiTransfer } from 'react-icons/bi';
 
 
 const useStyles = makeStyles(theme => ({
@@ -31,13 +30,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const TicketActionButtonsCustom = ({ 
-	ticket, 
-	showSelectMessageCheckbox, 
-	selectedMessages, 
-	forwardMessageModalOpen,
-	setForwardMessageModalOpen 
- }) => {
+const TicketActionButtonsCustom = ({ ticket }) => {
 	const classes = useStyles();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -59,14 +52,6 @@ const TicketActionButtonsCustom = ({
 	const handleCloseTicketOptionsMenu = e => {
 		setAnchorEl(null);
 	};
-	
-	const handleOpenModalForward = () => {
-		if (selectedMessages.length === 0) {
-			toastError({response: {data: {message: "Nenhuma mensagem selecionada"}}});
-			return;
-		}
-		setForwardMessageModalOpen(true);
-	}
 
 	const handleUpdateTicketStatus = async (e, status, userId) => {
 		setLoading(true);
@@ -106,8 +91,6 @@ const TicketActionButtonsCustom = ({
 			)}
 			{ticket.status === "open" && (
 				<>
-				{!showSelectMessageCheckbox ? (
-					<>
 					<Tooltip title={i18n.t("messagesList.header.buttons.return")}>
 						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
 							<UndoRoundedIcon />
@@ -146,16 +129,6 @@ const TicketActionButtonsCustom = ({
 						menuOpen={ticketOptionsMenuOpen}
 						handleClose={handleCloseTicketOptionsMenu}
 					/>
-					</>) : (
-					<ButtonWithSpinner
-						loading={loading}
-						startIcon={<BiSend />}
-						size="small"
-						onClick={handleOpenModalForward}
-					>
-						Encaminhar
-					</ButtonWithSpinner>
-				)}
 				</>
 			)}
 			{ticket.status === "pending" && (

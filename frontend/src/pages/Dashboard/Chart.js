@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from "@material-ui/core/styles";
 import {
 	CartesianGrid,
@@ -16,11 +16,12 @@ import { startOfHour, parseISO, format } from "date-fns";
 import Title from "./Title";
 import useTickets from "../../hooks/useTickets";
 
-const Chart = ({ dateStartTicket, dateEndTicket, queueTicket }) => {
+const Chart = ({ queueTicket }) => {
 	const theme = useTheme();
 
-	const date = useRef(new Date().toISOString());
-	const { tickets } = useTickets({ date: date.current });
+	const { tickets, count } = useTickets({
+		queueIds: queueTicket ? `[${queueTicket}]` : "[]",
+	});
 
 	const [chartData, setChartData] = useState([
 		{ time: "00:00", amount: 0 },
@@ -66,7 +67,7 @@ const Chart = ({ dateStartTicket, dateEndTicket, queueTicket }) => {
 
 	return (
 		<React.Fragment>
-			<Title>{`${"Atendimentos Hoje: "}`}</Title>
+			<Title>{`${"Atendimentos Criados: "}${count}`}</Title>
 			<ResponsiveContainer>
 				<LineChart
 					data={chartData}
@@ -105,7 +106,7 @@ const Chart = ({ dateStartTicket, dateEndTicket, queueTicket }) => {
 					<Line
 						type="monotone"
 						dataKey="amount"
-						stroke="#4dc3ff"
+						stroke="#8884d8"
 						strokeWidth={2}
 					// fill={theme.palette.primary.main}
 					/>

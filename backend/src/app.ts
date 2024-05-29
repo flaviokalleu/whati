@@ -1,17 +1,18 @@
-import "./bootstrap";
-import "reflect-metadata";
-import "express-async-errors";
-import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
+import "express-async-errors";
+import "reflect-metadata";
+import "./bootstrap";
 
-import "./database";
+import bodyParser from 'body-parser';
 import uploadConfig from "./config/upload";
+import "./database";
 import AppError from "./errors/AppError";
+import { messageQueue, sendScheduledMessages } from "./queues";
 import routes from "./routes";
 import { logger } from "./utils/logger";
-import { messageQueue, sendScheduledMessages } from "./queues";
 
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 
@@ -21,6 +22,9 @@ app.set("queues", {
   messageQueue,
   sendScheduledMessages
 });
+
+const bodyparser = require('body-parser');
+app.use(bodyParser.json({ limit: '10mb' }));
 
 app.use(
   cors({

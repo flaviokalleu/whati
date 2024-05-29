@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 
 import * as Yup from "yup";
-import { Formik, Form, Field, FieldArray } from "formik";
+import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 
@@ -19,8 +19,8 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { Chip, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from "@material-ui/core";
-import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import { FormControl, Grid, IconButton } from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import moment from "moment"
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
@@ -29,20 +29,18 @@ import AttachFile from "@material-ui/icons/AttachFile";
 import { head } from "lodash";
 import ConfirmationModal from "../ConfirmationModal";
 import MessageVariablesPicker from "../MessageVariablesPicker";
-import useQueues from "../../hooks/useQueues";
-import UserStatusIcon from "../UserModal/statusIcon";
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
 		flexWrap: "wrap",
 	},
-	// multFieldLine: {
-	// 	display: "flex",
-	// 	"& > *:not(:last-child)": {
-	// 		marginRight: theme.spacing(1),
-	// 	},
-	// },
+	multFieldLine: {
+		display: "flex",
+		"& > *:not(:last-child)": {
+			marginRight: theme.spacing(1),
+		},
+	},
 
 	btnWrapper: {
 		position: "relative",
@@ -56,10 +54,10 @@ const useStyles = makeStyles(theme => ({
 		marginTop: -12,
 		marginLeft: -12,
 	},
-	// formControl: {
-	// 	margin: theme.spacing(1),
-	// 	minWidth: 120,
-	// },
+	formControl: {
+		margin: theme.spacing(1),
+		minWidth: 120,
+	},
 }));
 
 const ScheduleSchema = Yup.object().shape({
@@ -74,17 +72,12 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	const classes = useStyles();
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
-	const isMounted = useRef(true);
 
 	const initialState = {
 		body: "",
 		contactId: "",
 		sendAt: moment().add(1, 'hour').format('YYYY-MM-DDTHH:mm'),
-		sentAt: "",
-		openTicket: "enabled",
-		ticketUserId: "",
-		queueId: "",
-		statusTicket: "closed"
+		sentAt: ""
 	};
 
 	const initialContact = {
@@ -99,74 +92,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	const attachmentFile = useRef(null);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const messageInputRef = useRef();
-	const [whatsapps, setWhatsapps] = useState([]);
-	const [selectedWhatsapps, setSelectedWhatsapps] = useState([]);
-	const { companyId, whatsappId } = user;
-	const [loading, setLoading] = useState(false);
-	const [queues, setQueues] = useState([]);
-	const [allQueues, setAllQueues] = useState([]);
-	const [selectedUser, setSelectedUser] = useState(null);
-	const [selectedQueue, setSelectedQueue] = useState(null);
-	const { findAll: findAllQueues } = useQueues();
-	const [options, setOptions] = useState([]);
-	const [searchParam, setSearchParam] = useState("");
-
-	useEffect(() => {
-		return () => {
-			isMounted.current = false;
-		};
-	}, []);
-
-	useEffect(() => {
-		if (isMounted.current) {
-			const loadQueues = async () => {
-				const list = await findAllQueues();
-				setAllQueues(list);
-				setQueues(list);
-
-			};
-			loadQueues();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	useEffect(() => {
-		if (searchParam.length < 3) {
-			setLoading(false);
-			setSelectedQueue("");
-			return;
-		}
-		const delayDebounceFn = setTimeout(() => {
-			setLoading(true);
-			const fetchUsers = async () => {
-				try {
-					const { data } = await api.get("/users/");
-					setOptions(data.users);
-					setLoading(false);
-				} catch (err) {
-					setLoading(false);
-					toastError(err);
-				}
-			};
-
-			fetchUsers();
-		}, 500);
-		return () => clearTimeout(delayDebounceFn);
-	}, [searchParam]);
-
-	useEffect(() => {
-		api
-			.get(`/whatsapp`, { params: { companyId, session: 0 } })
-			.then(({ data }) => {
-				// Mapear os dados recebidos da API para adicionar a propriedade 'selected'
-				const mappedWhatsapps = data.map((whatsapp) => ({
-					...whatsapp,
-					selected: false,
-				}));
-
-				setWhatsapps(mappedWhatsapps);
-			});
-	}, [])
 
 	useEffect(() => {
 		if (contactId && contacts.length) {
@@ -207,10 +132,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 		}
 	}, [scheduleId, contactId, open, user]);
 
-	const filterOptions = createFilterOptions({
-		trim: true,
-	});
-
 	const handleClose = () => {
 		onClose();
 		setAttachment(null);
@@ -225,8 +146,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	};
 
 	const handleSaveSchedule = async values => {
-		const scheduleData = { ...values, userId: user.id, whatsappId: selectedWhatsapps, ticketUserId: selectedUser?.id || null,
-			queueId: selectedQueue || null };
+		const scheduleData = { ...values, userId: user.id };
 		try {
 			if (scheduleId) {
 				await api.put(`/schedules/${scheduleId}`, scheduleData);
@@ -309,7 +229,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 			<Dialog
 				open={open}
 				onClose={handleClose}
-				maxWidth="md"
+				maxWidth="xs"
 				fullWidth
 				scroll="paper"
 			>
@@ -360,6 +280,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										/>
 									</FormControl>
 								</div>
+								<br />
 								<div className={classes.multFieldLine}>
 									<Field
 										as={TextField}
@@ -381,204 +302,22 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										onClick={value => handleClickMsgVar(value, setFieldValue)}
 									/>
 								</Grid>
-								<Grid container spacing={1}>
-									<Grid item xs={12} md={6} xl={6}>
-										<FormControl
-											variant="outlined"
-											margin="dense"
-											fullWidth
-											className={classes.formControl}
-										>
-											<InputLabel id="whatsapp-selection-label">
-												{i18n.t("campaigns.dialog.form.whatsapp")}
-											</InputLabel>
-											<Field
-												as={Select}
-												multiple
-												label={i18n.t("campaigns.dialog.form.whatsapp")}
-												placeholder={i18n.t("campaigns.dialog.form.whatsapp")}
-												labelId="whatsapp-selection-label"
-												id="whatsappIds"
-												name="whatsappIds"
-												required
-												error={touched.whatsappId && Boolean(errors.whatsappId)}
-												value={selectedWhatsapps}
-												onChange={(event) => setSelectedWhatsapps(event.target.value)}
-												renderValue={(selected) => (
-													<div>
-														{selected.map((value) => (
-															<Chip key={value} label={whatsapps.find((whatsapp) => whatsapp.id === value).name} />
-														))}
-													</div>
-												)}
-											>
-												{whatsapps &&
-													whatsapps.map((whatsapp) => (
-														<MenuItem key={whatsapp.id} value={whatsapp.id}>
-															{whatsapp.name}
-														</MenuItem>
-													))}
-											</Field>
-										</FormControl>
-									</Grid>
-									<Grid item xs={12} md={6} xl={6}>
-										<FormControl
-											variant="outlined"
-											margin="dense"
-											fullWidth
-											className={classes.formControl}
-										>
-											<InputLabel id="openTicket-selection-label">
-												{i18n.t("campaigns.dialog.form.openTicket")}
-											</InputLabel>
-											<Field
-												as={Select}
-												label={i18n.t("campaigns.dialog.form.openTicket")}
-												placeholder={i18n.t(
-													"campaigns.dialog.form.openTicket"
-												)}
-												labelId="openTicket-selection-label"
-												id="openTicket"
-												name="openTicket"
-												error={
-													touched.openTicket && Boolean(errors.openTicket)
-												}
-											>
-												<MenuItem value={"enabled"}>{i18n.t("campaigns.dialog.form.enabledOpenTicket")}</MenuItem>
-												<MenuItem value={"disabled"}>{i18n.t("campaigns.dialog.form.disabledOpenTicket")}</MenuItem>
-											</Field>
-										</FormControl>
-									</Grid>
-								</Grid>
-								<Grid spacing={1} container>
-									{/* SELECIONAR USUARIO */}
-									<Grid item xs={12} md={6} xl={6}>
-										<Autocomplete
-											style={{ marginTop: '8px' }}
-											variant="outlined"
-											margin="dense"
-											className={classes.formControl}
-											getOptionLabel={(option) => `${option.name}`}
-											value={selectedUser}
-											size="small"
-											onChange={(e, newValue) => {
-												setSelectedUser(newValue);
-												if (newValue != null && Array.isArray(newValue.queues)) {
-													if (newValue.queues.length === 1) {
-														setSelectedQueue(newValue.queues[0].id);
-													}
-													setQueues(newValue.queues);
-
-												} else {
-													setQueues(allQueues);
-													setSelectedQueue("");
-												}
-											}}
-											options={options}
-											filterOptions={filterOptions}
-											freeSolo
-											fullWidth
-											disabled={values.openTicket === "disabled"}
-											autoHighlight
-											noOptionsText={i18n.t("transferTicketModal.noOptions")}
-											loading={loading}
-											renderOption={option => (<span> <UserStatusIcon user={option} /> {option.name}</span>)}
-											renderInput={(params) => (
-												<TextField
-													{...params}
-													label={i18n.t("transferTicketModal.fieldLabel")}
-													variant="outlined"
-													onChange={(e) => setSearchParam(e.target.value)}
-													InputProps={{
-														...params.InputProps,
-														endAdornment: (
-															<React.Fragment>
-																{loading ? (
-																	<CircularProgress color="inherit" size={20} />
-																) : null}
-																{params.InputProps.endAdornment}
-															</React.Fragment>
-														),
-													}}
-												/>
-											)}
-										/>
-									</Grid>
-
-									<Grid item xs={12} md={6} xl={6}>
-										<FormControl
-											variant="outlined"
-											margin="dense"
-											fullWidth
-											className={classes.formControl}
-										>
-											<InputLabel>
-												{i18n.t("transferTicketModal.fieldQueueLabel")}
-											</InputLabel>
-											<Select
-												value={selectedQueue}
-												onChange={(e) => setSelectedQueue(e.target.value)}
-												label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
-												disabled={values.openTicket === "disabled"}
-											>
-												{queues.map((queue) => (
-													<MenuItem key={queue.id} value={queue.id}>
-														{queue.name}
-													</MenuItem>
-												))}
-											</Select>
-										</FormControl>
-									</Grid>
-								</Grid>
-								<Grid spacing={1} container style={{ marginTop: '-10px' }}>
-									<Grid item xs={12} md={6} xl={6}>
-										<FormControl
-											variant="outlined"
-											margin="dense"
-											fullWidth											
-											className={classes.formControl}
-										>
-											<InputLabel id="statusTicket-selection-label">
-												{i18n.t("campaigns.dialog.form.statusTicket")}
-											</InputLabel>
-											<Field
-												as={Select}
-												disabled={values.openTicket === "disabled"}
-												label={i18n.t("campaigns.dialog.form.statusTicket")}
-												placeholder={i18n.t(
-													"campaigns.dialog.form.statusTicket"
-												)}
-												labelId="statusTicket-selection-label"
-												id="statusTicket"
-												name="statusTicket"
-												error={
-													touched.statusTicket && Boolean(errors.statusTicket)
-												}
-											>
-												<MenuItem value={"closed"}>{i18n.t("campaigns.dialog.form.closedTicketStatus")}</MenuItem>
-												<MenuItem value={"open"}>{i18n.t("campaigns.dialog.form.openTicketStatus")}</MenuItem>
-											</Field>
-										</FormControl>
-									</Grid>
-
-									<Grid item xs={12} md={6} xl={6}>
-										<Field
-											as={TextField}
-											label={i18n.t("scheduleModal.form.sendAt")}
-											type="datetime-local"
-											name="sendAt"
-											// InputLabelProps={{
-											// 	shrink: true,
-											// }}
-											error={touched.sendAt && Boolean(errors.sendAt)}
-											helperText={touched.sendAt && errors.sendAt}
-											variant="outlined"
-											fullWidth
-											size="small"
-											style={{ marginTop: '8px' }}
-										/>
-									</Grid>
-								</Grid>																
+								<br />
+								<div className={classes.multFieldLine}>
+									<Field
+										as={TextField}
+										label={i18n.t("scheduleModal.form.sendAt")}
+										type="datetime-local"
+										name="sendAt"
+										InputLabelProps={{
+											shrink: true,
+										}}
+										error={touched.sendAt && Boolean(errors.sendAt)}
+										helperText={touched.sendAt && errors.sendAt}
+										variant="outlined"
+										fullWidth
+									/>
+								</div>
 								{(schedule.mediaPath || attachment) && (
 									<Grid xs={12} item>
 										<Button startIcon={<AttachFile />}>

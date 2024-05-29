@@ -20,7 +20,7 @@ import Container from "@material-ui/core/Container";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import moment from "moment";
-import logo from "../../assets/logo_login.png";
+import logo from "../../assets/logo.png";
 import { toast } from 'react-toastify'; 
 import toastError from '../../errors/toastError';
 import 'react-toastify/dist/ReactToastify.css';
@@ -41,16 +41,12 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
   paper: {
-    //backgroundColor: "rgba(255, 255, 255, 0.8)", // Fundo semi-transparente
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: "35px",
-    padding: theme.spacing(2),
+    backgroundColor: "white",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    border: "6px solid transparent", // Adiciona uma borda transparente
-    boxShadow: "0 0 180px rgba(0, 0, 255, 0.5)", // Adiciona um efeito de sombra azul
-    animation: "neonBorder 60s linear infinite", // Aplica a animação neonBorder
+    padding: "55px 30px",
+    borderRadius: "12.5px",
   },
   avatar: {
     margin: theme.spacing(1),
@@ -118,7 +114,7 @@ const handleSendEmail = async (values) => {
     if (response.data.status === 404) {
       toast.error("Email não encontrado");
     } else {
-      toast.success(i18n.t("Email não encontrado"));
+      toast.success(i18n.t("Email enviado com sucesso!"));
     }
   } catch (err) {
     console.log("API Error:", err);
@@ -139,7 +135,7 @@ const handleSendEmail = async (values) => {
         );
         setError(""); // Limpe o erro se não houver erro
         toast.success(i18n.t("Senha redefinida com sucesso."));
-        history.push("/");
+        history.push("/login");
       } catch (err) {
         console.log(err);
       }

@@ -28,7 +28,6 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
 
 import moment from "moment";
 

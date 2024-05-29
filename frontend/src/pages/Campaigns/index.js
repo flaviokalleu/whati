@@ -1,44 +1,43 @@
 /* eslint-disable no-unused-vars */
 
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 
 import { useHistory } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import IconButton from "@material-ui/core/IconButton";
-import SearchIcon from "@material-ui/icons/Search";
 import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
+import { makeStyles } from "@material-ui/core/styles";
+import SearchIcon from "@material-ui/icons/Search";
 
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
 import DescriptionIcon from "@material-ui/icons/Description";
-import TimerOffIcon from "@material-ui/icons/TimerOff";
-import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+import EditIcon from "@material-ui/icons/Edit";
 import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
-import CampaignModal from "../../components/CampaignModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
-import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
+import CampaignModal from "../../components/CampaignModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import { SocketContext } from "../../context/Socket/SocketContext";
+import toastError from "../../errors/toastError";
 import { useDate } from "../../hooks/useDate";
-import { socketConnection } from "../../services/socket";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -112,6 +111,8 @@ const Campaigns = () => {
 
   const { datetimeToClient } = useDate();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -128,7 +129,7 @@ const Campaigns = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.getSocket(companyId);
 
     socket.on(`company-${companyId}-campaign`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -141,7 +142,7 @@ const Campaigns = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [socketManager]);
 
   const fetchCampaigns = async () => {
     try {
@@ -326,9 +327,9 @@ const Campaigns = () => {
               <TableCell align="center">
                 {i18n.t("campaigns.table.completedAt")}
               </TableCell>
-              <TableCell align="center">
+              {/* <TableCell align="center">
                 {i18n.t("campaigns.table.confirmation")}
-              </TableCell>
+              </TableCell> */}
               <TableCell align="center">
                 {i18n.t("campaigns.table.actions")}
               </TableCell>
@@ -362,9 +363,9 @@ const Campaigns = () => {
                       ? datetimeToClient(campaign.completedAt)
                       : "Não concluída"}
                   </TableCell>
-                  <TableCell align="center">
+                  {/* <TableCell align="center">
                     {campaign.confirmation ? "Habilitada" : "Desabilitada"}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell align="center">
                     {campaign.status === "EM_ANDAMENTO" && (
                       <IconButton

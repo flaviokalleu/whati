@@ -187,13 +187,13 @@ export const update = async (
   const ticketData: TicketData = req.body;
   const { companyId } = req.user;
 
-  const response = await UpdateTicketService({
+  const { ticket } = await UpdateTicketService({
     ticketData,
     ticketId,
     companyId
   });
 
-  const { ticket } = response || {}; // FIX LUCAS_SAUD: Ensure 'ticket' is defined
+
   return res.status(200).json(ticket);
 };
 
@@ -209,9 +209,11 @@ export const remove = async (
   const ticket = await DeleteTicketService(ticketId);
 
   const io = getIO();
-  io.to(ticket.status)
-    .to(ticketId)
-    .to("notification")
+  io.to(ticketId)
+    .to(`company-${companyId}-${ticket.status}`)
+    .to(`company-${companyId}-notification`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
+    .to(`queue-${ticket.queueId}-notification`)
     .emit(`company-${companyId}-ticket`, {
       action: "delete",
       ticketId: +ticketId

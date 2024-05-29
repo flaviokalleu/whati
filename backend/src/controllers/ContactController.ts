@@ -37,7 +37,6 @@ interface ContactData {
   number: string;
   email?: string;
   extraInfo?: ExtraInfo[];
-  disableBot?: boolean;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -104,7 +103,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-contact`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
     action: "create",
     contact
   });
@@ -156,7 +155,7 @@ export const update = async (
   });
 
   const io = getIO();
-  io.emit(`company-${companyId}-contact`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
     action: "update",
     contact
   });
@@ -176,7 +175,7 @@ export const remove = async (
   await DeleteContactService(contactId);
 
   const io = getIO();
-  io.emit(`company-${companyId}-contact`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
     action: "delete",
     contactId
   });

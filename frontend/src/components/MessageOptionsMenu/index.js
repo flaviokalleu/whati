@@ -8,19 +8,8 @@ import ConfirmationModal from "../ConfirmationModal";
 import { Menu } from "@material-ui/core";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
-import ForwardMessageModal from "../ForwardMessageModal";
 
-const MessageOptionsMenu = ({ 
-	message, 
-  	menuOpen, 
-  	handleClose, 
-  	anchorEl, 
-  	setShowSelectCheckbox, 
-  	showSelectCheckBox, 
-  	forwardMessageModalOpen, 
-  	setForwardMessageModalOpen,
-  	selectedMessages,
- }) => {
+const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
@@ -30,11 +19,6 @@ const MessageOptionsMenu = ({
 		} catch (err) {
 			toastError(err);
 		}
-	};
-	
-	const handleSetShowSelectCheckbox = () => {
-		setShowSelectCheckbox(!showSelectCheckBox);
-		handleClose();
 	};
 
 	const hanldeReplyMessage = () => {
@@ -46,24 +30,9 @@ const MessageOptionsMenu = ({
 		setConfirmationOpen(true);
 		handleClose();
 	};
-	
-	const handleForwardModal = () => {
-		setForwardMessageModalOpen(true);
-		handleClose();
-	};
 
 	return (
 		<>
-		 <ForwardMessageModal
-				modalOpen={forwardMessageModalOpen}
-				onClose={(e) => setForwardMessageModalOpen(false)}
-				message={message}
-				onClose={(e) => {
-					setForwardMessageModalOpen(false);
-					setShowSelectCheckbox(false);
-				}}
-				messages={selectedMessages}
-			/>
 			<ConfirmationModal
 				title={i18n.t("messageOptionsMenu.confirmationModal.title")}
 				open={confirmationOpen}
@@ -93,9 +62,6 @@ const MessageOptionsMenu = ({
 				)}
 				<MenuItem onClick={hanldeReplyMessage}>
 					{i18n.t("messageOptionsMenu.reply")}
-				</MenuItem>
-				<MenuItem onClick={handleSetShowSelectCheckbox}>
-					Selecionar para encaminhar
 				</MenuItem>
 			</Menu>
 		</>

@@ -30,7 +30,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
@@ -107,6 +107,8 @@ const Announcements = () => {
   const [searchParam, setSearchParam] = useState("");
   const [announcements, dispatch] = useReducer(reducer, []);
 
+  const socketManager = useContext(SocketContext);
+
   // trava para nao acessar pagina que não pode  
   useEffect(() => {
     async function fetchData() {
@@ -137,7 +139,7 @@ const Announcements = () => {
 
   useEffect(() => {
     const companyId = user.companyId;
-    const socket = socketConnection({ companyId, userId: user.id });
+    const socket = socketManager.getSocket(companyId);
 
     socket.on(`company-announcement`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -150,7 +152,7 @@ const Announcements = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [socketManager, user.companyId]);
 
   const fetchAnnouncements = async () => {
     try {

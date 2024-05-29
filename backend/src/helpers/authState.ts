@@ -4,14 +4,7 @@ import type {
   SignalDataTypeMap
 } from "@whiskeysockets/baileys";
 import { BufferJSON, initAuthCreds, proto } from "@whiskeysockets/baileys";
-import { useRedisAuthStateWithHSet } from 'baileys-redis-auth';
 import Whatsapp from "../models/Whatsapp";
-
-type RedisOptions = {
-  host: string;
-  port: string | number;
-  password: string;
-};
 
 const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
   "pre-key": "preKeys",
@@ -21,11 +14,13 @@ const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
   "app-state-sync-version": "appStateVersions",
   "sender-key-memory": "senderKeyMemory"
 };
+
 const authState = async (
   whatsapp: Whatsapp
 ): Promise<{ state: AuthenticationState; saveState: () => void }> => {
   let creds: AuthenticationCreds;
   let keys: any = {};
+
   const saveState = async () => {
     try {
       await whatsapp.update({
@@ -36,30 +31,15 @@ const authState = async (
     }
   };
 
-  const redisOptions = {
-    host: process.env.REDIS_AUTHSTATE_SERVER,
-    port: parseInt(process.env.REDIS_AUTHSTATE_PORT || '0', 10),
-    password: process.env.REDIS_AUTHSTATE_PWD
-  };
+  // const getSessionDatabase = await whatsappById(whatsapp.id);
 
-  const { state: redisAuthState, saveCreds, redis } = await useRedisAuthStateWithHSet(redisOptions, process.env.REDIS_AUTHSTATE_DATABASE);
-
-  if (Object.keys(await redis.hgetall(process.env.REDIS_AUTHSTATE_DATABASE)).length === 0) {
-    // Redis está vazio, carregue do arquivo
-    if (whatsapp.session && whatsapp.session !== null) {
-      const result = JSON.parse(whatsapp.session, BufferJSON.reviver);
-      creds = result.creds;
-      keys = result.keys;
-    } else {
-      creds = initAuthCreds();
-      keys = {};
-    }
-    // Salve no Redis
-    await saveCreds();
+  if (whatsapp.session && whatsapp.session !== null) {
+    const result = JSON.parse(whatsapp.session, BufferJSON.reviver);
+    creds = result.creds;
+    keys = result.keys;
   } else {
-    // Redis já contém dados, carregue do Redis
-    creds = redisAuthState.creds;
-    keys = redisAuthState.keys;
+    creds = initAuthCreds();
+    keys = {};
   }
 
   return {
@@ -87,15 +67,10 @@ const authState = async (
             Object.assign(keys[key], data[i]);
           }
           saveState();
-          // Salve também no Redis
-          saveCreds();
         }
       }
     },
-    saveState: async () => {
-      await saveCreds(); // Salva as credenciais no Redis
-      saveState(); // Salva no banco de dados local
-    }
+    saveState
   };
 };
 

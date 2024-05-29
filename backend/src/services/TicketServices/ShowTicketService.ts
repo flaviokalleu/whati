@@ -16,7 +16,7 @@ const ShowTicketService = async (
       {
         model: Contact,
         as: "contact",
-        attributes: ["id", "name", "number", "email", "profilePicUrl", "disableBot"],
+        attributes: ["id", "name", "number", "email", "profilePicUrl"],
         include: ["extraInfo"]
       },
       {

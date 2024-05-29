@@ -20,7 +20,7 @@ import {
 } from "@material-ui/core";
 import api from "../../services/api";
 import { isArray } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
@@ -111,6 +111,8 @@ export default function ChatPopover() {
   const [play] = useSound(notifySound);
   const soundAlertRef = useRef();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     soundAlertRef.current = play;
 
@@ -137,7 +139,10 @@ export default function ChatPopover() {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.getSocket(companyId);
+    if (!socket) {
+      return () => {}; 
+    }
     
     socket.on(`company-${companyId}-chat`, (data) => {
       if (data.action === "new-message") {
@@ -155,8 +160,7 @@ export default function ChatPopover() {
     return () => {
       socket.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [socketManager, user.id]);
 
   useEffect(() => {
     let unreadsCount = 0;

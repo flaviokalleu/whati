@@ -14,8 +14,6 @@ import Company from "./Company";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
 import User from "./User";
-import Queue from "./Queue";
-import Whatsapp from "./Whatsapp";
 
 @Table
 class Schedule extends Model<Schedule> {
@@ -70,35 +68,11 @@ class Schedule extends Model<Schedule> {
   @BelongsTo(() => Company)
   company: Company;
 
-  @ForeignKey(() => User)
-  @Column
-  ticketUserId: number;
-
-  @ForeignKey(() => Queue)
-  @Column
-  queueId: number;
-
-  @BelongsTo(() => Queue)
-  queue: Queue;
-
-  @Column({ defaultValue: "closed" })
-  statusTicket: string;
-
-  @Column({ defaultValue: "disabled" })
-  openTicket: string;
-
   @Column
   mediaPath: string;
 
   @Column
   mediaName: string;
-
-  @ForeignKey(() => Whatsapp)
-  @Column
-  whatsappId: number;
-
-  @BelongsTo(() => Whatsapp)
-  whatsapp: Whatsapp;
 }
 
 export default Schedule;

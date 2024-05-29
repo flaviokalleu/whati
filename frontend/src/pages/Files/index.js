@@ -34,7 +34,7 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import FileModal from "../../components/FileModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
@@ -118,6 +118,8 @@ const FileLists = () => {
         }
     }, [searchParam, pageNumber]);
 
+    const socketManager = useContext(SocketContext);
+
     useEffect(() => {
         dispatch({ type: "RESET" });
         setPageNumber(1);
@@ -132,7 +134,7 @@ const FileLists = () => {
     }, [searchParam, pageNumber, fetchFileLists]);
 
     useEffect(() => {
-        const socket = socketConnection({ companyId: user.companyId });
+        const socket = socketManager.getSocket(user.companyId);
 
         socket.on(`company-${user.companyId}-file`, (data) => {
             if (data.action === "update" || data.action === "create") {
@@ -147,7 +149,7 @@ const FileLists = () => {
         return () => {
             socket.disconnect();
         };
-    }, [user]);
+    }, [socketManager, user]);
 
     const handleOpenFileListModal = () => {
         setSelectedFileList(null);

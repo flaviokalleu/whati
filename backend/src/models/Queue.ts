@@ -84,7 +84,7 @@ class Queue extends Model<Queue> {
   @Column
   orderQueue: number;
 
-
+  
   @ForeignKey(() => QueueIntegrations)
   @Column
   integrationId: number;
@@ -98,12 +98,6 @@ class Queue extends Model<Queue> {
 
   @BelongsTo(() => Prompt)
   prompt: Prompt;
-
-  @Column
-  mediaPath: string;
-
-  @Column
-  mediaName: string;
 }
 
 export default Queue;

@@ -30,7 +30,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 
@@ -110,6 +110,8 @@ const Quickemessages = () => {
   const { user } = useContext(AuthContext);
   const { profile } = user;
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -126,7 +128,7 @@ const Quickemessages = () => {
 
   useEffect(() => {
     const companyId = user.companyId;
-    const socket = socketConnection({ companyId, userId: user.id });
+    const socket = socketManager.getSocket(companyId);
 
     socket.on(`company${companyId}-quickemessage`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -139,14 +141,14 @@ const Quickemessages = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [socketManager, user.companyId]);
 
   const fetchQuickemessages = async () => {
     try {
       const companyId = user.companyId;
       //const searchParam = ({ companyId, userId: user.id });
       const { data } = await api.get("/quick-messages", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber, userId: user.id },
       });
 
       dispatch({ type: "LOAD_QUICKMESSAGES", payload: data.records });
@@ -182,7 +184,7 @@ const Quickemessages = () => {
   const handleDeleteQuickemessage = async (quickemessageId) => {
     try {
       await api.delete(`/quick-messages/${quickemessageId}`);
-      toast.success(i18n.t("quickMessages.toasts.deleted"));
+      toast.success(i18n.t("quickemessages.toasts.deleted"));
     } catch (err) {
       toastError(err);
     }

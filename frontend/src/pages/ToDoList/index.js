@@ -9,7 +9,6 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { i18n } from '../../translate/i18n';
 
 const useStyles = makeStyles({
   root: {
@@ -98,13 +97,13 @@ const ToDoList = () => {
       <div className={classes.inputContainer}>
         <TextField
           className={classes.input}
-          label={i18n.t("todo.newtask")}
+          label="Nova tarefa"
           value={task}
           onChange={handleTaskChange}
           variant="outlined"
         />
         <Button variant="contained" color="primary" onClick={handleAddTask}>
-          {editIndex >= 0 ? i18n.t("todo.buttons.edit") : i18n.t("todo.buttons.add")}
+          {editIndex >= 0 ? 'Salvar' : 'Adicionar'}
         </Button>
       </div>
       <div className={classes.listContainer}>

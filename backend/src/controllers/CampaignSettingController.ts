@@ -25,7 +25,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const record = await CreateService(data, companyId);
 
   const io = getIO();
-  io.emit(`company-${companyId}-campaignSettings`, {
+  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-campaignSettings`, {
     action: "create",
     record
   });

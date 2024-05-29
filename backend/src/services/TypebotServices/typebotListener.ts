@@ -303,7 +303,7 @@ const typebotListener = async ({
                         const media = {
                             audio: {
                                 url: message.content.url,
-                                mimetype: 'audio/mp3',
+                                mimetype: 'audio/mp4',
                                 ptt: true
                             },
                         }
@@ -317,7 +317,7 @@ const typebotListener = async ({
                          await wbot.sendPresenceUpdate('composing', msg.key.remoteJid)
                          await delay(typebotDelayMessage)
                          await wbot.sendPresenceUpdate('paused', msg.key.remoteJid)
-                         const media = {
+                        const media = {
 
                              document: { url: message.content.url },
                              mimetype: 'application/pdf',

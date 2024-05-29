@@ -13,12 +13,6 @@ interface ScheduleData {
   companyId?: number;
   ticketId?: number;
   userId?: number;
-  ticketUserId?: number | string;
-  queueId?: number | string;
-  openTicket?: string;
-  statusTicket?: string;
-  whatsappId?: number | string;
-
 }
 
 interface Request {

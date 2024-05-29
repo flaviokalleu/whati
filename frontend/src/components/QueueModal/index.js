@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
-import { head } from "lodash";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
@@ -20,8 +19,6 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
-import MessageVariablesPicker from "../MessageVariablesPicker";
-
 import {
   FormControl,
   Grid,
@@ -34,10 +31,9 @@ import {
   Tab,
   Tabs,
 } from "@material-ui/core";
-import { AttachFile, Colorize, DeleteOutline } from "@material-ui/icons";
+import { Colorize } from "@material-ui/icons";
 import { QueueOptions } from "../QueueOptions";
 import SchedulesForm from "../SchedulesForm";
-import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -99,11 +95,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const greetingRef = useRef();
   const [integrations, setIntegrations] = useState([]);
-  const [attachment, setAttachment] = useState(null);
-  const attachmentFile = useRef(null);
-  const [queueEditable, setQueueEditable] = useState(true);
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
-  
+
   const [schedules, setSchedules] = useState([
     { weekday: "Segunda-feira", weekdayEn: "monday", startTime: "08:00", endTime: "18:00", },
     { weekday: "Terça-feira", weekdayEn: "tuesday", startTime: "08:00", endTime: "18:00", },
@@ -182,27 +174,6 @@ const QueueModal = ({ open, onClose, queueId }) => {
     onClose();
     setQueue(initialState);
   };
-  
-  const handleAttachmentFile = (e) => {
-    const file = head(e.target.files);
-    if (file) {
-      setAttachment(file);
-    }
-  };
-
-  const deleteMedia = async () => {
-    if (attachment) {
-      setAttachment(null);
-      attachmentFile.current.value = null;
-    }
-
-    if (queue.mediaPath) {
-      await api.delete(`/queue/${queue.id}/media-upload`);
-      setQueue((prev) => ({ ...prev, mediaPath: null, mediaName: null }));
-      toast.success(i18n.t("queueModal.toasts.deleted"));
-    }
-  };
-
 
   const handleSaveQueue = async (values) => {
     try {
@@ -210,20 +181,10 @@ const QueueModal = ({ open, onClose, queueId }) => {
         await api.put(`/queue/${queueId}`, {
           ...values, schedules, promptId: selectedPrompt ? selectedPrompt : null
         });
-       if (attachment != null) {
-          const formData = new FormData();
-          formData.append("file", attachment);
-          await api.post(`/queue/${queueId}/media-upload`, formData);
-        }
       } else {
         await api.post("/queue", {
           ...values, schedules, promptId: selectedPrompt ? selectedPrompt : null
         });
-       if (attachment != null) {
-          const formData = new FormData();
-          formData.append("file", attachment);
-          await api.post(`/queue/${queueId}/media-upload`, formData);
-        }
       }
       toast.success("Queue saved successfully");
       handleClose();
@@ -242,34 +203,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
     setSelectedPrompt(e.target.value);
   };
 
-  const handleClickMsgVar = async (msgVar, setFieldValue) => {
-    const activeElement = document.activeElement; // Pega o elemento atualmente focado
-    const fieldName = activeElement.name; // Supõe que o elemento focado tenha uma propriedade 'name' que corresponda ao nome do campo no Formik
-
-    if (fieldName) {
-        const firstHalfText = activeElement.value.substring(0, activeElement.selectionStart);
-        const secondHalfText = activeElement.value.substring(activeElement.selectionEnd);
-        const newCursorPos = activeElement.selectionStart + msgVar.length;
-
-        setFieldValue(fieldName, `${firstHalfText}${msgVar}${secondHalfText}`);
-
-        await new Promise(r => setTimeout(r, 100));
-        activeElement.focus(); // Re-foca no campo ativo
-        activeElement.setSelectionRange(newCursorPos, newCursorPos); // Posiciona o cursor corretamente
-    }
-};
-
-
   return (
     <div className={classes.root}>
-     <ConfirmationModal
-        title={i18n.t("queueModal.confirmationModal.deleteTitle")}
-        open={confirmationOpen}
-        onClose={() => setConfirmationOpen(false)}
-        onConfirm={deleteMedia}
-      >
-        {i18n.t("queueModal.confirmationModal.deleteMessage")}
-      </ConfirmationModal>
       <Dialog
         maxWidth="md"
         fullWidth={true}
@@ -281,13 +216,6 @@ const QueueModal = ({ open, onClose, queueId }) => {
           {queueId
             ? `${i18n.t("queueModal.title.edit")}`
             : `${i18n.t("queueModal.title.add")}`}
-            <div style={{ display: "none" }}>
-            <input
-              type="file"
-              ref={attachmentFile}
-              onChange={(e) => handleAttachmentFile(e)}
-            />
-          </div>
         </DialogTitle>
         <Tabs
           value={tab}
@@ -312,7 +240,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                 }, 400);
               }}
             >
-              {({ touched, errors, isSubmitting, values, setFieldValue, }) => (
+              {({ touched, errors, isSubmitting, values }) => (
                 <Form>
                   <DialogContent dividers>
                     <Field
@@ -489,45 +417,10 @@ const QueueModal = ({ open, onClose, queueId }) => {
                           margin="dense"
                         />
                       )}
-
-                        <Grid item>
-                          <MessageVariablesPicker
-                            disabled={isSubmitting}
-                            onClick={value => handleClickMsgVar(value, setFieldValue)}
-                          />
-                        </Grid>
-
                     </div>
                     <QueueOptions queueId={queueId} />
-                     {(queue.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFile />}>
-                        {attachment != null
-                          ? attachment.name
-                          : queue.mediaName}
-                      </Button>
-                      {queueEditable && (
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="secondary"
-                        >
-                          <DeleteOutline />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  )}
                   </DialogContent>
                   <DialogActions>
-                  {!attachment && !queue.mediaPath && queueEditable && (
-                      <Button
-                        color="primary"
-                        onClick={() => attachmentFile.current.click()}
-                        disabled={isSubmitting}
-                        variant="outlined"
-                      >
-                        {i18n.t("queueModal.buttons.attach")}
-                      </Button>
-                    )}
                     <Button
                       onClick={handleClose}
                       color="secondary"

@@ -16,7 +16,7 @@ import ScheduleModal from "../../components/ScheduleModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import moment from "moment";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import usePlans from "../../hooks/usePlans";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -43,21 +43,21 @@ const eventTitleStyle = {
 
 const localizer = momentLocalizer(moment);
 var defaultMessages = {
-  date: i18n.t("schedules.calendar.date"),
-  time: i18n.t("schedules.calendar.time"),
-  event: i18n.t("schedules.calendar.event"),
-  allDay: i18n.t("schedules.calendar.allDay"),
-  week: i18n.t("schedules.calendar.week"),
-  work_week: i18n.t("schedules.calendar.work_week"),
-  day: i18n.t("schedules.calendar.day"),
-  month: i18n.t("schedules.calendar.month"),
-  previous: i18n.t("schedules.calendar.previous"),
-  next: i18n.t("schedules.calendar.next"),
-  yesterday: i18n.t("schedules.calendar.yesterday"),
-  tomorrow: i18n.t("schedules.calendar.tomorrow"),
-  today: i18n.t("schedules.calendar.today"),
-  agenda: i18n.t("schedules.calendar.agenda"),
-  noEventsInRange: i18n.t("schedules.calendar.noEventsInRange"),
+  date: "Data",
+  time: "Hora",
+  event: "Evento",
+  allDay: "Dia Todo",
+  week: "Semana",
+  work_week: "Agendamentos",
+  day: "Dia",
+  month: "Mês",
+  previous: "Anterior",
+  next: "Próximo",
+  yesterday: "Ontem",
+  tomorrow: "Amanhã",
+  today: "Hoje",
+  agenda: "Agenda",
+  noEventsInRange: "Não há agendamentos no período.",
   showMore: function showMore(total) {
     return "+" + total + " mais";
   }
@@ -139,6 +139,8 @@ const Schedules = () => {
     }
   }, [contactId]);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -160,7 +162,7 @@ const Schedules = () => {
 
   useEffect(() => {
     handleOpenScheduleModalFromContactId();
-    const socket = socketConnection({ companyId: user.companyId });
+    const socket = socketManager.getSocket(user.companyId);
 
     socket.on(`company${user.companyId}-schedule`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -175,7 +177,7 @@ const Schedules = () => {
     return () => {
       socket.disconnect();
     };
-  }, [handleOpenScheduleModalFromContactId, user]);
+  }, [handleOpenScheduleModalFromContactId, socketManager, user]);
 
   const cleanContact = () => {
     setContactId("");

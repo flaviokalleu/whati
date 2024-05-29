@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n.js";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +38,8 @@ const Settings = () => {
 
   const [settings, setSettings] = useState([]);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -52,7 +54,7 @@ const Settings = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.getSocket(companyId);
 
     socket.on(`company-${companyId}-settings`, (data) => {
       if (data.action === "update") {
@@ -68,7 +70,7 @@ const Settings = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [socketManager]);
 
   const handleChangeSetting = async (e) => {
     const selectedValue = e.target.value;

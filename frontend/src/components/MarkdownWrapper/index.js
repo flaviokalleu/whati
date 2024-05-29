@@ -1,5 +1,6 @@
-import React from "react";
+import Avatar from "@material-ui/core/Avatar";
 import Markdown from "markdown-to-jsx";
+import React from "react";
 
 const elements = [
 	"a",
@@ -149,7 +150,9 @@ const CustomLink = ({ children, ...props }) => (
 	</a>
 );
 
-const MarkdownWrapper = ({ children }) => {
+const MarkdownWrapper = ({ children, message }) => {
+	let type = message?.mediaType;
+	console.log('type', type)
 	const boldRegex = /\*(.*?)\*/g;
 	const tildaRegex = /~(.*?)~/g;
 
@@ -179,7 +182,47 @@ const MarkdownWrapper = ({ children }) => {
 	}, []);
 
 	if (!children) return null;
+	const regex = /(?<=FN:)(.*)(?=\n)|(?<=TEL;.*:)(.*)(?=\n)/g;
 
+	// Executar a expressão regular na string do vCard
+	const matches = children.match(regex);
+
+	// Extrair o nome e o número de telefone
+	const contact = matches ? matches[0] : '';
+	const number = matches ? matches[1] : '';
+	const vcardStyle = {
+		backgroundColor: 'rgb(74 222 128)',
+		border: '1.5px solid green',
+		borderRadius: '4px',
+		width: '300px',
+		display: 'flex',
+		alignItems: 'center',
+		padding: '5px 0',
+	};
+
+	const avatar = {
+		marginLeft: '10px',
+	};
+
+	const infoStyle = {
+		marginLeft: '10px',
+	};
+	const p = {
+		margin: '2px',
+	}
+
+
+	if (type === 'contactMessage') {
+		return (
+			<div style={vcardStyle}>
+				<Avatar style={avatar} src={message.contact.profilePicUrl} alt="contact_image" />
+				<div style={infoStyle}>
+					<p style={p}><strong>Nome:</strong> {contact}</p>
+					<p style={p}><strong>Número:</strong> {number}</p>
+				</div>
+			</div>
+		)
+	}
 	return <Markdown options={options}>{children}</Markdown>;
 };
 

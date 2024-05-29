@@ -115,6 +115,9 @@ export default function Options(props) {
   
   const [SettingsTransfTicket, setSettingsTransfTicket] = useState("disabled");
   const [loadingSettingsTransfTicket, setLoadingSettingsTransfTicket] = useState(false);
+  
+  const [sendGreetingMessageOneQueues, setSendGreetingMessageOneQueues] = useState("disabled");
+  const [loadingSendGreetingMessageOneQueues, setLoadingSendGreetingMessageOneQueues] = useState(false);
 
   const { update } = useSettings();
 
@@ -149,7 +152,12 @@ export default function Options(props) {
       if (SettingsTransfTicket) {
         setSettingsTransfTicket(SettingsTransfTicket.value);
       }
-	  {/*TRANSFERIR TICKET*/}	
+	  {/*TRANSFERIR TICKET*/}
+
+      const sendGreetingMessageOneQueues = settings.find((s) => s.key === "sendGreetingMessageOneQueues");
+      if (sendGreetingMessageOneQueues) {
+        setSendGreetingMessageOneQueues(sendGreetingMessageOneQueues.value)
+      }	  
 	  
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
@@ -198,6 +206,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingUserRating(false);
+  }
+  
+    async function handleSendGreetingMessageOneQueues(value) {
+    setSendGreetingMessageOneQueues(value);
+    setLoadingSendGreetingMessageOneQueues(true);
+    await update({
+      key: "sendGreetingMessageOneQueues",
+      value,
+    });
+	toast.success("Operação atualizada com sucesso.");
+    setLoadingSendGreetingMessageOneQueues(false);
   }
 
   async function handleScheduleType(value) {
@@ -494,6 +513,26 @@ export default function Options(props) {
             </Select>
             <FormHelperText>
               {loadingSettingsTransfTicket && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+		
+		{/* ENVIAR SAUDAÇÃO QUANDO HOUVER SOMENTE 1 FILA */}
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="sendGreetingMessageOneQueues-label">Enviar saudação quando houver somente 1 fila</InputLabel>
+            <Select
+              labelId="sendGreetingMessageOneQueues-label"
+              value={sendGreetingMessageOneQueues}
+              onChange={async (e) => {
+                handleSendGreetingMessageOneQueues(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>Desabilitado</MenuItem>
+              <MenuItem value={"enabled"}>Habilitado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingSendGreetingMessageOneQueues && "Atualizando..."}
             </FormHelperText>
           </FormControl>
         </Grid>

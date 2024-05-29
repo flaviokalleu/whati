@@ -48,7 +48,7 @@ const CreateOrUpdateContactService = async ({
         whatsappId
       });
     }
-    io.emit(`company-${companyId}-contact`, {
+    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
       action: "update",
       contact
     });
@@ -64,7 +64,7 @@ const CreateOrUpdateContactService = async ({
       whatsappId
     });
 
-    io.emit(`company-${companyId}-contact`, {
+    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
       action: "create",
       contact
     });

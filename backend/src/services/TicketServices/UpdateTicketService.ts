@@ -12,13 +12,12 @@ import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
-import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
-import ShowUserService from "../UserServices/ShowUserService";
+import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne"; //NOVO PLW DESIGN//
+import ShowUserService from "../UserServices/ShowUserService"; //NOVO PLW DESIGN//
 import { isNil } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
 import { Op } from "sequelize";
 import AppError from "../../errors/AppError";
-import { Server } from "socket.io";
 
 interface TicketData {
   status?: string;
@@ -58,6 +57,8 @@ const UpdateTicketService = async ({
     let promptId: number | null = ticketData.promptId || null;
     let useIntegration: boolean | null = ticketData.useIntegration || false;
     let integrationId: number | null = ticketData.integrationId || null;
+
+    console.log("ticketData", ticketData);
 
     const io = getIO();
 
@@ -131,7 +132,8 @@ const UpdateTicketService = async ({
             ratingAt: moment().toDate()
           });
 
-          io.to("open")
+          io.to(`company-${ticket.companyId}-open`)
+            .to(`queue-${ticket.queueId}-open`)
             .to(ticketId.toString())
             .emit(`company-${ticket.companyId}-ticket`, {
               action: "delete",
@@ -230,7 +232,7 @@ const UpdateTicketService = async ({
                 }
               );
               await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-            }
+            }      
     }
 
     await ticket.update({
@@ -267,15 +269,22 @@ const UpdateTicketService = async ({
 
     if (ticket.status !== oldStatus || ticket.user?.id !== oldUserId) {
 
-      io.to(oldStatus).emit(`company-${companyId}-ticket`, {
-        action: "delete",
-        ticketId: ticket.id
-      });
+      io.to(`company-${companyId}-${oldStatus}`)
+        .to(`queue-${ticket.queueId}-${oldStatus}`)
+        .to(`user-${oldUserId}`)
+        .emit(`company-${companyId}-ticket`, {
+          action: "delete",
+          ticketId: ticket.id
+        });
     }
 
-    io.to(ticket.status)
-      .to("notification")
+    io.to(`company-${companyId}-${ticket.status}`)
+      .to(`company-${companyId}-notification`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-notification`)
       .to(ticketId.toString())
+      .to(`user-${ticket?.userId}`)
+      .to(`user-${oldUserId}`)
       .emit(`company-${companyId}-ticket`, {
         action: "update",
         ticket
@@ -288,13 +297,3 @@ const UpdateTicketService = async ({
 };
 
 export default UpdateTicketService;
-
-export const notifyUpdate = (io: Server, ticket: Ticket, ticketId: number, companyId: number) => {
-  io.to(ticket.status)
-    .to("notification")
-    .to(ticketId.toString())
-    .emit(`company-${companyId}-ticket`, {
-      action: "update",
-      ticket
-    });
-}

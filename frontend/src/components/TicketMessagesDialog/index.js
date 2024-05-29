@@ -17,7 +17,7 @@ import MessagesList from "../MessagesList";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const drawerWidth = 320;
 
@@ -67,6 +67,8 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     let delayDebounceFn = null;
     if (open) {
@@ -108,16 +110,16 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
     let socket = null;
 
     if (open) {
-      socket = socketConnection({ companyId });
-      socket.on("connect", () => socket.emit("joinChatBox", `${ticket.id}`));
+      const socket = socketManager.getSocket(companyId);
+      socket.on("ready", () => socket.emit("joinChatBox", `${ticket.id}`));
 
       socket.on(`company-${companyId}-ticket`, (data) => {
-        if (data.action === "update") {
+        if (data.action === "update" && data.ticket.id === ticket.id) {
           setTicket(data.ticket);
         }
 
-        if (data.action === "delete") {
-          toast.success("Ticket deleted sucessfully.");
+        if (data.action === "delete" && data.ticketId === ticket.id) {
+          // toast.success("Ticket deleted sucessfully.");
           history.push("/tickets");
         }
       });
@@ -139,7 +141,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
         socket.disconnect();
       }
     };
-  }, [ticketId, ticket, history, open]);
+  }, [ticketId, ticket, history, open, socketManager]);
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);

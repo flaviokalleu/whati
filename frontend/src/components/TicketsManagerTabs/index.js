@@ -10,15 +10,12 @@ import Tab from "@material-ui/core/Tab";
 import Badge from "@material-ui/core/Badge";
 import MoveToInboxIcon from "@material-ui/icons/MoveToInbox";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import GroupIcon from "@material-ui/icons/Group";
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 
 import NewTicketModal from "../NewTicketModal";
 import TicketsList from "../TicketsListCustom";
-import TicketsListGroup from "../TicketsListGroup";
-
 import TabPanel from "../TabPanel";
 
 import { i18n } from "../../translate/i18n";
@@ -250,12 +247,6 @@ const TicketsManagerTabs = () => {
             classes={{ root: classes.tab }}
           />
           <Tab
-            value={"group"}
-            icon={<GroupIcon />}
-            label="Grupos"
-            classes={{ root: classes.tab }}
-          />
-          <Tab
             value={"closed"}
             icon={<CheckBoxIcon />}
             label={i18n.t("tickets.tabs.closed.title")}
@@ -369,62 +360,8 @@ const TicketsManagerTabs = () => {
           />
         </Paper>
       </TabPanel>
-      <TabPanel value={tab} name="group" className={classes.ticketsWrapper}>
-        <Tabs
-          value={tabOpen}
-          onChange={handleChangeTabOpen}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="fullWidth"
-        >
-          <Tab
-            label={
-              <Badge
-                className={classes.badge}
-                badgeContent={openCount}
-                color="primary"
-              >
-                {i18n.t("ticketsList.assignedHeader")}
-              </Badge>
-            }
-            value={"open"}
-          />
-          <Tab
-            label={
-              <Badge
-                className={classes.badge}
-                badgeContent={pendingCount}
-                color="primary"
-              >
-                {i18n.t("ticketsList.pendingHeader")}
-              </Badge>
-            }
-            value={"pending"}
-          />
-        </Tabs>
-        <Paper className={classes.ticketsWrapper}>
-          <TicketsListGroup
-            status="open"
-            showAll={showAllTickets}
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setOpenCount(val)}
-            style={applyPanelStyle("open")}
-          />
-          <TicketsListGroup
-            status="pending"
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setPendingCount(val)}
-            style={applyPanelStyle("pending")}
-          />
-        </Paper>
-      </TabPanel>
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
         <TicketsList
-          status="closed"
-          showAll={true}
-          selectedQueueIds={selectedQueueIds}
-        />
-        <TicketsListGroup
           status="closed"
           showAll={true}
           selectedQueueIds={selectedQueueIds}
