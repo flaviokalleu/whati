@@ -1,10 +1,8 @@
 import CampaignSetting from "../../models/CampaignSetting";
 import { isArray, isObject } from "lodash";
-
 interface Data {
   settings: any;
 }
-
 const CreateService = async (
   data: Data,
   companyId: number
@@ -16,21 +14,14 @@ const CreateService = async (
         ? JSON.stringify(data.settings[settingKey])
         : data.settings[settingKey];
     const [record, created] = await CampaignSetting.findOrCreate({
-      where: {
-        key: settingKey,
-        companyId
-      },
+      where: { key: settingKey, companyId },
       defaults: { key: settingKey, value, companyId }
     });
-
     if (!created) {
       await record.update({ value });
     }
-
     settings.push(record);
   }
-
   return settings;
 };
-
 export default CreateService;

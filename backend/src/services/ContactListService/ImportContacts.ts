@@ -4,8 +4,6 @@ import { has } from "lodash";
 import ContactListItem from "../../models/ContactListItem";
 import CheckContactNumber from "../WbotServices/CheckNumber";
 import { logger } from "../../utils/logger";
-// import CheckContactNumber from "../WbotServices/CheckNumber";
-
 export async function ImportContacts(
   contactListId: number,
   companyId: number,
@@ -18,11 +16,9 @@ export async function ImportContacts(
     let name = "";
     let number = "";
     let email = "";
-
     if (has(row, "nome") || has(row, "Nome")) {
       name = row["nome"] || row["Nome"];
     }
-
     if (
       has(row, "numero") ||
       has(row, "número") ||
@@ -32,7 +28,6 @@ export async function ImportContacts(
       number = row["numero"] || row["número"] || row["Numero"] || row["Número"];
       number = `${number}`.replace(/\D/g, "");
     }
-
     if (
       has(row, "email") ||
       has(row, "e-mail") ||
@@ -41,12 +36,9 @@ export async function ImportContacts(
     ) {
       email = row["email"] || row["e-mail"] || row["Email"] || row["E-mail"];
     }
-
     return { name, number, email, contactListId, companyId };
   });
-
   const contactList: ContactListItem[] = [];
-
   for (const contact of contacts) {
     const [newContact, created] = await ContactListItem.findOrCreate({
       where: {
@@ -60,20 +52,5 @@ export async function ImportContacts(
       contactList.push(newContact);
     }
   }
-
-  if (contactList) {
-    for (let newContact of contactList) {
-      try {
-        const response = await CheckContactNumber(newContact.number, companyId);
-        newContact.isWhatsappValid = response.exists;
-        const number = response.jid.replace(/\D/g, "");
-        newContact.number = number;
-        await newContact.save();
-      } catch (e) {
-        logger.error(`Número de contato inválido: ${newContact.number}`);
-      }
-    }
-  }
-
   return contactList;
 }

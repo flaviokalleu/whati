@@ -1,23 +1,23 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, useHistory } from "react-router-dom";
 
-import clsx from "clsx";
 import { toast } from "react-toastify";
+import clsx from "clsx";
 
 import { Paper, makeStyles } from "@material-ui/core";
 
-import { AuthContext } from "../../context/Auth/AuthContext";
-import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
-import { SocketContext } from "../../context/Socket/SocketContext";
-import toastError from "../../errors/toastError";
-import api from "../../services/api";
 import ContactDrawer from "../ContactDrawer";
 import MessageInput from "../MessageInputCustom/";
-import MessagesList from "../MessagesList";
-import { TagsContainer } from "../TagsContainer";
-import TicketActionButtons from "../TicketActionButtonsCustom";
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
+import TicketActionButtons from "../TicketActionButtonsCustom";
+import MessagesList from "../MessagesList";
+import api from "../../services/api";
+import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
+import toastError from "../../errors/toastError";
+import { AuthContext } from "../../context/Auth/AuthContext";
+import { TagsContainer } from "../TagsContainer";
+import { socketConnection } from "../../services/socket";
 
 const drawerWidth = 320;
 
@@ -68,23 +68,21 @@ const Ticket = () => {
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
 
-  const socketManager = useContext(SocketContext);
-
   useEffect(() => {
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchTicket = async () => {
         try {
           const { data } = await api.get("/tickets/u/" + ticketId);
-          const { queueId } = data;
-          const { queues, profile } = user;
+          // const { queueId } = data;
+          // const { queues, profile } = user;
 
-          const queueAllowed = queues.find((q) => q.id === queueId);
-          if (queueAllowed === undefined && profile !== "admin") {
-            toast.error("Acesso não permitido");
-            history.push("/tickets");
-            return;
-          }
+          // const queueAllowed = queues.find((q) => q.id === queueId);
+          // if (queueAllowed === undefined && profile !== "admin") {
+          //   toast.error("Acesso não permitido");
+          //   history.push("/tickets");
+          //   return;
+          // }
 
           setContact(data.contact);
           setTicket(data);
@@ -101,17 +99,17 @@ const Ticket = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
-    socket.on("ready", () => socket.emit("joinChatBox", `${ticket.id}`));
+    socket.on("connect", () => socket.emit("joinChatBox", `${ticket.id}`));
 
     socket.on(`company-${companyId}-ticket`, (data) => {
-      if (data.action === "update" && data.ticket.id === ticket.id) {
+      if (data.action === "update") {
         setTicket(data.ticket);
       }
 
-      if (data.action === "delete" && data.ticketId === ticket.id) {
-        // toast.success("Ticket deleted sucessfully.");
+      if (data.action === "delete") {
+        toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
     });
@@ -130,7 +128,7 @@ const Ticket = () => {
     return () => {
       socket.disconnect();
     };
-  }, [ticketId, ticket, history, socketManager]);
+  }, [ticketId, ticket, history]);
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);

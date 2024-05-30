@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useReducer } from "react";
-import { toast } from "react-toastify";
-
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
@@ -9,24 +7,12 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import IconButton from "@material-ui/core/IconButton";
-import SearchIcon from "@material-ui/icons/Search";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
-
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
-
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
-import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
 import SubscriptionModal from "../../components/SubscriptionModal";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
-import UserModal from "../../components/UserModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 
 import moment from "moment";
@@ -90,19 +76,17 @@ const Invoices = () => {
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [searchParam, setSearchParam] = useState("");
+  const [searchParam, ] = useState("");
   const [invoices, dispatch] = useReducer(reducer, []);
   const [storagePlans, setStoragePlans] = React.useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-
 
   const handleOpenContactModal = (invoices) => {
     setStoragePlans(invoices);
     setSelectedContactId(null);
     setContactModalOpen(true);
   };
-
 
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
@@ -121,6 +105,7 @@ const Invoices = () => {
           const { data } = await api.get("/invoices/all", {
             params: { searchParam, pageNumber },
           });
+
           dispatch({ type: "LOAD_INVOICES", payload: data });
           setHasMore(data.hasMore);
           setLoading(false);
@@ -133,7 +118,6 @@ const Invoices = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber]);
 
-
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
@@ -145,11 +129,12 @@ const Invoices = () => {
       loadMore();
     }
   };
+
   const rowStyle = (record) => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
     var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var dias = moment.duration(diff).asDays();
     if (dias < 0 && record.status !== "paid") {
       return { backgroundColor: "#ffbcbc9c" };
     }
@@ -159,7 +144,7 @@ const Invoices = () => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
     var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var dias = moment.duration(diff).asDays();
     const status = record.status;
     if (status === "paid") {
       return "Pago";
@@ -169,8 +154,15 @@ const Invoices = () => {
     } else {
       return "Em Aberto"
     }
-
   }
+  
+  const renderUseWhatsapp = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseFacebook = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseInstagram = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseCampaigns = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseSchedules = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseInternalChat = (row) => { return row.status === false ? "Não" : "Sim" };
+  const renderUseExternalApi = (row) => { return row.status === false ? "Não" : "Sim" };
 
   return (
     <MainContainer>
@@ -183,7 +175,7 @@ const Invoices = () => {
 
       ></SubscriptionModal>
       <MainHeader>
-        <Title>Faturas</Title>
+        <Title>Faturas ({invoices.length})</Title>
       </MainHeader>
       <Paper
         className={classes.mainPaper}
@@ -193,8 +185,20 @@ const Invoices = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">Id</TableCell>
+              {/* <TableCell align="center">Id</TableCell> */}
               <TableCell align="center">Detalhes</TableCell>
+
+              <TableCell align="center">Usuários</TableCell>
+              <TableCell align="center">Conexões</TableCell>
+              <TableCell align="center">Filas</TableCell>
+              {/* <TableCell align="center">Whatsapp</TableCell>
+              <TableCell align="center">Facebook</TableCell>
+              <TableCell align="center">Instagram</TableCell> */}
+              {/* <TableCell align="center">Campanhas</TableCell>
+              <TableCell align="center">Agendamentos</TableCell>
+              <TableCell align="center">Chat Interno</TableCell>
+              <TableCell align="center">Rest PI</TableCell> */}
+
               <TableCell align="center">Valor</TableCell>
               <TableCell align="center">Data Venc.</TableCell>
               <TableCell align="center">Status</TableCell>
@@ -205,8 +209,20 @@ const Invoices = () => {
             <>
               {invoices.map((invoices) => (
                 <TableRow style={rowStyle(invoices)} key={invoices.id}>
-                  <TableCell align="center">{invoices.id}</TableCell>
+                  {/* <TableCell align="center">{invoices.id}</TableCell> */}
                   <TableCell align="center">{invoices.detail}</TableCell>
+
+                  <TableCell align="center">{invoices.users}</TableCell>
+                  <TableCell align="center">{invoices.connections}</TableCell>
+                  <TableCell align="center">{invoices.queues}</TableCell>
+                  {/* <TableCell align="center">{renderUseWhatsapp(invoices.useWhatsapp)}</TableCell>
+                  <TableCell align="center">{renderUseFacebook(invoices.useFacebook)}</TableCell>
+                  <TableCell align="center">{renderUseInstagram(invoices.useInstagram)}</TableCell> */}
+                  {/* <TableCell align="center">{renderUseCampaigns(invoices.useCampaigns)}</TableCell>
+                  <TableCell align="center">{renderUseSchedules(invoices.useSchedules)}</TableCell>
+                  <TableCell align="center">{renderUseInternalChat(invoices.useInternalChat)}</TableCell>
+                  <TableCell align="center">{renderUseExternalApi(invoices.useExternalApi)}</TableCell> */}
+
                   <TableCell style={{ fontWeight: 'bold' }} align="center">{invoices.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</TableCell>
                   <TableCell align="center">{moment(invoices.dueDate).format("DD/MM/YYYY")}</TableCell>
                   <TableCell style={{ fontWeight: 'bold' }} align="center">{rowStatus(invoices)}</TableCell>
@@ -222,11 +238,10 @@ const Invoices = () => {
                       </Button> :
                       <Button
                         size="small"
-                        variant="outlined" 
-                        /* color="secondary"
-                        disabled */
+                        variant="outlined"
+                      // color="secondary"
                       >
-                        PAGO 
+                        PAGO
                       </Button>}
 
                   </TableCell>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles, TextField, Grid, Container } from "@material-ui/core";
+import { makeStyles, TextField, Grid } from "@material-ui/core";
 import { Formik, Form, FastField, FieldArray } from "formik";
 import { isArray } from "lodash";
 import NumberFormat from "react-number-format";
@@ -73,55 +73,61 @@ function SchedulesForm(props) {
               <Grid spacing={4} container>
                 {values.schedules.map((item, index) => {
                   return (
-                      <Container>
+                    <Grid key={index} xs={12} md={4} item>
+                      <Grid container>
+                        <Grid className={classes.control} xs={12} item>
                           <FastField
                             as={TextField}
                             label="Dia da Semana"
                             name={`schedules[${index}].weekday`}
                             disabled
                             variant="outlined"
-                            style={{ marginRight: "3.2%", width: "30%" }}
+                            className={classes.fullWidth}
                             margin="dense"
                           />
+                        </Grid>
+                        <Grid className={classes.control} xs={12} md={6} item>
                           <FastField
+                            label="Hora de Inicial"
                             name={`schedules[${index}].startTime`}
-                            >
+                          >
                             {({ field }) => (
                               <NumberFormat
-                                label="Hora de Inicial"
                                 {...field}
                                 variant="outlined"
                                 margin="dense"
                                 customInput={TextField}
                                 format="##:##"
-                                style={{ marginRight: "3.2%", width: "30%" }}
+                                className={classes.fullWidth}
                               />
                             )}
                           </FastField>
+                        </Grid>
+                        <Grid className={classes.control} xs={12} md={6} item>
                           <FastField
+                            label="Hora de Final"
                             name={`schedules[${index}].endTime`}
-                            >
+                          >
                             {({ field }) => (
                               <NumberFormat
-                                label="Hora de Final"
                                 {...field}
                                 variant="outlined"
                                 margin="dense"
                                 customInput={TextField}
                                 format="##:##"
-                                style={{ marginRight: "3.2%", width: "30%" }}
+                                className={classes.fullWidth}
                               />
                             )}
                           </FastField>
-
-                      </Container>
-
+                        </Grid>
+                      </Grid>
+                    </Grid>
                   );
                 })}
               </Grid>
             )}
           ></FieldArray>
-          <div style={{ textAlign: "center", marginTop: "2%" }} className={classes.buttonContainer}>
+          <div className={classes.buttonContainer}>
             <ButtonWithSpinner
               loading={loading}
               type="submit"

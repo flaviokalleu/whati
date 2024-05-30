@@ -2,28 +2,22 @@ import { Op, fn, col, where } from "sequelize";
 import ContactList from "../../models/ContactList";
 import ContactListItem from "../../models/ContactListItem";
 import { isEmpty } from "lodash";
-
 interface Request {
   companyId: number | string;
   searchParam?: string;
   pageNumber?: string;
 }
-
 interface Response {
   records: ContactList[];
   count: number;
   hasMore: boolean;
 }
-
 const ListService = async ({
   searchParam = "",
   pageNumber = "1",
   companyId
 }: Request): Promise<Response> => {
-  let whereCondition: any = {
-    companyId
-  };
-
+  let whereCondition: any = { companyId };
   if (!isEmpty(searchParam)) {
     whereCondition = {
       ...whereCondition,
@@ -38,10 +32,8 @@ const ListService = async ({
       ]
     };
   }
-
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
-
   const { count, rows: records } = await ContactList.findAndCountAll({
     where: whereCondition,
     limit,
@@ -63,14 +55,7 @@ const ListService = async ({
     ],
     group: ["ContactList.id"]
   });
-
   const hasMore = count > offset + records.length;
-
-  return {
-    records,
-    count,
-    hasMore
-  };
+  return { records, count, hasMore };
 };
-
 export default ListService;

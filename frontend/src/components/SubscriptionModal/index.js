@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 
-
 import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
@@ -37,18 +36,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
 const ContactModal = ({ open, onClose, Invoice, contactId, initialValues, onSave }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
-
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
-
 
   const handleClose = () => {
     onClose();

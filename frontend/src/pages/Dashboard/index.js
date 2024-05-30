@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-
+import { i18n } from "../../translate/i18n";
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
@@ -24,10 +24,10 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ForumIcon from "@material-ui/icons/Forum";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import ClearIcon from "@material-ui/icons/Clear";
-import SendIcon from '@material-ui/icons/Send';
-import MessageIcon from '@material-ui/icons/Message';
-import AccessAlarmIcon from '@material-ui/icons/AccessAlarm';
-import TimerIcon from '@material-ui/icons/Timer';
+import SendIcon from "@material-ui/icons/Send";
+import MessageIcon from "@material-ui/icons/Message";
+import AccessAlarmIcon from "@material-ui/icons/AccessAlarm";
+import TimerIcon from "@material-ui/icons/Timer";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
@@ -47,7 +47,7 @@ import useTickets from "../../hooks/useTickets";
 import useUsers from "../../hooks/useUsers";
 import useContacts from "../../hooks/useContacts";
 import useMessages from "../../hooks/useMessages";
-import { ChatsUser } from "./ChartsUser"
+import { ChatsUser } from "./ChartsUser";
 
 import Filters from "./Filters";
 import { isEmpty } from "lodash";
@@ -84,6 +84,14 @@ const useStyles = makeStyles((theme) => ({
     color: grey[600],
     fontSize: "14px",
   },
+  iconWithEffect: {
+    fontSize: 100,
+    color: "#ffffff",
+    transition: "transform 0.3s",
+    "&:hover": {
+      transform: "scale(1.1)",
+    },
+  },
   alignRight: {
     textAlign: "right",
   },
@@ -100,113 +108,125 @@ const useStyles = makeStyles((theme) => ({
     border: "none",
   },
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
   },
   fixedHeightPaper: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: 240,
   },
   customFixedHeightPaper: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: 120,
   },
   customFixedHeightPaperLg: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
+  }, //EM ATENDIMENTO
+  roundedPaper: {
+    padding: theme.spacing(3),
+    display: "flex",
+    overflow: "auto",
+    flexDirection: "column",
+    borderRadius: theme.spacing(2),
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    transition: "transform 0.2s",
+    "&:hover": {
+      transform: "scale(1.02)",
+    },
   },
   card1: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#11bf42",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, //AGUARDANDO ATENDIMENTO
   card2: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#748e9d",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, //ATENDIMENTOS FINALIZADOS
   card3: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#e53935",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, //NOVOS LEADS
   card4: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#cc991b",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, // TOTAL MENSAGENS RECEBIDAS
   card5: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#47a7f6",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, //ATENDIMENTOS EM ABERTO
   card6: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#b87d77",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, // TOTAL DE MENSAGENS ENVIADAS
   card7: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#7bc780",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, // TEMPO MÉDIO DE ATENDIMENTOS
   card8: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#b05c38",
+    backgroundColor: "#007fad",
     color: "#eee",
-  },
+  }, // TEMPO DE ESPERA
   card9: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
     height: "100%",
-    backgroundColor: "#bd3c58",
+    backgroundColor: "#007fad",
     color: "#eee",
   },
   fixedHeightPaper2: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
@@ -217,9 +237,11 @@ const Dashboard = () => {
   const classes = useStyles();
   const [counters, setCounters] = useState({});
   const [attendants, setAttendants] = useState([]);
-  const [period, setPeriod] = useState(0);
   const [filterType, setFilterType] = useState(1);
-  const [dateFrom, setDateFrom] = useState(moment("1", "D").format("YYYY-MM-DD"));
+  const [period, setPeriod] = useState(0);
+  const [dateFrom, setDateFrom] = useState(
+    moment("1", "D").format("YYYY-MM-DD")
+  );
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DD"));
   const [loading, setLoading] = useState(false);
   const { find } = useDashboard();
@@ -228,9 +250,13 @@ const Dashboard = () => {
   let date = newDate.getDate();
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
-  let now = `${year}-${month < 10 ? `0${month}` : `${month}`}-${date < 10 ? `0${date}` : `${date}`}`;
+  let now = `${year}-${month < 10 ? `0${month}` : `${month}`}-${
+    date < 10 ? `0${date}` : `${date}`
+  }`;
 
   const [showFilter, setShowFilter] = useState(false);
+  const [dateStartTicket, setDateStartTicket] = useState(now);
+  const [dateEndTicket, setDateEndTicket] = useState(now);
   const [queueTicket, setQueueTicket] = useState(false);
 
   const { user } = useContext(AuthContext);
@@ -249,20 +275,6 @@ const Dashboard = () => {
     }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
-    async function handleChangePeriod(value) {
-    setPeriod(value);
-  }
-
-  async function handleChangeFilterType(value) {
-    setFilterType(value);
-    if (value === 1) {
-      setPeriod(0);
-    } else {
-      setDateFrom("");
-      setDateTo("");
-    }
-  }
 
   async function fetchData() {
     setLoading(true);
@@ -317,107 +329,104 @@ const Dashboard = () => {
   const GetUsers = () => {
     let count;
     let userOnline = 0;
-    attendants.forEach(user => {
+    attendants.forEach((user) => {
       if (user.online === true) {
-        userOnline = userOnline + 1
+        userOnline = userOnline + 1;
       }
-    })
+    });
     count = userOnline === 0 ? 0 : userOnline;
     return count;
   };
-  
-    const GetContacts = (all) => {
+
+  const GetContacts = (all) => {
     let props = {};
     if (all) {
       props = {};
+    } else {
+      props = {
+        dateStart: dateStartTicket,
+        dateEnd: dateEndTicket,
+      };
     }
     const { count } = useContacts(props);
     return count;
   };
-  
-    function renderFilters() {
-    if (filterType === 1) {
-      return (
-        <>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Data Inicial"
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className={classes.fullWidth}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Data Final"
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className={classes.fullWidth}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-        </>
-      );
+
+  const GetMessages = (all, fromMe) => {
+    let props = {};
+    if (all) {
+      if (fromMe) {
+        props = {
+          fromMe: true,
+        };
+      } else {
+        props = {
+          fromMe: false,
+        };
+      }
     } else {
-      return (
-        <Grid item xs={12} sm={6} md={4}>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="period-selector-label">Período</InputLabel>
-            <Select
-              labelId="period-selector-label"
-              id="period-selector"
-              value={period}
-              onChange={(e) => handleChangePeriod(e.target.value)}
-            >
-              <MenuItem value={0}>Nenhum selecionado</MenuItem>
-              <MenuItem value={3}>Últimos 3 dias</MenuItem>
-              <MenuItem value={7}>Últimos 7 dias</MenuItem>
-              <MenuItem value={15}>Últimos 15 dias</MenuItem>
-              <MenuItem value={30}>Últimos 30 dias</MenuItem>
-              <MenuItem value={60}>Últimos 60 dias</MenuItem>
-              <MenuItem value={90}>Últimos 90 dias</MenuItem>
-            </Select>
-            <FormHelperText>Selecione o período desejado</FormHelperText>
-          </FormControl>
-        </Grid>
-      );
+      if (fromMe) {
+        props = {
+          fromMe: true,
+          dateStart: dateStartTicket,
+          dateEnd: dateEndTicket,
+        };
+      } else {
+        props = {
+          fromMe: false,
+          dateStart: dateStartTicket,
+          dateEnd: dateEndTicket,
+        };
+      }
     }
+    const { count } = useMessages(props);
+    return count;
+  };
+
+  function toggleShowFilter() {
+    setShowFilter(!showFilter);
   }
 
   return (
     <div>
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3} justifyContent="flex-end">
-		
+          {/* FILTROS */}
+          <Grid item xs={12}>
+            <Button
+              onClick={toggleShowFilter}
+              style={{ float: "right" }}
+              color="primary"
+            >
+              {!showFilter ? <FilterListIcon /> : <ClearIcon />}
+            </Button>
+          </Grid>
+
+          {showFilter && (
+            <Filters
+              classes={classes}
+              setDateStartTicket={setDateStartTicket}
+              setDateEndTicket={setDateEndTicket}
+              dateStartTicket={dateStartTicket}
+              dateEndTicket={dateEndTicket}
+              setQueueTicket={setQueueTicket}
+              queueTicket={queueTicket}
+            />
+          )}
 
           {/* EM ATENDIMENTO */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card1}
-              style={{ overflow: "hidden" }}
-              elevation={4}
+              className={`${classes.roundedPaper} ${classes.card1}`}
+              elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Em Conversa
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.inservice")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {counters.supportHappening}
                     </Typography>
                   </Grid>
@@ -426,7 +435,7 @@ const Dashboard = () => {
                   <CallIcon
                     style={{
                       fontSize: 100,
-                      color: "#0b708c",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
@@ -437,24 +446,16 @@ const Dashboard = () => {
           {/* AGUARDANDO */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card2}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card2}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Aguardando
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.waiting")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {counters.supportPending}
                     </Typography>
                   </Grid>
@@ -463,7 +464,7 @@ const Dashboard = () => {
                   <HourglassEmptyIcon
                     style={{
                       fontSize: 100,
-                      color: "#47606e",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
@@ -472,30 +473,20 @@ const Dashboard = () => {
           </Grid>
 
           {/* ATENDENTES ATIVOS */}
-			  {/*<Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card6}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card6}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Conversas Ativas
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.onlineAgents")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {GetUsers()}
-                      <span
-                        style={{ color: "#805753" }}
-                      >
+                      <span style={{ color: "#ffffff" }}>
                         /{attendants.length}
                       </span>
                     </Typography>
@@ -505,35 +496,27 @@ const Dashboard = () => {
                   <RecordVoiceOverIcon
                     style={{
                       fontSize: 100,
-                      color: "#805753",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
               </Grid>
             </Paper>
-</Grid>*/}
+          </Grid>
 
           {/* FINALIZADOS */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card3}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card3}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Finalizados
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.completedTickets")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {counters.supportFinished}
                     </Typography>
                   </Grid>
@@ -542,7 +525,7 @@ const Dashboard = () => {
                   <CheckCircleIcon
                     style={{
                       fontSize: 100,
-                      color: "#5852ab",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
@@ -550,27 +533,102 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          {/* NOVOS CONTATOS */}
+          {/* MINHAS MENSAGEM ENVIADAS */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card4}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card7}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Novos Contatos
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.totalSentMessages")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
+                      {GetMessages(false, true)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid item xs={4}>
+                  <SendIcon
+                    style={{
+                      fontSize: 100,
+                      color: "#ffffff",
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* MINHAS MENSAGEM RECEBIDAS */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper
+              className={`${classes.roundedPaper} ${classes.card5}`}
+              elevation={6}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={8}>
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.totalReceivedMessages")}
+                  </Typography>
+                  <Grid item>
+                    <Typography component="h1" variant="h4">
+                      {GetMessages(false, false)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid item xs={4}>
+                  <MessageIcon
+                    style={{
+                      fontSize: 100,
+                      color: "#ffffff",
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* CARD DE GRAFICO */}
+          {/*<Grid item xs={12}>
+            <Paper
+              elevation={6}
+              className={classes.fixedHeightPaper}
+            >
+              <Chart
+                dateStartTicket={dateStartTicket}
+                dateEndTicket={dateEndTicket}
+                queueTicket={queueTicket}
+              />
+            </Paper>
+                  </Grid> *}
+
+          {/* INFO DOS USUARIOS bugg*/}
+          {/*<Grid item xs={12}>
+            {attendants.length ? (
+              <TableAttendantsStatus
+                attendants={attendants}
+                loading={loading}
+              />
+            ) : null}
+            </Grid>*/}
+
+          
+          {/* NOVOS CONTATOS */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper
+              className={`${classes.roundedPaper} ${classes.card4}`}
+              elevation={6}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={8}>
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.newLeads")}
+                  </Typography>
+                  <Grid item>
+                    <Typography component="h1" variant="h4">
                       {GetContacts(true)}
                     </Typography>
                   </Grid>
@@ -579,7 +637,7 @@ const Dashboard = () => {
                   <GroupAddIcon
                     style={{
                       fontSize: 100,
-                      color: "#8c6b19",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
@@ -587,28 +645,19 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          
           {/* T.M. DE ATENDIMENTO */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card8}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card8}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    T.M. de Conversa
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.averageHandlingTime")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {formatTime(counters.avgSupportTime)}
                     </Typography>
                   </Grid>
@@ -617,7 +666,7 @@ const Dashboard = () => {
                   <AccessAlarmIcon
                     style={{
                       fontSize: 100,
-                      color: "#7a3f26",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
@@ -628,24 +677,16 @@ const Dashboard = () => {
           {/* T.M. DE ESPERA */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
-              className={classes.card9}
-              style={{ overflow: "hidden" }}
+              className={`${classes.roundedPaper} ${classes.card9}`}
               elevation={6}
             >
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    T.M. de Espera
+                  <Typography component="h3" variant="h6" paragraph>
+                    {i18n.t("dashboard.title.averageWaitTime")}
                   </Typography>
                   <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
+                    <Typography component="h1" variant="h4">
                       {formatTime(counters.avgWaitTime)}
                     </Typography>
                   </Grid>
@@ -654,71 +695,32 @@ const Dashboard = () => {
                   <TimerIcon
                     style={{
                       fontSize: 100,
-                      color: "#8a2c40",
+                      color: "#ffffff",
                     }}
                   />
                 </Grid>
               </Grid>
             </Paper>
           </Grid>
-		  
-		  {/* FILTROS */}
-          <Grid item xs={12} sm={6} md={4}>
-            <FormControl className={classes.selectContainer}>
-              <InputLabel id="period-selector-label">Tipo de Filtro</InputLabel>
-              <Select
-                labelId="period-selector-label"
-                value={filterType}
-                onChange={(e) => handleChangeFilterType(e.target.value)}
-              >
-                <MenuItem value={1}>Filtro por Data</MenuItem>
-                <MenuItem value={2}>Filtro por Período</MenuItem>
-              </Select>
-              <FormHelperText>Selecione o período desejado</FormHelperText>
-            </FormControl>
-          </Grid>
-
-          {renderFilters()}
-
-          {/* BOTAO FILTRAR */}
-          <Grid item xs={12} className={classes.alignRight}>
-            <ButtonWithSpinner
-              loading={loading}
-              onClick={() => fetchData()}
-              variant="contained"
-              color="primary"
-            >
-              Filtrar
-            </ButtonWithSpinner>
-          </Grid>
-
-          {/* USUARIOS ONLINE */}
-          <Grid item xs={12}>
-            {attendants.length ? (
-              <TableAttendantsStatus
-                attendants={attendants}
-                loading={loading}
-              />
-            ) : null}
-          </Grid>
-
           {/* TOTAL DE ATENDIMENTOS POR USUARIO */}
-          <Grid item xs={12}>
-            <Paper className={classes.fixedHeightPaper2}>
-              <ChatsUser />
-            </Paper>
-          </Grid>
+          <Grid container spacing={2}>
+            {/* Componente ChatsUser */}
+            <Grid item xs={12} md={6}>
+              <Paper className={classes.roundedPaper}>
+                <ChatsUser />
+              </Paper>
+            </Grid>
 
-          {/* TOTAL DE ATENDIMENTOS */}
-          <Grid item xs={12}>
-            <Paper className={classes.fixedHeightPaper2}>
-              <ChartsDate />
-            </Paper>
+            {/* Componente ChartsDate */}
+            <Grid item xs={12} md={6}>
+              <Paper className={classes.roundedPaper}>
+                <ChartsDate />
+              </Paper>
+            </Grid>
           </Grid>
-
         </Grid>
-      </Container >
-    </div >
+      </Container>
+    </div>
   );
 };
 

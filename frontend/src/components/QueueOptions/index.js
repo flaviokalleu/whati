@@ -4,7 +4,7 @@ import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Typography from "@material-ui/core/Typography";
-import { Button, IconButton, StepContent, TextField } from "@material-ui/core";
+import { Button, FormControl, IconButton, InputLabel, Link, MenuItem, Select, StepContent, TextField } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import SaveIcon from "@material-ui/icons/Save";
@@ -12,30 +12,25 @@ import EditIcon from "@material-ui/icons/Edit";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    //height: 400,
-    [theme.breakpoints.down("sm")]: {
-      maxHeight: "20vh",
-    },
-  },
-  button: {
-    marginRight: theme.spacing(1),
-  },
-  input: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  addButton: {
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-  },
-}));
+import { useStyles } from "./style";
+import dataApi from "./dataApi";
+import { toast } from "react-toastify";
+
 
 export function QueueOptionStepper({ queueId, options, updateOptions }) {
   const classes = useStyles();
   const [activeOption, setActiveOption] = useState(-1);
+  const [optionType, setOptionType] = useState('Texto');
+  const [file, setFile] = useState(null);
+  const [link, setLink] = useState(null);
+
+  const makeFileLink = (option) => {
+    if (!option) return '';
+    if (option.message)  {
+      return `/public/${option.message}`;
+    } 
+    return '';
+  }
 
   const handleOption = (index) => async () => {
     setActiveOption(index);
@@ -66,7 +61,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
   const handleSave = async (option) => {
     try {
       if (option.id) {
-        await api.request({
+        const {data} = await api.request({
           url: `/queue-options/${option.id}`,
           method: "PUT",
           data: option,
@@ -85,6 +80,42 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       toastError(e);
     }
   };
+
+  const handleSaveFile = async (option) => {
+    if (!file) return;
+    if (!option.id) {
+      toastError('Opção não salva, salve a opção antes de adicionar um arquivo');
+    }
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const {data} = await api.request({
+        url: `/queue-options/${option.id}/file`,
+        method: "POST",
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      option.edition = false;
+      console.log(data);
+      updateOptions();
+      toast.success('Arquivo adicionado.');
+    } catch (e) {
+      toastError(e);
+    }
+  };
+
+  const handleOptionChangeType = (event, index) => {
+    options[index].optionType = event.target.value;
+    updateOptions();
+  };
+
+  const handleSetFile = () => {
+    const file = document.getElementById('file').files[0];
+    setFile(file);
+    console.log(file);
+  }
 
   const handleEdition = (index) => {
     options[index].edition = !options[index].edition;
@@ -122,10 +153,24 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
   };
 
   const renderTitle = (index) => {
+
     const option = options[index];
+    console.log(option);
     if (option.edition) {
       return (
         <>
+          <FormControl variant="standard" style={{ width: '100%' }} sx={{ width: '100%' }}>
+            <InputLabel>Tipo de opção</InputLabel>
+            <Select
+              value={option.optionType}
+              onChange={(event) => handleOptionChangeType(event, index)}
+              label="Tipo de opção">
+              <MenuItem value={'Texto'}>Texto</MenuItem>
+              <MenuItem value={'Atendente'}>Atendente</MenuItem>
+              <MenuItem value={'Fila'}>Fila</MenuItem>
+              <MenuItem value={'Arquivo'}>Arquivo</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             value={option.title}
             onChange={(event) => handleOptionChangeTitle(event, index)}
@@ -178,19 +223,71 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
   const renderMessage = (index) => {
     const option = options[index];
     if (option.edition) {
-      return (
-        <>
-          <TextField
-            style={{ width: "100%" }}
-            multiline
-            value={option.message}
-            onChange={(event) => handleOptionChangeMessage(event, index)}
-            size="small"
-            className={classes.input}
-            placeholder="Digite o texto da opção"
-          />
-        </>
-      );
+      if (option.optionType === 'Texto') {
+        return (
+          <>
+            <TextField
+              style={{ width: "100%" }}
+              multiline
+              value={option.message}
+              onChange={(event) => handleOptionChangeMessage(event, index)}
+              size="small"
+              className={classes.input}
+              placeholder="Digite o texto da opção"
+            />
+          </>
+        );
+      } else if (option.optionType === 'Atendente') {
+        const users = dataApi.getUsers();
+        return (
+          <>
+            <FormControl variant="standard" style={{ width: '100%' }} sx={{ width: '100%' }}>
+              <InputLabel>Atendente</InputLabel>
+              <Select
+                value={option.message}
+                onChange={(event) => handleOptionChangeMessage(event, index)}
+                label="Atendente">
+                {users.users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        );
+      } else if (option.optionType === 'Fila') {
+        const queues = dataApi.getQueues();
+        queues.forEach(queue => {if (queue.id === queue.id.toString()) {queues.splice(queue, 1)}})
+        return (
+          <>
+            <FormControl variant="standard" style={{ width: '100%' }} sx={{ width: '100%' }}>
+              <InputLabel>Fila</InputLabel>
+              <Select
+                value={option.message}
+                onChange={(event) => handleOptionChangeMessage(event, index)}
+                label="Fila">
+                {queues.map((queue) => (
+                  <MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        );
+      } else if (option.optionType === 'Arquivo') {
+        return (
+          <>
+            <input
+              accept="image/*,application/pdf"
+              className={classes.input}
+              id="file"
+              type="file"
+              name="file"
+              onChange={handleSetFile}
+            />
+            {makeFileLink(option) !== '' && (<><br/><Link href={makeFileLink(option)} target="_blank">Arquivo atual</Link><br/></>)}<br/>
+            <Button variant="outlined" onClick={() => handleSaveFile(option)} component="span">Enviar</Button><br/>
+          </>
+        );
+      }
     }
     return (
       <>
@@ -218,7 +315,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
   const renderStep = (option, index) => {
     return (
       <Step key={index}>
-        <StepLabel style={{ cursor: "pointer" }} onClick={handleOption(index)}>
+        <StepLabel style={{ cursor: "pointer", width: '100%' }} onClick={handleOption(index)}>
           {renderTitle(index)}
         </StepLabel>
         <StepContent>
@@ -268,6 +365,30 @@ export function QueueOptions({ queueId }) {
   const classes = useStyles();
   const [options, setOptions] = useState([]);
 
+  const getQueues = async () => {
+    try {
+      const { data } = await api.request({
+        url: "/queue?ax=1",
+        method: "GET",
+      });
+      dataApi.setQueues(data);
+    } catch (e) {
+      toastError(e);
+    }
+  }
+  
+  const getUsers = async () => {
+    try {
+      const { data } = await api.request({
+        url: "/users?ax=2",
+        method: "GET",
+      });
+      dataApi.setUsers(data);      
+    } catch (e) {
+      toastError(e);
+    }
+  }
+
   useEffect(() => {
     if (queueId) {
       const fetchOptions = async () => {
@@ -291,6 +412,8 @@ export function QueueOptions({ queueId }) {
       };
       fetchOptions();
     }
+    getQueues();
+    getUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

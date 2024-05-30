@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react";
 import {
   Chip,
   IconButton,
+  Button,
+  Divider,
   List,
   ListItem,
   ListItemSecondaryAction,
@@ -9,9 +11,13 @@ import {
   makeStyles,
 } from "@material-ui/core";
 
+import{GetApp} from "@material-ui/icons";
+
 import { useHistory, useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useDate } from "../../hooks/useDate";
+
+import ModalImageCors from "../../components/ModalImageCors";
 
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
@@ -28,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100% - 58px)",
     overflow: "hidden",
     borderRadius: 0,
-    backgroundColor: theme.palette.boxlist, //DARK MODE PLW DESIGN//
   },
   chatList: {
     display: "flex",
@@ -41,6 +46,8 @@ const useStyles = makeStyles((theme) => ({
   listItem: {
     cursor: "pointer",
   },
+  lastMessage:{
+  }
 }));
 
 export default function ChatList({
@@ -71,6 +78,46 @@ export default function ChatList({
     if (id !== chat.uuid) {
       history.push(`/chats/${chat.uuid}`);
       handleSelectChat(chat);
+    }
+  };
+
+  const checkMessageMedia = (chat) => {
+    if (chat.mediaType === "image") {
+      return <ModalImageCors imageUrl={chat.mediaUrl} />;
+    }
+    if (chat.mediaType === "audio") {
+      return (
+        <audio controls>
+          <source src={chat.mediaUrl} type="audio/ogg"></source>
+        </audio>
+      );
+    }
+
+    if (chat.mediaType === "video") {
+      return (
+        <video
+          className={classes.chatMedia}
+          src={chat.mediaUrl}
+          controls
+        />
+      );
+    } else {
+      return (
+        <>
+          <div className={classes.downloadMedia}>
+            <Button
+              startIcon={<GetApp />}
+              color="primary"
+              variant="outlined"
+              target="_blank"
+              href={chat.mediaUrl}
+            >
+              Download
+            </Button>
+          </div>
+          <Divider />
+        </>
+      );
     }
   };
 
@@ -107,10 +154,10 @@ export default function ChatList({
       : "";
   };
 
-  const getItemStyle = (chat) => {
+  const getItemStyle = (chat,classes) => {
     return {
       borderLeft: chat.uuid === id ? "6px solid #002d6e" : null,
-      backgroundColor: chat.uuid === id ? "theme.palette.chatlist" : null,
+      backgroundColor: chat.uuid === id ? classes.lastMessage : null,
     };
   };
 
@@ -134,7 +181,7 @@ export default function ChatList({
                   onClick={() => goToMessages(chat)}
                   key={key}
                   className={classes.listItem}
-                  style={getItemStyle(chat)}
+                  style={getItemStyle(chat,classes)}
                   button
                 >
                   <ListItemText

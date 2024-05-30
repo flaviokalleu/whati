@@ -43,7 +43,7 @@ import useContactLists from "../../hooks/useContactLists";
 import { Grid } from "@material-ui/core";
 
 import planilhaExemplo from "../../assets/planilha.xlsx";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -120,8 +120,6 @@ const ContactListItems = () => {
 
   const { findById: findContactList } = useContactLists();
 
-  const socketManager = useContext(SocketContext);
-
   useEffect(() => {
     findContactList(contactListId).then((data) => {
       setContactList(data);
@@ -156,7 +154,7 @@ const ContactListItems = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-ContactListItem`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -184,7 +182,7 @@ const ContactListItems = () => {
     return () => {
       socket.disconnect();
     };
-  }, [contactListId, socketManager]);
+  }, [contactListId]);
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());

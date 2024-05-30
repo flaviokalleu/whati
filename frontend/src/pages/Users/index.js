@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { toast } from "react-toastify";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -28,7 +28,9 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
+import UserStatusIcon from "../../components/UserModal/statusIcon";
+import { WhatsApp } from "@material-ui/icons";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_USERS") {
@@ -96,8 +98,6 @@ const Users = () => {
   const [searchParam, setSearchParam] = useState("");
   const [users, dispatch] = useReducer(reducer, []);
 
-  const socketManager = useContext(SocketContext);
-
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -125,7 +125,7 @@ const Users = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-user`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -140,7 +140,7 @@ const Users = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);
+  }, []);
 
   const handleOpenUserModal = () => {
     setSelectedUser(null);
@@ -190,8 +190,7 @@ const Users = () => {
       <ConfirmationModal
         title={
           deletingUser &&
-          `${i18n.t("users.confirmationModal.deleteTitle")} ${
-            deletingUser.name
+          `${i18n.t("users.confirmationModal.deleteTitle")} ${deletingUser.name
           }?`
         }
         open={confirmModalOpen}
@@ -207,7 +206,7 @@ const Users = () => {
         userId={selectedUser && selectedUser.id}
       />
       <MainHeader>
-        <Title>{i18n.t("users.title")}</Title>
+        <Title>{i18n.t("users.title")} ({users.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
             placeholder={i18n.t("contacts.searchPlaceholder")}
@@ -239,29 +238,29 @@ const Users = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-			<TableCell align="center">
-                {i18n.t("users.table.id")}
-              </TableCell>
+              <TableCell align="center">{i18n.t("users.table.id")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.status")}</TableCell>
               <TableCell align="center">{i18n.t("users.table.name")}</TableCell>
-              <TableCell align="center">
-                {i18n.t("users.table.email")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("users.table.profile")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("users.table.actions")}
-              </TableCell>
+              <TableCell align="center">{i18n.t("users.table.email")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.profile")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.whatsapp")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.startWork")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.endWork")}</TableCell>
+              <TableCell align="center">{i18n.t("users.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <>
               {users.map((user) => (
                 <TableRow key={user.id}>
-				  <TableCell align="center">{user.id}</TableCell>
+                  <TableCell align="center">{user.id}</TableCell>
+                  <TableCell align="center"><UserStatusIcon user={user} /></TableCell>
                   <TableCell align="center">{user.name}</TableCell>
                   <TableCell align="center">{user.email}</TableCell>
                   <TableCell align="center">{user.profile}</TableCell>
+                  <TableCell align="center">{user.whatsapp?.name}</TableCell>
+                  <TableCell align="center">{user.startWork}</TableCell>
+                  <TableCell align="center">{user.endWork}</TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"
@@ -282,7 +281,7 @@ const Users = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton columns={4} />}
+              {loading && <TableRowSkeleton columns={8} />}
             </>
           </TableBody>
         </Table>

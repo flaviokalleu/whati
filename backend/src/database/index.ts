@@ -16,7 +16,6 @@ import QuickMessage from "../models/QuickMessage";
 import Help from "../models/Help";
 import TicketTraking from "../models/TicketTraking";
 import UserRating from "../models/UserRating";
-import QueueOption from "../models/QueueOption";
 import Schedule from "../models/Schedule";
 import Tag from "../models/Tag";
 import TicketTag from "../models/TicketTag";
@@ -30,20 +29,20 @@ import Announcement from "../models/Announcement";
 import Chat from "../models/Chat";
 import ChatUser from "../models/ChatUser";
 import ChatMessage from "../models/ChatMessage";
+import Chatbot from "../models/Chatbot";
+import DialogChatBots from "../models/DialogChatBots";
+import Integrations from "../models/Integrations";
 import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
-import BaileysChats from "../models/BaileysChats";
-import Files from "../models/Files";
-import FilesOptions from "../models/FilesOptions";
-import Prompt from "../models/Prompt";
-import QueueIntegrations from "../models/QueueIntegrations";
-
-// eslint-disable-next-line
+import ApiUsages from "../models/ApiUsages";
+import Rating from "../models/Rating";
+import RatingOption from "../models/RatingOption";
+import Task from "../models/Task";
+import Email from "../models/Email";
+import AgendamentoEmail from "../models/AgendamentoEmail";
+import Evento from "../models/Evento";
 const dbConfig = require("../config/database");
-// import dbConfig from "../config/database";
-
 const sequelize = new Sequelize(dbConfig);
-
 const models = [
   Company,
   User,
@@ -62,7 +61,6 @@ const models = [
   Help,
   TicketTraking,
   UserRating,
-  QueueOption,
   Schedule,
   Tag,
   TicketTag,
@@ -76,15 +74,17 @@ const models = [
   Chat,
   ChatUser,
   ChatMessage,
+  Chatbot,
+  DialogChatBots,
+  Integrations,
   Invoices,
   Subscriptions,
-  BaileysChats,
-  Files,
-  FilesOptions,
-  Prompt,
-  QueueIntegrations,
+  ApiUsages,
+  Rating,
+  RatingOption,
+  Task,
+  Email,
+  Evento
 ];
-
 sequelize.addModels(models);
-
 export default sequelize;

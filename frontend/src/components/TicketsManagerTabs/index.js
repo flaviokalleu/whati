@@ -3,19 +3,23 @@ import { useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import SearchIcon from "@material-ui/icons/Search";
+import PageviewIcon from "@material-ui/icons/Pageview";
 import InputBase from "@material-ui/core/InputBase";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Badge from "@material-ui/core/Badge";
-import MoveToInboxIcon from "@material-ui/icons/MoveToInbox";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
+import GroupIcon from "@material-ui/icons/Group";
+import SearchIcon from "@material-ui/icons/Search";
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 
 import NewTicketModal from "../NewTicketModal";
 import TicketsList from "../TicketsListCustom";
+import TicketsListGroup from "../TicketsListGroup";
+
 import TabPanel from "../TabPanel";
 
 import { i18n } from "../../translate/i18n";
@@ -26,117 +30,79 @@ import { Button } from "@material-ui/core";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
 
-const useStyles = makeStyles(theme => ({
-	ticketsWrapper: {
-		position: "relative",
-		display: "flex",
-		height: "100%",
-		flexDirection: "column",
-		overflow: "hidden",
-		borderTopRightRadius: 0,
-		borderBottomRightRadius: 0,
-		borderRadius:0,
-	},
+const useStyles = makeStyles((theme) => ({
+  ticketsWrapper: {
+    position: "relative",
+    display: "flex",
+    height: "100%",
+    flexDirection: "column",
+    overflow: "hidden",
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
 
-	tabsHeader: {
-		flex: "none",
-		backgroundColor: theme.palette.tabHeaderBackground,
-	},
+  tabsHeader: {
+    flex: "none",
+    backgroundColor: theme.palette.tabHeaderBackground,
+  },
 
-	tabsInternal: {
-		flex: "none",
-		backgroundColor: theme.palette.tabHeaderBackground
-	},
+  settingsIcon: {
+    alignSelf: "center",
+    marginLeft: "auto",
+    padding: 8,
+  },
 
-	settingsIcon: {
-		alignSelf: "center",
-		marginLeft: "auto",
-		padding: 8,
-	},
+  tab: {
+    minWidth: 70,
+    fontSize: 12,
+    marginLeft: 0,
+  },
 
-	tab: {
-		minWidth: 120,
-		width: 120,
-	},
+  tabPanelItem: {
+    minWidth: 80,
+    fontSize: 12,
+    marginLeft: 0,
+  },
 
-	internalTab: {
-		minWidth: 120,
-		width: 120,
-		padding: 5
-	},
+  ticketOptionsBox: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: theme.palette.optionsBackground,
+    padding: theme.spacing(1),
+  },
 
-	ticketOptionsBox: {
-		display: "flex",
-		justifyContent: "space-between",
-		alignItems: "center",
-		background: theme.palette.optionsBackground,
-		padding: theme.spacing(1),
-	},
+  serachInputWrapper: {
+    flex: 1,
+    background: theme.palette.total,
+    display: "flex",
+    borderRadius: 40,
+    padding: 4,
+    marginRight: theme.spacing(1),
+  },
 
-	ticketSearchLine: {
-		padding: theme.spacing(1),
-	},
+  searchIcon: {
+    color: "grey",
+    marginLeft: 6,
+    marginRight: 6,
+    alignSelf: "center",
+  },
 
-	serachInputWrapper: {
-		flex: 1,
-		background: theme.palette.total,
-		display: "flex",
-		borderRadius: 40,
-		padding: 4,
-		marginRight: theme.spacing(1),
-	},
+  searchInput: {
+    flex: 1,
+    border: "none",
+    borderRadius: 30,
+  },
 
-	searchIcon: {
-		color: "grey",
-		marginLeft: 6,
-		marginRight: 6,
-		alignSelf: "center",
-	},
-
-	searchInput: {
-		flex: 1,
-		border: "none",
-		borderRadius: 30,
-	},
-
-	insiderTabPanel: {
-		height: '100%',
-		marginTop: "-72px",
-		paddingTop: "72px"
-	},
-
-	insiderDoubleTabPanel: {
-		display:"flex",
-		flexDirection: "column",
-		marginTop: "-72px",
-		paddingTop: "72px",
-		height: "100%"
-	},
-
-	labelContainer: {
-		width: "auto",
-		padding: 0
-	},
-	iconLabelWrapper: {
-		flexDirection: "row",
-		'& > *:first-child': {
-			marginBottom: '3px !important',
-			marginRight: 16
-		}
-	},
-	insiderTabLabel: {
-		[theme.breakpoints.down(1600)]: {
-			display:'none'
-		}
-	},
-	smallFormControl: {
-		'& .MuiOutlinedInput-input': {
-			padding: "12px 10px",
-		},
-		'& .MuiInputLabel-outlined': {
-			marginTop: "-6px"
-		}
-	}
+  badge: {
+    right: "-10px",
+  },
+  show: {
+    display: "block",
+  },
+  hide: {
+    display: "none !important",
+  },
 }));
 
 const TicketsManagerTabs = () => {
@@ -161,7 +127,10 @@ const TicketsManagerTabs = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   useEffect(() => {
-    if (user.profile.toUpperCase() === "ADMIN") {
+    if (
+      user.profile.toUpperCase() === "ADMIN" ||
+      user.allUserChat === "enabled"
+    ) {
       setShowAllTickets(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -227,7 +196,7 @@ const TicketsManagerTabs = () => {
       <NewTicketModal
         modalOpen={newTicketModalOpen}
         onClose={(ticket) => {
-          
+          console.log("ticket", ticket);
           handleCloseOrOpenTicket(ticket);
         }}
       />
@@ -242,19 +211,28 @@ const TicketsManagerTabs = () => {
         >
           <Tab
             value={"open"}
-            icon={<MoveToInboxIcon />}
+            icon={<LibraryBooksIcon />}
             label={i18n.t("tickets.tabs.open.title")}
             classes={{ root: classes.tab }}
           />
+
           <Tab
             value={"closed"}
-            icon={<CheckBoxIcon />}
+            icon={<LibraryAddCheckIcon />}
             label={i18n.t("tickets.tabs.closed.title")}
             classes={{ root: classes.tab }}
           />
+
+          <Tab
+            value={"group"}
+            icon={<GroupIcon />}
+            label="Grupos"
+            classes={{ root: classes.tab }}
+          />
+
           <Tab
             value={"search"}
-            icon={<SearchIcon />}
+            icon={<PageviewIcon />}
             label={i18n.t("tickets.tabs.search.title")}
             classes={{ root: classes.tab }}
           />
@@ -282,7 +260,11 @@ const TicketsManagerTabs = () => {
               {i18n.t("ticketsManager.buttons.newTicket")}
             </Button>
             <Can
-              role={user.profile}
+              role={
+                user.allUserChat === "enabled" && user.profile === "user"
+                  ? "admin"
+                  : user.profile
+              }
               perform="tickets-manager:showall"
               yes={() => (
                 <FormControlLabel
@@ -325,11 +307,14 @@ const TicketsManagerTabs = () => {
                 className={classes.badge}
                 badgeContent={openCount}
                 color="primary"
+                overlap="rectangular"
               >
                 {i18n.t("ticketsList.assignedHeader")}
               </Badge>
             }
             value={"open"}
+            name="open"
+            classes={{ root: classes.tabPanelItem }}
           />
           <Tab
             label={
@@ -337,11 +322,14 @@ const TicketsManagerTabs = () => {
                 className={classes.badge}
                 badgeContent={pendingCount}
                 color="secondary"
+                overlap="rectangular"
               >
                 {i18n.t("ticketsList.pendingHeader")}
               </Badge>
             }
             value={"pending"}
+            name="pending"
+            classes={{ root: classes.tabPanelItem }}
           />
         </Tabs>
         <Paper className={classes.ticketsWrapper}>
@@ -354,6 +342,56 @@ const TicketsManagerTabs = () => {
           />
           <TicketsList
             status="pending"
+            showAll={showAllTickets}
+            selectedQueueIds={selectedQueueIds}
+            updateCount={(val) => setPendingCount(val)}
+            style={applyPanelStyle("pending")}
+          />
+        </Paper>
+      </TabPanel>
+      <TabPanel value={tab} name="group" className={classes.ticketsWrapper}>
+        <Tabs
+          value={tabOpen}
+          onChange={handleChangeTabOpen}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+        >
+          <Tab
+            label={
+              <Badge
+                className={classes.badge}
+                badgeContent={openCount}
+                color="primary"
+              >
+                {i18n.t("ticketsList.assignedHeader")}
+              </Badge>
+            }
+            value={"open"}
+          />
+          <Tab
+            label={
+              <Badge
+                className={classes.badge}
+                badgeContent={pendingCount}
+                color="primary"
+              >
+                {i18n.t("ticketsList.pendingHeader")}
+              </Badge>
+            }
+            value={"pending"}
+          />
+        </Tabs>
+        <Paper className={classes.ticketsWrapper}>
+          <TicketsListGroup
+            status="open"
+            showAll={showAllTickets}
+            selectedQueueIds={selectedQueueIds}
+            updateCount={(val) => setOpenCount(val)}
+            style={applyPanelStyle("open")}
+          />
+          <TicketsListGroup
+            status="pending"
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setPendingCount(val)}
             style={applyPanelStyle("pending")}
@@ -362,6 +400,11 @@ const TicketsManagerTabs = () => {
       </TabPanel>
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
         <TicketsList
+          status="closed"
+          showAll={true}
+          selectedQueueIds={selectedQueueIds}
+        />
+        <TicketsListGroup
           status="closed"
           showAll={true}
           selectedQueueIds={selectedQueueIds}

@@ -1,12 +1,8 @@
 import "../bootstrap";
-
 module.exports = {
-  define: {
-    charset: "utf8mb4",
-    collate: "utf8mb4_bin"
-  },
+  define: { charset: "utf8mb4", collate: "utf8mb4_bin" },
   dialect: process.env.DB_DIALECT || "mysql",
-  timezone: "-03:00",
+  timezone: process.env.DB_TIMEZONE || "-03:00",
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 3306,
   database: process.env.DB_NAME,

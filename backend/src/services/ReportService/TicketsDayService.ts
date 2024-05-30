@@ -1,28 +1,26 @@
 import sequelize from "../../database/index";
 import { QueryTypes } from "sequelize";
-
 interface Return {
   data: {};
   count: number;
 }
-
 interface Request {
   initialDate: string;
   finalDate: string;
   companyId: number;
 }
-
 interface DataReturn {
   total: number;
   data?: number;
   horario?: string;
 }
-
-export const TicketsDayService = async ({ initialDate, finalDate, companyId }: Request): Promise<Return> => {
-
-  let sql = '';
+export const TicketsDayService = async ({
+  initialDate,
+  finalDate,
+  companyId
+}: Request): Promise<Return> => {
+  let sql = "";
   let count = 0;
-
   if (initialDate && initialDate.trim() === finalDate && finalDate.trim()) {
     sql = `
     SELECT
@@ -40,7 +38,7 @@ export const TicketsDayService = async ({ initialDate, finalDate, companyId }: R
       --to_char(DATE(tick."createdAt"), 'dd-mm-YYYY')
     ORDER BY
       horario asc;
-    `
+    `;
   } else {
     sql = `
     SELECT
@@ -56,15 +54,13 @@ export const TicketsDayService = async ({ initialDate, finalDate, companyId }: R
     to_char(DATE(tick."createdAt"), 'dd/mm/YYYY')
   ORDER BY
     data asc;
-  `
+  `;
   }
-
-  const data: DataReturn[] = await sequelize.query(sql, { type: QueryTypes.SELECT });
-
-  data.forEach((register) => {
+  const data: DataReturn[] = await sequelize.query(sql, {
+    type: QueryTypes.SELECT
+  });
+  data.forEach(register => {
     count += Number(register.total);
-  })
-
+  });
   return { data, count };
-
-}
+};

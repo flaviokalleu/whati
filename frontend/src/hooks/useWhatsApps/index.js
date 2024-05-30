@@ -1,8 +1,8 @@
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useReducer } from "react";
 import toastError from "../../errors/toastError";
 
 import api from "../../services/api";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_WHATSAPPS") {
@@ -57,8 +57,6 @@ const useWhatsApps = () => {
   const [whatsApps, dispatch] = useReducer(reducer, []);
   const [loading, setLoading] = useState(true);
 
-  const socketManager = useContext(SocketContext);
-
   useEffect(() => {
     setLoading(true);
     const fetchSession = async () => {
@@ -76,7 +74,7 @@ const useWhatsApps = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-whatsapp`, (data) => {
       if (data.action === "update") {
@@ -99,7 +97,7 @@ const useWhatsApps = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);
+  }, []);
 
   return { whatsApps, loading };
 };

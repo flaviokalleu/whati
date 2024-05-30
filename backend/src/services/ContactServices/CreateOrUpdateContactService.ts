@@ -1,7 +1,8 @@
+import CheckSettings from "../../helpers/CheckSettings";
 import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
-import { isNil } from "lodash";
+
 interface ExtraInfo extends ContactCustomField {
   name: string;
   value: string;
@@ -10,66 +11,55 @@ interface ExtraInfo extends ContactCustomField {
 interface Request {
   name: string;
   number: string;
-  isGroup: boolean;
+  isGroup?: boolean; // Permitir isGroup ser opcional
   email?: string;
   profilePicUrl?: string;
   companyId: number;
+  channel?: string;
   extraInfo?: ExtraInfo[];
-  whatsappId?: number;
 }
 
 const CreateOrUpdateContactService = async ({
   name,
   number: rawNumber,
   profilePicUrl,
-  isGroup,
+  isGroup, // Remova a definição de isGroup daqui
   email = "",
+  channel = "whatsapp",
   companyId,
-  extraInfo = [],
-  whatsappId
+  extraInfo = []
 }: Request): Promise<Contact> => {
   const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
-
   const io = getIO();
   let contact: Contact | null;
+  contact = await Contact.findOne({ where: { number, companyId } });
 
-  contact = await Contact.findOne({
-    where: {
-      number,
-      companyId
-    }
-  });
+  // Verificar se o canal é Facebook ou Instagram
+  const isGroupValue = channel === 'facebook' || channel === 'instagram' ? false : true;
 
   if (contact) {
     contact.update({ profilePicUrl });
-    console.log(contact.whatsappId)
-    if (isNil(contact.whatsappId === null)) {
-      contact.update({
-        whatsappId
-      });
+    if (isGroup) {
+      contact.update({ name });
     }
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "update",
-      contact
-    });
+    io.emit(`company-${companyId}-contact`, { action: "update", contact });
   } else {
+    const acceptAudioMessageContact = await CheckSettings(
+      "acceptAudioMessageContact"
+    );
     contact = await Contact.create({
       name,
       number,
       profilePicUrl,
       email,
-      isGroup,
+      isGroup: isGroupValue, // Usar isGroupValue aqui
       extraInfo,
       companyId,
-      whatsappId
+      channel,
+      acceptAudioMessage: acceptAudioMessageContact === "enabled" ? true : false
     });
-
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "create",
-      contact
-    });
+    io.emit(`company-${companyId}-contact`, { action: "create", contact });
   }
-
   return contact;
 };
 

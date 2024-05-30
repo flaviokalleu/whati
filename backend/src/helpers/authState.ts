@@ -5,7 +5,6 @@ import type {
 } from "@whiskeysockets/baileys";
 import { BufferJSON, initAuthCreds, proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
-
 const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
   "pre-key": "preKeys",
   session: "sessions",
@@ -14,13 +13,11 @@ const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
   "app-state-sync-version": "appStateVersions",
   "sender-key-memory": "senderKeyMemory"
 };
-
 const authState = async (
   whatsapp: Whatsapp
 ): Promise<{ state: AuthenticationState; saveState: () => void }> => {
   let creds: AuthenticationCreds;
   let keys: any = {};
-
   const saveState = async () => {
     try {
       await whatsapp.update({
@@ -30,9 +27,6 @@ const authState = async (
       console.log(error);
     }
   };
-
-  // const getSessionDatabase = await whatsappById(whatsapp.id);
-
   if (whatsapp.session && whatsapp.session !== null) {
     const result = JSON.parse(whatsapp.session, BufferJSON.reviver);
     creds = result.creds;
@@ -41,7 +35,6 @@ const authState = async (
     creds = initAuthCreds();
     keys = {};
   }
-
   return {
     state: {
       creds,
@@ -60,7 +53,6 @@ const authState = async (
           }, {});
         },
         set: (data: any) => {
-          // eslint-disable-next-line no-restricted-syntax, guard-for-in
           for (const i in data) {
             const key = KEY_MAP[i as keyof SignalDataTypeMap];
             keys[key] = keys[key] || {};
@@ -73,5 +65,4 @@ const authState = async (
     saveState
   };
 };
-
 export default authState;

@@ -1,6 +1,98 @@
 const messages = {
 	en: {
 		translations: {
+
+			dashboard: {
+				title: {
+				  inservice: "IN SERVICE",
+				  waiting: "WAITING FOR SERVICE",
+				  onlineAgents: "ONLINE AGENTS",
+				  completedTickets: "COMPLETED TICKETS",
+				  totalSentMessages: "TOTAL SENT MESSAGES",
+				  totalReceivedMessages: "TOTAL RECEIVED MESSAGES",
+				  newLeads: "NEW LEADS",
+				  averageHandlingTime: "AVERAGE HANDLING TIME",
+				  averageWaitTime: "AVERAGE WAIT TIME",
+				  totalUserInteractions: "TOTAL INTERACTIONS PER USER",
+				  totalInteractions: "TOTAL INTERACTIONS",
+				  startDate: "Start Date",
+				  endDate: "End Date",
+				  filter: "FILTER",
+				}
+			  },
+			  
+			  
+			messageVariablesPicker: {
+				label: "Available Variables",
+				vars: {
+				  contactFirstName: "First Name",
+				  contactName: "Name",
+				  user: "Agent",
+				  greeting: "Greeting",
+				  protocolNumber: "Protocol",
+				  date: "Date",
+				  hour: "Hour",
+				  ticket_id: "Ticket Number",
+				  queue: "Department",
+				  connection: "Connection"
+				}
+			  },
+			  
+			quickemessage: {
+				toasts: {
+				  success: "Shortcut added successfully!",
+				  deleted: "Shortcut removed successfully!",
+				},
+				title: "Quick Responses",
+				buttons: {
+				  add: "New Response",
+				},
+				dialog: {
+				  add: "Add",
+				  edit: "Edit",
+				  form: {
+					shortcode: "Shortcut",
+					message: "Message",
+					global: "Global",
+				  },
+				  buttons: {
+					cancel: "Cancel",
+					edit: "Save",
+					attach: "Attach",
+					add: "Save",
+				  },
+				},
+				confirmationModal: {
+				  deleteTitle: "Deletion",
+				  deleteMessage: "This action is irreversible! Do you want to proceed?",
+				},
+			  },
+			  
+			quickemessages: {
+				toasts: {
+				  success: "Shortcut added successfully!",
+				  deleted: "Shortcut removed successfully!",
+				},
+				title: "Quick Responses",
+				table: {
+				  shortcode: "Shortcut",
+				  mediaName: "File",
+				  status: "Global",
+				  actions: "Action",
+				},
+				searchPlaceholder: "Search",
+				buttons: {
+				  add: "Add",
+				  attach: "Attach File",
+				  cancel: "Cancel",
+				  edit: "Save",
+				},
+				confirmationModal: {
+				  deleteTitle: "Deletion",
+				  deleteMessage: "This action is irreversible! Do you want to proceed?",
+				},
+			  },
+			  
 			signup: {
 				title: "Sign up",
 				toasts: {
@@ -31,13 +123,6 @@ const messages = {
 			auth: {
 				toasts: {
 					success: "Login successfully!",
-				},
-			},
-			dashboard: {
-				charts: {
-					perDay: {
-						title: "Tickets today: ",
-					},
 				},
 			},
 			connections: {
@@ -171,22 +256,26 @@ const messages = {
 			},
 			userModal: {
 				title: {
-					add: "Add user",
-					edit: "Edit user",
+				  add: "Add User",
+				  edit: "Edit User",
 				},
 				form: {
-					name: "Name",
-					email: "Email",
-					password: "Password",
-					profile: "Profile",
+				  name: "Name",
+				  email: "Email",
+				  password: "Password",
+				  farewellMessage: "Farewell Message",
+				  profile: "Profile",
+				  whatsapp: "Default Connection",
+				  startWork: "Start of Work",
+				  endWork: "End of Work"
 				},
 				buttons: {
-					okAdd: "Add",
-					okEdit: "Save",
-					cancel: "Cancel",
+				  okAdd: "Add",
+				  okEdit: "Save",
+				  cancel: "Cancel",
 				},
 				success: "User saved successfully.",
-			},
+			  },			  
 			chat: {
 				noTicketMessage: "Select a ticket to start chatting.",
 			},
@@ -220,16 +309,21 @@ const messages = {
 			transferTicketModal: {
 				title: "Transfer Ticket",
 				fieldLabel: "Type to search for users",
-				noOptions: "No user found with this name",
+				fieldQueueLabel: "Transfer to queue",
+				fieldQueuePlaceholder: "Select a queue",
+				noOptions: "No users found with that name",
 				buttons: {
-					ok: "Transfer",
-					cancel: "Cancel",
+				  ok: "Transfer",
+				  cancel: "Cancel",
 				},
-			},
+			  },
+			  
 			ticketsList: {
 				pendingHeader: "Queue",
 				assignedHeader: "Working on",
 				noTicketsTitle: "Nothing here!",
+				noqueue: "No Queue",
+				Assigned: "Assigned:",
 				noTicketsMessage: "No tickets found with this status or search term.",
 				buttons: {
 					accept: "Accept",
@@ -238,6 +332,7 @@ const messages = {
 			newTicketModal: {
 				title: "Create Ticket",
 				fieldLabel: "Type to search for a contact",
+				fieldQueuePlaceholder: "Select a queue",
 				add: "Add",
 				buttons: {
 					ok: "Save",
@@ -284,27 +379,36 @@ const messages = {
 			},
 			queueSelect: {
 				inputLabel: "Queues",
+				unique: {
+					inputLabel: "Queue"
+				}
 			},
 			users: {
 				title: "Users",
 				table: {
-					name: "Name",
-					email: "Email",
-					profile: "Profile",
-					actions: "Actions",
+				  id: "ID",
+				  status: "Status",
+				  name: "Name",
+				  email: "Email",
+				  profile: "Profile",
+				  whatsapp: "Default Connection",
+				  startWork: "Start of Work",
+				  endWork: "End of Work",
+				  actions: "Actions",
 				},
 				buttons: {
-					add: "Add user",
+				  add: "Add User",
 				},
 				toasts: {
-					deleted: "User deleted sucessfully.",
+				  deleted: "User deleted successfully.",
 				},
 				confirmationModal: {
-					deleteTitle: "Delete",
-					deleteMessage:
-						"All user data will be lost. Users' open tickets will be moved to queue.",
+				  deleteTitle: "Delete",
+				  deleteMessage:
+					"All data of the user will be lost. Open support requests of this user will be moved to the queue.",
 				},
-			},
+			  },
+			  
 			settings: {
 				success: "Settings saved successfully.",
 				title: "Settings",
@@ -320,15 +424,23 @@ const messages = {
 			},
 			messagesList: {
 				header: {
-					assignedTo: "Assigned to:",
-					buttons: {
-						return: "Return",
-						resolve: "Resolve",
-						reopen: "Reopen",
-						accept: "Accept",
-					},
+				  assignedTo: "Assigned to:",
+				  dialogRatingTitle: "Would you like to leave a service rating for the customer?",
+				  dialogClosingTitle: "Closing the customer service session!",
+				  dialogRatingCancel: "Resolve WITH Farewell Message",
+				  dialogRatingSuccess: "Resolve and Send Rating",
+				  dialogRatingWithoutFarewellMsg: "Resolve WITHOUT Farewell Message",
+				  ratingTitle: "Choose a rating menu",
+				  buttons: {
+					return: "Return",
+					resolve: "Resolve",
+					reopen: "Reopen",
+					accept: "Accept",
+					rating: "Send Rating",
+				  },
 				},
-			},
+			  },
+			  
 			messagesInput: {
 				placeholderOpen: "Type a message",
 				placeholderClosed: "Reopen or accept this ticket to send a message.",

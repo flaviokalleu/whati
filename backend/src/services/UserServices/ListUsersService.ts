@@ -2,20 +2,18 @@ import { Sequelize, Op } from "sequelize";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import User from "../../models/User";
-
+import Plan from "../../models/Plan";
 interface Request {
   searchParam?: string;
   pageNumber?: string | number;
   profile?: string;
   companyId?: number;
 }
-
 interface Response {
   users: User[];
   count: number;
   hasMore: boolean;
 }
-
 const ListUsersService = async ({
   searchParam = "",
   pageNumber = "1",
@@ -32,33 +30,55 @@ const ListUsersService = async ({
       },
       { email: { [Op.like]: `%${searchParam.toLowerCase()}%` } }
     ],
-    companyId: {
-      [Op.eq]: companyId
-    }
+    companyId: { [Op.eq]: companyId }
   };
-
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
-
   const { count, rows: users } = await User.findAndCountAll({
     where: whereCondition,
-    attributes: ["name", "id", "email", "companyId", "profile", "createdAt"],
+    attributes: [
+      "name",
+      "id",
+      "email",
+      "companyId",
+      "profile",
+      "createdAt",
+      "online",
+      "startWork",
+      "endWork",
+      "farewellMessage"
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
     include: [
       { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
-      { model: Company, as: "company", attributes: ["id", "name"] }
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name", "dueDate", "document"],
+        include: [
+          {
+            model: Plan,
+            as: "plan",
+            attributes: [
+              "id",
+              "name",
+              "amount",
+              "useWhatsapp",
+              "useFacebook",
+              "useInstagram",
+              "useCampaigns",
+              "useSchedules",
+              "useInternalChat",
+              "useExternalApi"
+            ]
+          }
+        ]
+      }
     ]
   });
-
   const hasMore = count > offset + users.length;
-
-  return {
-    users,
-    count,
-    hasMore
-  };
+  return { users, count, hasMore };
 };
-
 export default ListUsersService;

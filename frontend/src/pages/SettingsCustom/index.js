@@ -32,7 +32,8 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
   },
   tab: {
-    backgroundColor: theme.palette.options,
+    // background: "#f2f5f3" 
+    backgroundColor: theme.mode === 'light' ? "#f2f2f2" : "#7f7f7f",
     borderRadius: 4,
   },
   paper: {
@@ -101,35 +102,6 @@ const SettingsCustom = () => {
   }, []);
 
   const handleTabChange = (event, newValue) => {
-      async function findData() {
-        setLoading(true);
-        try {
-          const companyId = localStorage.getItem("companyId");
-          const company = await find(companyId);
-          const settingList = await getAllSettings();
-          setCompany(company);
-          setSchedules(company.schedules);
-          setSettings(settingList);
-  
-          if (Array.isArray(settingList)) {
-            const scheduleType = settingList.find(
-              (d) => d.key === "scheduleType"
-            );
-            if (scheduleType) {
-              setSchedulesEnabled(scheduleType.value === "company");
-            }
-          }
-  
-          const user = await getCurrentUserInfo();
-          setCurrentUser(user);
-        } catch (e) {
-          toast.error(e);
-        }
-        setLoading(false);
-      }
-      findData();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-
     setTab(newValue);
   };
 

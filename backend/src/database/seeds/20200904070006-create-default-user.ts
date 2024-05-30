@@ -1,10 +1,9 @@
 import { QueryInterface } from "sequelize";
 import { hash } from "bcryptjs";
-
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.sequelize.transaction(async t => {
-      const passwordHash = await hash("123456", 8);
+      const passwordHash = await hash("mudar@123", 8);
       return Promise.all([
         queryInterface.bulkInsert(
           "Users",
@@ -25,7 +24,6 @@ module.exports = {
       ]);
     });
   },
-
   down: async (queryInterface: QueryInterface) => {
     return queryInterface.bulkDelete("Users", {});
   }

@@ -15,6 +15,8 @@ interface Response {
   records: ChatMessage[];
   count: number;
   hasMore: boolean;
+  mediaPath?:string | undefined | null;
+  mediaName?:string | undefined | null;
 }
 
 const FindMessages = async ({

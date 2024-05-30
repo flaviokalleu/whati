@@ -1,22 +1,32 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	CircularProgress,
+	Select,
+	InputLabel,
+	makeStyles,
+	MenuItem,
+	FormControl,
+	TextField,
+	InputAdornment,
+	IconButton
+} from '@material-ui/core';
+
+import { 
+	Visibility, 
+	VisibilityOff 
+} from '@material-ui/icons';
+
 import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
 
 import { i18n } from "../../translate/i18n";
 
@@ -38,11 +48,9 @@ const useStyles = makeStyles(theme => ({
 			marginRight: theme.spacing(1),
 		},
 	},
-
 	btnWrapper: {
 		position: "relative",
 	},
-
 	buttonProgress: {
 		color: green[500],
 		position: "absolute",
@@ -54,6 +62,14 @@ const useStyles = makeStyles(theme => ({
 	formControl: {
 		margin: theme.spacing(1),
 		minWidth: 120,
+	},
+	textField: {
+		marginRight: theme.spacing(1),
+		flex: 1,
+	},
+	container: {
+		display: 'flex',
+		flexWrap: 'wrap',
 	},
 }));
 
@@ -74,15 +90,20 @@ const UserModal = ({ open, onClose, userId }) => {
 		email: "",
 		password: "",
 		profile: "user",
-		allTicket: "desabled"
+		startWork: "",
+		endWork: "",
+		farewellMessage: ""
 	};
 
 	const { user: loggedInUser } = useContext(AuthContext);
 
 	const [user, setUser] = useState(initialState);
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+	const [showPassword, setShowPassword] = useState(false);
 	const [whatsappId, setWhatsappId] = useState(false);
 	const { loading, whatsApps } = useWhatsApps();
+	const startWorkRef = useRef();
+	const endWorkRef = useRef();
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -109,7 +130,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	const handleSaveUser = async values => {
-		const userData = { ...values, whatsappId, queueIds: selectedQueueIds, allTicket: values.allTicket };
+		const userData = { ...values, whatsappId, queueIds: selectedQueueIds };
 		try {
 			if (userId) {
 				await api.put(`/users/${userId}`, userData);
@@ -163,15 +184,27 @@ const UserModal = ({ open, onClose, userId }) => {
 										margin="dense"
 										fullWidth
 									/>
-									<Field
+																		<Field
 										as={TextField}
-										label={i18n.t("userModal.form.password")}
-										type="password"
 										name="password"
-										error={touched.password && Boolean(errors.password)}
-										helperText={touched.password && errors.password}
 										variant="outlined"
 										margin="dense"
+										label={i18n.t("userModal.form.password")}
+										error={touched.password && Boolean(errors.password)}
+										helperText={touched.password && errors.password}
+										type={showPassword ? 'text' : 'password'}
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<IconButton
+														aria-label="toggle password visibility"
+														onClick={() => setShowPassword((e) => !e)}
+													>
+														{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
+													</IconButton>
+												</InputAdornment>
+											)
+										}}
 										fullWidth
 									/>
 								</div>
@@ -216,6 +249,7 @@ const UserModal = ({ open, onClose, userId }) => {
 										/>
 									</FormControl>
 								</div>
+
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editQueues"
@@ -228,18 +262,15 @@ const UserModal = ({ open, onClose, userId }) => {
 								/>
 								<Can
 									role={loggedInUser.profile}
-									perform="user-modal:editProfile"
-									yes={() => (
+									perform="user-modal:editQueues"
+									yes={() => (!loading &&
 										<FormControl variant="outlined" margin="dense" className={classes.maxWidth} fullWidth>
-											<InputLabel>
-												{i18n.t("userModal.form.whatsapp")}
-											</InputLabel>
+											<InputLabel>{i18n.t("userModal.form.whatsapp")}</InputLabel>
 											<Field
 												as={Select}
 												value={whatsappId}
 												onChange={(e) => setWhatsappId(e.target.value)}
 												label={i18n.t("userModal.form.whatsapp")}
-
 											>
 												<MenuItem value={''}>&nbsp;</MenuItem>
 												{whatsApps.map((whatsapp) => (
@@ -249,47 +280,79 @@ const UserModal = ({ open, onClose, userId }) => {
 										</FormControl>
 									)}
 								/>
-								
-								
-								
-								<div className={classes.divider}>
-									<span className={classes.dividerText}>Liberações</span>
-								</div>
-								
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editProfile"
 									yes={() => (!loading &&
-										<div className={classes.textField}>
-											<FormControl
-												variant="outlined"
-												className={classes.maxWidth}
-												margin="dense"
+										<form className={classes.container} noValidate>
+											<Field
+												as={TextField}
+												label={i18n.t("userModal.form.startWork")}
+												type="time"
+												ampm={false}
+												defaultValue="00:00"
+												inputRef={startWorkRef}
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 600, // 5 min
+												}}
 												fullWidth
-											>
-												<>
-													<InputLabel id="profile-selection-input-label">
-														{i18n.t("userModal.form.allTicket")}
-													</InputLabel>
-
-													<Field
-														as={Select}
-														label={i18n.t("allTicket.form.viewTags")}
-														name="allTicket"
-														labelId="allTicket-selection-label"
-														id="allTicket-selection"
-														required
-													>
-														<MenuItem value="enabled">{i18n.t("userModal.form.allTicketEnabled")}</MenuItem>
-														<MenuItem value="desabled">{i18n.t("userModal.form.allTicketDesabled")}</MenuItem>
-													</Field>
-												</>
-											</FormControl>
-										</div>
-
+												name="startWork"
+												error={
+													touched.startWork && Boolean(errors.startWork)
+												}
+												helperText={
+													touched.startWork && errors.startWork
+												}
+												variant="outlined"
+												margin="dense"
+												className={classes.textField}
+											/>
+											<Field
+												as={TextField}
+												label={i18n.t("userModal.form.endWork")}
+												type="time"
+												ampm={false}
+												defaultValue="23:59"
+												inputRef={endWorkRef}
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 600, // 5 min
+												}}
+												fullWidth
+												name="endWork"
+												error={
+													touched.endWork && Boolean(errors.endWork)
+												}
+												helperText={
+													touched.endWork && errors.endWork
+												}
+												variant="outlined"
+												margin="dense"
+												className={classes.textField}
+											/>
+										</form>
 									)}
 								/>
-								
+
+								<Field
+									as={TextField}
+									label={i18n.t("userModal.form.farewellMessage")}
+									type="farewellMessage"
+									multiline
+									rows={4}
+									fullWidth
+									name="farewellMessage"
+									error={touched.farewellMessage && Boolean(errors.farewellMessage)}
+									helperText={touched.farewellMessage && errors.farewellMessage}
+									variant="outlined"
+									margin="dense"
+								/>
+
 							</DialogContent>
 							<DialogActions>
 								<Button

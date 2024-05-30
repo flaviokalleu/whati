@@ -1,15 +1,14 @@
 import * as Yup from "yup";
-
 import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
-
 interface Request {
   name: string;
   companyId: number;
   queueIds?: number[];
+  maxUseBotQueueId?: number,
   greetingMessage?: string;
   complationMessage?: string;
   outOfHoursMessage?: string;
@@ -18,22 +17,19 @@ interface Request {
   isDefault?: boolean;
   token?: string;
   provider?: string;
-  //sendIdQueue?: number;
-  //timeSendQueue?: number;
-  transferQueueId?: number;
-  timeToTransfer?: number;    
-  promptId?: number;
-  maxUseBotQueues?: number;
-  timeUseBotQueues?: number;
+  facebookUserId?: string;
+  facebookUserToken?: string;
+  tokenMeta?: string;
+  channel?: string;
+  facebookPageUserId?: string;
+  maxUseBotQueues?: string;
   expiresTicket?: number;
-  expiresInactiveMessage?: string;
+  chatGPTEnabled?: boolean;
 }
-
 interface Response {
   whatsapp: Whatsapp;
   oldDefaultWhatsapp: Whatsapp | null;
 }
-
 const CreateWhatsAppService = async ({
   name,
   status = "OPENING",
@@ -46,37 +42,30 @@ const CreateWhatsAppService = async ({
   companyId,
   token = "",
   provider = "beta",
-  //timeSendQueue,
-  //sendIdQueue,
-  transferQueueId,
-  timeToTransfer,    
-  promptId,
-  maxUseBotQueues = 3,
-  timeUseBotQueues = 0,
-  expiresTicket = 0,
-  expiresInactiveMessage = ""
+  facebookUserId,
+  facebookUserToken,
+  facebookPageUserId,
+  tokenMeta,
+  channel = "whatsapp",
+  maxUseBotQueues,
+  expiresTicket,
+  chatGPTEnabled = false,
+  maxUseBotQueueId,
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
-    where: {
-      id: companyId
-    },
+    where: { id: companyId },
     include: [{ model: Plan, as: "plan" }]
   });
-
   if (company !== null) {
     const whatsappCount = await Whatsapp.count({
-      where: {
-        companyId
-      }
+      where: { companyId, channel: channel }
     });
-
     if (whatsappCount >= company.plan.connections) {
       throw new AppError(
         `Número máximo de conexões já alcançado: ${whatsappCount}`
       );
     }
   }
-
   const schema = Yup.object().shape({
     name: Yup.string()
       .required()
@@ -87,39 +76,32 @@ const CreateWhatsAppService = async ({
         async value => {
           if (!value) return false;
           const nameExists = await Whatsapp.findOne({
-            where: { name: value }
+            where: { name: value, channel: channel }
           });
           return !nameExists;
         }
       ),
     isDefault: Yup.boolean().required()
   });
-
   try {
     await schema.validate({ name, status, isDefault });
   } catch (err: any) {
     throw new AppError(err.message);
   }
-
   const whatsappFound = await Whatsapp.findOne({ where: { companyId } });
-
-  isDefault = !whatsappFound;
-
+  isDefault = channel === "whatsapp" ? !whatsappFound : false;
   let oldDefaultWhatsapp: Whatsapp | null = null;
-
-  if (isDefault) {
+  if (channel === "whatsapp" && isDefault) {
     oldDefaultWhatsapp = await Whatsapp.findOne({
-      where: { isDefault: true, companyId }
+      where: { isDefault: true, companyId, channel: channel }
     });
     if (oldDefaultWhatsapp) {
       await oldDefaultWhatsapp.update({ isDefault: false, companyId });
     }
   }
-
   if (queueIds.length > 1 && !greetingMessage) {
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
-
   if (token !== null && token !== "") {
     const tokenSchema = Yup.object().shape({
       token: Yup.string()
@@ -131,20 +113,18 @@ const CreateWhatsAppService = async ({
           async value => {
             if (!value) return false;
             const tokenExists = await Whatsapp.findOne({
-              where: { token: value }
+              where: { token: value, channel: channel }
             });
             return !tokenExists;
           }
         )
     });
-
     try {
       await tokenSchema.validate({ token });
     } catch (err: any) {
       throw new AppError(err.message);
     }
   }
-
   const whatsapp = await Whatsapp.create(
     {
       name,
@@ -157,22 +137,19 @@ const CreateWhatsAppService = async ({
       companyId,
       token,
       provider,
-      //timeSendQueue,
-      //sendIdQueue,
-	  transferQueueId,
-	  timeToTransfer,	  
-      promptId,
+      channel,
+      facebookUserId,
+      facebookUserToken,
+      facebookPageUserId,
+      tokenMeta,
       maxUseBotQueues,
-      timeUseBotQueues,
       expiresTicket,
-      expiresInactiveMessage
+      maxUseBotQueueId,
+      chatGPTEnabled,
     },
     { include: ["queues"] }
   );
-
   await AssociateWhatsappQueue(whatsapp, queueIds);
-
   return { whatsapp, oldDefaultWhatsapp };
 };
-
 export default CreateWhatsAppService;

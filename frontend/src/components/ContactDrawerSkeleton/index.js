@@ -14,8 +14,8 @@ const ContactDrawerSkeleton = ({ classes }) => {
 						<Skeleton
 							animation="wave"
 							variant="circle"
-							width={60}
-							height={60}
+							width={160}
+							height={160}
 							className={classes.contactAvatar}
 						/>
 					</Grid>

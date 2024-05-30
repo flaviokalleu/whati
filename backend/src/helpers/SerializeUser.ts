@@ -2,7 +2,6 @@ import Queue from "../models/Queue";
 import Company from "../models/Company";
 import User from "../models/User";
 import Setting from "../models/Setting";
-
 interface SerializedUser {
   id: number;
   name: string;
@@ -12,9 +11,9 @@ interface SerializedUser {
   company: Company | null;
   super: boolean;
   queues: Queue[];
-  allTicket: string,
+  startWork: string;
+  endWork: string;
 }
-
 export const SerializeUser = async (user: User): Promise<SerializedUser> => {
   return {
     id: user.id,
@@ -25,6 +24,7 @@ export const SerializeUser = async (user: User): Promise<SerializedUser> => {
     company: user.company,
     super: user.super,
     queues: user.queues,
-	allTicket: user.allTicket,
+    startWork: user.startWork,
+    endWork: user.endWork
   };
 };

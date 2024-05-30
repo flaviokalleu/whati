@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState, useContext } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 
 import {
   Button,
@@ -25,7 +25,7 @@ import { DeleteOutline, Edit } from "@material-ui/icons";
 import QueueModal from "../../components/QueueModal";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -94,8 +94,6 @@ const Queues = () => {
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
-  const socketManager = useContext(SocketContext);
-
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -113,7 +111,7 @@ const Queues = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-queue`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -128,7 +126,7 @@ const Queues = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);
+  }, []);
 
   const handleOpenQueueModal = () => {
     setQueueModalOpen(true);
@@ -179,9 +177,16 @@ const Queues = () => {
         open={queueModalOpen}
         onClose={handleCloseQueueModal}
         queueId={selectedQueue?.id}
+        onEdit={(res) => {
+          if(res) {
+              setTimeout(() => {
+                handleEditQueue(res)
+              }, 500)
+          }
+        }}
       />
       <MainHeader>
-        <Title>{i18n.t("queues.title")}</Title>
+        <Title>{i18n.t("queues.title")} ({queues.length})</Title>
         <MainHeaderButtonsWrapper>
           <Button
             variant="contained"
@@ -196,17 +201,14 @@ const Queues = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-			   <TableCell align="center">
-                {i18n.t("queues.table.id")}
+            <TableCell align="center">
+                {i18n.t("ID")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.name")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.color")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("queues.table.orderQueue")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.greeting")}
@@ -220,7 +222,7 @@ const Queues = () => {
             <>
               {queues.map((queue) => (
                 <TableRow key={queue.id}>
-				<TableCell align="center">{queue.id}</TableCell>
+                  <TableCell align="center">{queue.id}</TableCell>
                   <TableCell align="center">{queue.name}</TableCell>
                   <TableCell align="center">
                     <div className={classes.customTableCell}>
@@ -232,17 +234,6 @@ const Queues = () => {
                           alignSelf: "center",
                         }}
                       />
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <Typography
-                        style={{ width: 300, align: "center" }}
-                        noWrap
-                        variant="body2"
-                      >
-                        {queue.orderQueue}
-                      </Typography>
                     </div>
                   </TableCell>
                   <TableCell align="center">

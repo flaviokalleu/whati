@@ -1,6 +1,5 @@
 import { QueryTypes } from "sequelize";
 import sequelize from "../../database";
-
 type Result = {
   id: number;
   currentSchedule: [];
@@ -8,7 +7,6 @@ type Result = {
   endTime: string;
   inActivity: boolean;
 };
-
 const VerifyCurrentSchedule = async (id: string | number): Promise<Result> => {
   const sql = `
     select
@@ -32,14 +30,11 @@ const VerifyCurrentSchedule = async (id: string | number): Promise<Result> => {
     ) s
     where s.currentSchedule->>'startTime' not like '' and s.currentSchedule->>'endTime' not like '';
   `;
-
   const result: Result = await sequelize.query(sql, {
     replacements: { id },
     type: QueryTypes.SELECT,
     plain: true
   });
-
   return result;
 };
-
 export default VerifyCurrentSchedule;

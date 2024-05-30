@@ -1,5 +1,4 @@
 import { QueryInterface } from "sequelize";
-
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.sequelize.transaction(t => {
@@ -12,7 +11,14 @@ module.exports = {
               users: 10,
               connections: 10,
               queues: 10,
-              value: 30,
+              amount: 100,
+              useWhatsapp: true,
+              useFacebook: true,
+              useInstagram: true,
+              useCampaigns: true,
+              useSchedules: true,
+              useInternalChat: true,
+              useExternalApi: true,
               createdAt: new Date(),
               updatedAt: new Date()
             }
@@ -23,9 +29,8 @@ module.exports = {
           "Companies",
           [
             {
-              name: "Empresa 1",
+              name: "UNDER CONTROL TECHNOLOGY",
               planId: 1,
-              dueDate: "2093-03-14 04:00:00+01",
               createdAt: new Date(),
               updatedAt: new Date()
             }
@@ -35,7 +40,6 @@ module.exports = {
       ]);
     });
   },
-
   down: async (queryInterface: QueryInterface) => {
     return Promise.all([
       queryInterface.bulkDelete("Companies", {}),

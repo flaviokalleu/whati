@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
 	header: {
 		display: "flex",
 		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		backgroundColor: theme.palette.contactdrawer, //DARK MODE PLW DESIGN//
+		backgroundColor: "#eee",
 		alignItems: "center",
 		padding: theme.spacing(0, 1),
 		minHeight: "73px",
@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	content: {
 		display: "flex",
-		backgroundColor: theme.palette.contactdrawer, //DARK MODE PLW DESIGN//
+		backgroundColor: "#eee",
 		flexDirection: "column",
 		padding: "8px 0px 8px 8px",
 		height: "100%",
@@ -58,8 +58,9 @@ const useStyles = makeStyles(theme => ({
 
 	contactAvatar: {
 		margin: 15,
-		width: 100,
-		height: 100,
+		width: 160,
+		height: 160,
+		borderRadius: 10,
 	},
 
 	contactHeader: {

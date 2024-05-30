@@ -1,4 +1,4 @@
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 
 const useStyles = makeStyles(theme => ({
@@ -17,8 +17,8 @@ const ContactTag = ({ tag }) => {
     const classes = useStyles();
 
     return (
-        <div className={classes.tag} style={{ backgroundColor: tag.color, marginTop: "2px" }}>
-            {tag.name.toUpperCase()}
+        <div className={classes.tag} style={{ backgroundColor: tag.color, marginTop: '2px' }}>
+            {tag.name}
         </div>
     )
 }

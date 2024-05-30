@@ -1,8 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
-
+import * as serviceworker from './serviceWorker';
 import App from "./App";
+
+ //Sobrescrevendo as funções do console em ambiente de produção
+if (process.env.NODE_ENV === 'production') {
+  console.log = console.error = console.warn = () => {};
+}
 
 ReactDOM.render(
 	<CssBaseline>
@@ -11,12 +16,4 @@ ReactDOM.render(
 	document.getElementById("root")
 );
 
-// ReactDOM.render(
-// 	<React.StrictMode>
-// 		<CssBaseline>
-// 			<App />
-// 		</CssBaseline>,
-//   </React.StrictMode>
-
-// 	document.getElementById("root")
-// );
+serviceworker.register()

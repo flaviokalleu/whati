@@ -19,7 +19,7 @@ import ChatList from "./ChatList";
 import ChatMessages from "./ChatMessages";
 import { UsersFilter } from "../../components/UsersFilter";
 import api from "../../services/api";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 
 import { has, isObject } from "lodash";
 
@@ -32,7 +32,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     position: "relative",
     flex: 1,
-    padding: theme.spacing(2),
     height: `calc(100% - 48px)`,
     overflowY: "hidden",
     border: "1px solid rgba(0, 0, 0, 0.12)",
@@ -41,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     height: "100%",
     border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundColor: theme.palette.dark,
   },
   gridItem: {
     height: "100%",
@@ -150,7 +148,7 @@ export function ChatModal({
 
 function Chat(props) {
   const classes = useStyles();
-  const { user } = useContext(AuthContext);
+  const { user, socket } = useContext(AuthContext);
   const history = useHistory();
 
   const [showDialog, setShowDialog] = useState(false);
@@ -166,8 +164,6 @@ function Chat(props) {
   const isMounted = useRef(true);
   const scrollToBottomRef = useRef();
   const { id } = useParams();
-
-  const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     return () => {
@@ -208,7 +204,7 @@ function Chat(props) {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-chat-user-${user.id}`, (data) => {
       if (data.action === "create") {
@@ -272,10 +268,10 @@ function Chat(props) {
     }
 
     return () => {
-      socket.disconnect();
+       socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat, socketManager]);
+  }, [currentChat]);
 
   const selectChat = (chat) => {
     try {
@@ -286,11 +282,17 @@ function Chat(props) {
     } catch (err) {}
   };
 
-  const sendMessage = async (contentMessage) => {
+  const sendMessage = async (contentMessage,file) => {
     setLoading(true);
     try {
-      await api.post(`/chats/${currentChat.id}/messages`, {
-        message: contentMessage,
+      const formData = new FormData();
+  
+      formData.append("file", file);
+      formData.append("message", contentMessage);
+      await api.post(`/chats/${currentChat.id}/messages`,formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
     } catch (err) {}
     setLoading(false);
@@ -326,7 +328,7 @@ function Chat(props) {
       const { data } = await api.get("/chats");
       return data;
     } catch (err) {
-      console.log(err);
+      ;
     }
   };
 
@@ -334,7 +336,6 @@ function Chat(props) {
     return (
       <Grid className={classes.gridContainer} container>
         <Grid className={classes.gridItem} md={3} item>
-          
             <div className={classes.btnContainer}>
               <Button
                 onClick={() => {
@@ -347,7 +348,6 @@ function Chat(props) {
                 Nova
               </Button>
             </div>
-          
           <ChatList
             chats={chats}
             pageInfo={chatsPageInfo}

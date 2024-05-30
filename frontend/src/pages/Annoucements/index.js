@@ -30,7 +30,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
@@ -107,8 +107,6 @@ const Announcements = () => {
   const [searchParam, setSearchParam] = useState("");
   const [announcements, dispatch] = useReducer(reducer, []);
 
-  const socketManager = useContext(SocketContext);
-
   // trava para nao acessar pagina que não pode  
   useEffect(() => {
     async function fetchData() {
@@ -138,8 +136,8 @@ const Announcements = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    const companyId = user.companyId;
-    const socket = socketManager.getSocket(companyId);
+    const companyId = localStorage.getItem("companyId");
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-announcement`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -152,7 +150,7 @@ const Announcements = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager, user.companyId]);
+  }, []);
 
   const fetchAnnouncements = async () => {
     try {
@@ -186,13 +184,9 @@ const Announcements = () => {
     setAnnouncementModalOpen(true);
   };
 
-  const handleDeleteAnnouncement = async (announcement) => {
+  const handleDeleteAnnouncement = async (announcementId) => {
     try {
-      if (announcement.mediaName)
-      await api.delete(`/announcements/${announcement.id}/media-upload`);
-
-      await api.delete(`/announcements/${announcement.id}`);
-      
+      await api.delete(`/announcements/${announcementId}`);
       toast.success(i18n.t("announcements.toasts.deleted"));
     } catch (err) {
       toastError(err);
@@ -236,7 +230,7 @@ const Announcements = () => {
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => handleDeleteAnnouncement(deletingAnnouncement)}
+        onConfirm={() => handleDeleteAnnouncement(deletingAnnouncement.id)}
       >
         {i18n.t("announcements.confirmationModal.deleteMessage")}
       </ConfirmationModal>
@@ -321,10 +315,10 @@ const Announcements = () => {
                     {translatePriority(announcement.priority)}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.mediaName ?? i18n.t("quickMessages.noAttachment")}
+                    {announcement.mediaName ?? "Sem anexo"}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.status ? i18n.t("announcements.active") : i18n.t("announcements.inactive")}
+                    {announcement.status ? "ativo" : "inativo"}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton

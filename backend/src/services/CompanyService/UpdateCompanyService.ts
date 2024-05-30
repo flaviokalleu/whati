@@ -1,7 +1,6 @@
 import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
-
 interface CompanyData {
   name: string;
   id?: number | string;
@@ -12,8 +11,9 @@ interface CompanyData {
   campaignsEnabled?: boolean;
   dueDate?: string;
   recurrence?: string;
+  document?: string;
+  paymentMethod?: string;
 }
-
 const UpdateCompanyService = async (
   companyData: CompanyData
 ): Promise<Company> => {
@@ -26,13 +26,13 @@ const UpdateCompanyService = async (
     planId,
     campaignsEnabled,
     dueDate,
-    recurrence
+    recurrence,
+    document,
+    paymentMethod
   } = companyData;
-
   if (!company) {
     throw new AppError("ERR_NO_COMPANY_FOUND", 404);
   }
-
   await company.update({
     name,
     phone,
@@ -40,15 +40,13 @@ const UpdateCompanyService = async (
     status,
     planId,
     dueDate,
-    recurrence
+    recurrence,
+    document,
+    paymentMethod
   });
-
   if (companyData.campaignsEnabled !== undefined) {
     const [setting, created] = await Setting.findOrCreate({
-      where: {
-        companyId: company.id,
-        key: "campaignsEnabled"
-      },
+      where: { companyId: company.id, key: "campaignsEnabled" },
       defaults: {
         companyId: company.id,
         key: "campaignsEnabled",
@@ -59,8 +57,6 @@ const UpdateCompanyService = async (
       await setting.update({ value: `${campaignsEnabled}` });
     }
   }
-
   return company;
 };
-
 export default UpdateCompanyService;

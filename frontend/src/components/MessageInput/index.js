@@ -33,7 +33,7 @@ const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles(theme => ({
 	mainWrapper: {
-		backgroundColor: theme.palette.bordabox, //DARK MODE PLW DESIGN//
+		background: "#eee",
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
@@ -161,6 +161,7 @@ const useStyles = makeStyles(theme => ({
 		color: "#6bcbef",
 		fontWeight: 500,
 	},
+
 }));
 
 const MessageInput = ({ ticketStatus }) => {
@@ -173,9 +174,7 @@ const MessageInput = ({ ticketStatus }) => {
 	const [loading, setLoading] = useState(false);
 	const [recording, setRecording] = useState(false);
 	const inputRef = useRef();
-	const { setReplyingMessage, replyingMessage } = useContext(
-		ReplyMessageContext
-	);
+	const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
 	const { user } = useContext(AuthContext);
 
 	const [signMessage, setSignMessage] = useLocalStorage("signOption", true);

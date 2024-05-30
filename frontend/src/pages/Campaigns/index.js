@@ -1,43 +1,45 @@
 /* eslint-disable no-unused-vars */
 
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { toast } from "react-toastify";
 
 import { useHistory } from "react-router-dom";
 
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import InputAdornment from "@material-ui/core/InputAdornment";
+import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import TextField from "@material-ui/core/TextField";
-import { makeStyles } from "@material-ui/core/styles";
+import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
 
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import DescriptionIcon from "@material-ui/icons/Description";
 import EditIcon from "@material-ui/icons/Edit";
-import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
+import DescriptionIcon from "@material-ui/icons/Description";
+import TimerOffIcon from "@material-ui/icons/TimerOff";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 
-import { Grid } from "@material-ui/core";
-import { isArray } from "lodash";
-import CampaignModal from "../../components/CampaignModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
-import { SocketContext } from "../../context/Socket/SocketContext";
-import toastError from "../../errors/toastError";
-import { useDate } from "../../hooks/useDate";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import CampaignModal from "../../components/CampaignModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
+import toastError from "../../errors/toastError";
+import { Grid } from "@material-ui/core";
+import { isArray } from "lodash";
+import { useDate } from "../../hooks/useDate";
+import { socketConnection } from "../../services/socket";
+import usePlans from "../../hooks/usePlans";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -88,7 +90,8 @@ const reducer = (state, action) => {
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
-    padding: theme.spacing(1),
+    // padding: theme.spacing(1),
+    padding: theme.padding,
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
@@ -96,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Campaigns = () => {
   const classes = useStyles();
-
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
@@ -106,12 +108,27 @@ const Campaigns = () => {
   const [deletingCampaign, setDeletingCampaign] = useState(null);
   const [campaignModalOpen, setCampaignModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [showCampaigns, setShowCampaigns] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [campaigns, dispatch] = useReducer(reducer, []);
 
   const { datetimeToClient } = useDate();
+  const { getPlanCompany } = usePlans();
 
-  const socketManager = useContext(SocketContext);
+  useEffect(() => {
+    async function fetchData() {
+      const companyId = localStorage.getItem("companyId");
+      const planConfigs = await getPlanCompany(undefined, companyId);
+      if (!planConfigs.plan.useCampaigns) {
+        toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
+        setTimeout(() => {          
+          history.push(`/`)
+        }, 1000);
+      }
+    }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -129,7 +146,7 @@ const Campaigns = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.getSocket(companyId);
+    const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-campaign`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -142,7 +159,7 @@ const Campaigns = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);
+  }, []);
 
   const fetchCampaigns = async () => {
     try {
@@ -244,9 +261,7 @@ const Campaigns = () => {
       <ConfirmationModal
         title={
           deletingCampaign &&
-          `${i18n.t("campaigns.confirmationModal.deleteTitle")} ${
-            deletingCampaign.name
-          }?`
+          `${i18n.t("campaigns.confirmationModal.deleteTitle")} ${deletingCampaign.name}?`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
@@ -327,9 +342,9 @@ const Campaigns = () => {
               <TableCell align="center">
                 {i18n.t("campaigns.table.completedAt")}
               </TableCell>
-              {/* <TableCell align="center">
+              <TableCell align="center">
                 {i18n.t("campaigns.table.confirmation")}
-              </TableCell> */}
+              </TableCell>
               <TableCell align="center">
                 {i18n.t("campaigns.table.actions")}
               </TableCell>
@@ -363,9 +378,9 @@ const Campaigns = () => {
                       ? datetimeToClient(campaign.completedAt)
                       : "Não concluída"}
                   </TableCell>
-                  {/* <TableCell align="center">
+                  <TableCell align="center">
                     {campaign.confirmation ? "Habilitada" : "Desabilitada"}
-                  </TableCell> */}
+                  </TableCell>
                   <TableCell align="center">
                     {campaign.status === "EM_ANDAMENTO" && (
                       <IconButton

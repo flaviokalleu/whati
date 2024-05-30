@@ -1,32 +1,42 @@
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
-
+import Setting from "../../models/Setting";
 const ListCompaniesPlanService = async (): Promise<Company[]> => {
   const companies = await Company.findAll({
-    attributes: ["id", "name", "email", "status", "dueDate", "createdAt", "phone"],
+    attributes: [
+      "id",
+      "name",
+      "email",
+      "status",
+      "dueDate",
+      "createdAt",
+      "phone",
+      "document",
+      "lastLogin"
+    ],
     order: [["name", "ASC"]],
     include: [
       {
-        model: Plan, as: "plan",
+        model: Plan,
+        as: "plan",
         attributes: [
           "id",
           "name",
           "users",
           "connections",
           "queues",
-          "value",
+          "amount",
+          "useWhatsapp",
+          "useFacebook",
+          "useInstagram",
           "useCampaigns",
           "useSchedules",
           "useInternalChat",
-          "useExternalApi",
-          "useKanban",
-          "useOpenAi",
-          "useIntegrations"
+          "useExternalApi"
         ]
-      },
+      }
     ]
   });
   return companies;
 };
-
 export default ListCompaniesPlanService;

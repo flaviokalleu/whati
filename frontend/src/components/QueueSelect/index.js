@@ -19,36 +19,31 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const QueueSelect = ({ selectedQueueIds, onChange, multiple = true, title = i18n.t("queueSelect.inputLabel") }) => {
+const QueueSelect = ({ selectedQueueIds, onChange }) => {
 	const classes = useStyles();
 	const [queues, setQueues] = useState([]);
 
 	useEffect(() => {
-
-		fetchQueues();
-
+		(async () => {
+			try {
+				const { data } = await api.get("/queue");
+				setQueues(data);
+			} catch (err) {
+				toastError(err);
+			}
+		})();
 	}, []);
-
-	const fetchQueues = async () => {
-		try {
-			const { data } = await api.get("/queue");
-			setQueues(data);
-		} catch (err) {
-			toastError(err);
-		}
-	}
 
 	const handleChange = e => {
 		onChange(e.target.value);
 	};
 
 	return (
-		<div >
+		<div style={{ marginTop: 6 }}>
 			<FormControl fullWidth margin="dense" variant="outlined">
-				<InputLabel shrink={selectedQueueIds ? true : false} >{title}</InputLabel>
+				<InputLabel>{i18n.t("queueSelect.inputLabel")}</InputLabel>
 				<Select
-					label={title}
-					multiple={multiple}
+					multiple
 					labelWidth={60}
 					value={selectedQueueIds}
 					onChange={handleChange}
@@ -63,41 +58,24 @@ const QueueSelect = ({ selectedQueueIds, onChange, multiple = true, title = i18n
 						},
 						getContentAnchorEl: null,
 					}}
-
-					renderValue={selected => {
-						return (
-							<div className={classes.chips}>
-								{selected?.length > 0 && multiple ? (
-									selected.map(id => {
-										const queue = queues.find(q => q.id === id);
-										return queue ? (
-											<Chip
-												key={id}
-												style={{ backgroundColor: queue.color }}
-												variant="outlined"
-												label={queue.name}
-												className={classes.chip}
-											/>
-										) : null;
-									})
-
-								) :
-									(
+					renderValue={selected => (
+						<div className={classes.chips}>
+							{selected?.length > 0 &&
+								selected.map(id => {
+									const queue = queues.find(q => q.id === id);
+									return queue ? (
 										<Chip
-											key={selected}
+											key={id}
+											style={{ backgroundColor: queue.color }}
 											variant="outlined"
-											style={{ backgroundColor: queues.find(q => q.id === selected)?.color }}
-											label={queues.find(q => q.id === selected)?.name}
+											label={queue.name}
 											className={classes.chip}
 										/>
-									)
-								}
-
-							</div>
-						)
-					}}
+									) : null;
+								})}
+						</div>
+					)}
 				>
-					{!multiple && <MenuItem value={null}>Nenhum</MenuItem>}
 					{queues.map(queue => (
 						<MenuItem key={queue.id} value={queue.id}>
 							{queue.name}

@@ -1,25 +1,15 @@
 import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Plan from "../../models/Plan";
-
 interface PlanData {
   name: string;
   users: number;
   connections: number;
   queues: number;
-  value: number;
-  useCampaigns?: boolean;
-  useSchedules?: boolean;
-  useInternalChat?: boolean;
-  useExternalApi?: boolean;
-  useKanban?: boolean;
-  useOpenAi?: boolean;
-  useIntegrations?: boolean;
+  amount: string;
 }
-
 const CreatePlanService = async (planData: PlanData): Promise<Plan> => {
   const { name } = planData;
-
   const planSchema = Yup.object().shape({
     name: Yup.string()
       .min(2, "ERR_PLAN_INVALID_NAME")
@@ -32,23 +22,18 @@ const CreatePlanService = async (planData: PlanData): Promise<Plan> => {
             const planWithSameName = await Plan.findOne({
               where: { name: value }
             });
-
             return !planWithSameName;
           }
           return false;
         }
       )
   });
-
   try {
     await planSchema.validate({ name });
   } catch (err) {
     throw new AppError(err.message);
   }
-
   const plan = await Plan.create(planData);
-
   return plan;
 };
-
 export default CreatePlanService;

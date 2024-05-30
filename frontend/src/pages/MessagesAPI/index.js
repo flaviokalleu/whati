@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 // import api from "../../services/api";
 import axios from "axios";
 import usePlans from "../../hooks/usePlans";
+import CurlEmbed from "./apiDoc"
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -295,7 +296,7 @@ const MessagesAPI = () => {
             <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> Authorization (Bearer token) e Content-Type (application/json) <br />
+            <b>Headers: </b> Authorization (token cadastrado) e Content-Type (application/json) <br />
             <b>Body: </b> {"{ \"number\": \"595985523065\", \"body\": \"Sua mensagem\" }"}
           </Typography>
         </Grid>
@@ -315,11 +316,11 @@ const MessagesAPI = () => {
             <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> Authorization (Bearer token) e Content-Type (multipart/form-data) <br />
+            <b>Headers: </b> Authorization (token cadastrado) e Content-Type (multipart/form-data) <br />
             <b>FormData: </b> <br />
             <ul>
               <li>
-                <b>number: </b> 5599999999999
+                <b>number: </b> 5531991841066
               </li>
               <li>
                 <b>medias: </b> arquivo
@@ -334,6 +335,7 @@ const MessagesAPI = () => {
           {renderFormMessageMedia()}
         </Grid>
       </Grid>
+      
     </Paper>
   );
 };

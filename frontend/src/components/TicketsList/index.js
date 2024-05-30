@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
-import openSocket from "../../services/socket-io";
 
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -10,365 +9,329 @@ import TicketsListSkeleton from "../TicketsListSkeleton";
 
 import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
+import { ListSubheader } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
-
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
-import { toast } from "react-toastify";
-import { useHistory } from "react-router-dom";
+import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles((theme) => ({
-	ticketsListWrapper: {
-		position: "relative",
-		display: "flex",
-		height: "100%",
-		flexDirection: "column",
-		overflow: "hidden",
-		borderTopRightRadius: 0,
-		marginRight: -8,
-		borderBottomRightRadius: 0,
-	},
+  ticketsListWrapper: {
+    position: "relative",
+    display: "flex",
+    height: "100%",
+    flexDirection: "column",
+    overflow: "hidden",
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
 
-	ticketsList: {
-		flex: 1,
-		overflowY: "scroll",
-		...theme.scrollbarStyles,
-		borderTop: "2px solid rgba(0, 0, 0, 0.12)",
-	},
+  ticketsList: {
+    flex: 1,
+    overflowY: "scroll",
+    ...theme.scrollbarStyles,
+    borderTop: "2px solid rgba(0, 0, 0, 0.12)",
+  },
 
-	ticketsListHeader: {
-		color: "rgb(67, 83, 105)",
-		zIndex: 2,
-		backgroundColor: "white",
-		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "space-between",
-	},
+  ticketsListHeader: {
+    color: "rgb(67, 83, 105)",
+    zIndex: 2,
+    backgroundColor: "white",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 
-	ticketsCount: {
-		fontWeight: "normal",
-		color: "rgb(104, 121, 146)",
-		marginLeft: "8px",
-		fontSize: "14px",
-	},
+  ticketsCount: {
+    fontWeight: "normal",
+    color: "rgb(104, 121, 146)",
+    marginLeft: "8px",
+    fontSize: "14px",
+  },
 
-	noTicketsText: {
-		textAlign: "center",
-		color: "rgb(104, 121, 146)",
-		fontSize: "14px",
-		lineHeight: "1.4",
-	},
+  noTicketsText: {
+    textAlign: "center",
+    color: "rgb(104, 121, 146)",
+    fontSize: "14px",
+    lineHeight: "1.4",
+  },
 
-	noTicketsTitle: {
-		textAlign: "center",
-		fontSize: "16px",
-		fontWeight: "600",
-		margin: "0px",
-	},
+  noTicketsTitle: {
+    textAlign: "center",
+    fontSize: "16px",
+    fontWeight: "600",
+    margin: "0px",
+  },
 
-	noTicketsDiv: {
-		display: "flex",
-		height: "100px",
-		margin: 40,
-		flexDirection: "column",
-		alignItems: "center",
-		justifyContent: "center",
-	},
+  noTicketsDiv: {
+    display: "flex",
+    height: "100px",
+    margin: 40,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  userTag: {
+    position: "absolute",
+    marginRight: 5,
+    right: 5,
+    bottom: 5,
+    background: theme.palette.tabHeaderBackground,
+    color: theme.palette.primary,
+    border:"1px solid #CCC",
+    padding: 1,
+    paddingLeft: 5,
+    paddingRight: 5,
+    borderRadius: 10,
+    fontSize: "1em"
+  },
 }));
 
 const reducer = (state, action) => {
-	if (action.type === "LOAD_TICKETS") {
-		const newTickets = action.payload;
+  if (action.type === "LOAD_TICKETS") {
+    const newTickets = action.payload;
 
-		newTickets.forEach((ticket) => {
-			const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-			if (ticketIndex !== -1) {
-				state[ticketIndex] = ticket;
-				if (ticket.unreadMessages > 0) {
-					state.unshift(state.splice(ticketIndex, 1)[0]);
-				}
-			} else {
-				state.push(ticket);
-			}
-		});
+    newTickets.forEach((ticket) => {
+      const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+      if (ticketIndex !== -1) {
+        state[ticketIndex] = ticket;
+        if (ticket.unreadMessages > 0) {
+          state.unshift(state.splice(ticketIndex, 1)[0]);
+        }
+      } else {
+        state.push(ticket);
+      }
+    });
 
-		return [...state];
-	}
+    return [...newTickets];
+  }
 
-	if (action.type === "RESET_UNREAD") {
-		const ticketId = action.payload;
+  if (action.type === "RESET_UNREAD") {
+    const ticketId = action.payload;
 
-		const ticketIndex = state.findIndex((t) => t.id === ticketId);
-		if (ticketIndex !== -1) {
-			state[ticketIndex].unreadMessages = 0;
-		}
-
-		return [...state];
-	}
-
-	if (action.type === "UPDATE_TICKET") {
-		const ticket = action.payload;
-
-		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-		if (ticketIndex !== -1) {
-			state[ticketIndex] = ticket;
-		} else {
-			state.unshift(ticket);
-		}
-
-		return [...state];
-	}
-
-	if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
-		const ticket = action.payload;
-
-		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-		if (ticketIndex !== -1) {
-			state[ticketIndex] = ticket;
-			state.unshift(state.splice(ticketIndex, 1)[0]);
-		} else {
-			state.unshift(ticket);
-		}
-
-		return [...state];
-	}
-
-	if (action.type === "UPDATE_TICKET_CONTACT") {
-		const contact = action.payload;
-		const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
-		if (ticketIndex !== -1) {
-			state[ticketIndex].contact = contact;
-		}
-		return [...state];
-	}
-
-	if (action.type === "DELETE_TICKET") {
-		const ticketId = action.payload;
-		const ticketIndex = state.findIndex((t) => t.id === ticketId);
-		if (ticketIndex !== -1) {
-			state.splice(ticketIndex, 1);
-		}
-
-		return [...state];
-	}
-
-	if (action.type === "RESET") {
-		return [];
-	}
-};
-
-const TicketsList = (props) => {
-	const {
-		status,
-		searchParam,
-		showAll,
-		selectedQueueIds,
-		updateCount,
-		style,
-		tags,
-	} = props;
-	const classes = useStyles();
-	const history = useHistory();
-	const [pageNumber, setPageNumber] = useState(1);
-	const [ticketsList, dispatch] = useReducer(reducer, []);
-	const { user } = useContext(AuthContext);
-	const { profile, queues } = user;
-	const [settings, setSettings] = useState([]);
-
-
-	useEffect(() => {
-		dispatch({ type: "RESET" });
-		setPageNumber(1);
-	}, [status, searchParam, dispatch, showAll, selectedQueueIds, tags]);
-
-	const { tickets, hasMore, loading } = useTickets({
-		pageNumber,
-		searchParam,
-		status,
-		showAll,
-		tags: JSON.stringify(tags),
-		queueIds: JSON.stringify(selectedQueueIds),
-	});
-
-
-
-	useEffect(() => {
-		const fetchSession = async () => {
-			try {
-				const { data } = await api.get("/settings");
-				setSettings(data);
-			} catch (err) {
-				toastError(err);
-			}
-		};
-		fetchSession();
-	}, []);
-
-
-
-	const handleChangeBooleanSetting = async e => {
-		const selectedValue = e.target.checked ? "enabled" : "disabled";
-		const settingKey = e.target.name;
-
-		try {
-			await api.put(`/settings/${settingKey}`, {
-				value: selectedValue,
-			});
-			toast.success(i18n.t("settings.success"));
-			history.go(0);
-		} catch (err) {
-			toastError(err);
-		}
-	};
-
-
-
-	useEffect(() => {
-
-		const queueIds = queues.map((q) => q.id);
-		const filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
-		const getSettingValue = key => {
-			const { value } = settings.find(s => s.key === key);
-			return value;
-		};
-		const allticket = user.allTicket === 'enabled';
-
-
-
-
-		// Função para identificação liberação da settings 
-		if (profile === "admin" || allticket) {
-			dispatch({ type: "LOAD_TICKETS", payload: tickets });
-		} else {
-			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-		}
-
-
-
-
-	}, [tickets, status, searchParam, queues, profile]);
-
-	useEffect(() => {
-		const socket = openSocket();
-    if (!socket) {
-      return () => {}; 
+    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    if (ticketIndex !== -1) {
+      state[ticketIndex].unreadMessages = 0;
     }
 
-		const shouldUpdateTicket = (ticket) =>
-			(!ticket.userId || ticket.userId === user?.id || showAll) &&
-			(!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+    return [...state];
+  }
 
-		const notBelongsToUserQueues = (ticket) =>
-			ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
+  if (action.type === "UPDATE_TICKET") {
+    const ticket = action.payload;
 
-		socket.on("ready", () => {
-			if (status) {
-				socket.emit("joinTickets", status);
-			} else {
-				socket.emit("joinNotification");
-			}
-		});
+    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    if (ticketIndex !== -1) {
+      state[ticketIndex] = ticket;
+    } else {
+      state.unshift(ticket);
+    }
 
-		socket.on("ticket", (data) => {
-			if (data.action === "updateUnread") {
-				dispatch({
-					type: "RESET_UNREAD",
-					payload: data.ticketId,
-				});
-			}
+    return [...state];
+  }
 
-			if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
-				dispatch({
-					type: "UPDATE_TICKET",
-					payload: data.ticket,
-				});
-			}
+  if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
+    const ticket = action.payload;
 
-			if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
-				dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-			}
+    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    if (ticketIndex !== -1) {
+      state[ticketIndex] = ticket;
+      state.unshift(state.splice(ticketIndex, 1)[0]);
+    } else {
+      state.unshift(ticket);
+    }
 
-			if (data.action === "delete") {
-				dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
-			}
-		});
+    return [...state];
+  }
 
-		socket.on("appMessage", (data) => {
-			if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
-				dispatch({
-					type: "UPDATE_TICKET_UNREAD_MESSAGES",
-					payload: data.ticket,
-				});
-			}
-		});
+  if (action.type === "UPDATE_TICKET_CONTACT") {
+    const contact = action.payload;
+    const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
+    if (ticketIndex !== -1) {
+      state[ticketIndex].contact = contact;
+    }
+    return [...state];
+  }
 
-		socket.on("contact", (data) => {
-			if (data.action === "update") {
-				dispatch({
-					type: "UPDATE_TICKET_CONTACT",
-					payload: data.contact,
-				});
-			}
-		});
+  if (action.type === "DELETE_TICKET") {
+    const ticketId = action.payload;
+    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    if (ticketIndex !== -1) {
+      state.splice(ticketIndex, 1);
+    }
 
-		return () => {
-			socket.disconnect();
-		};
-	}, [status, showAll, user, selectedQueueIds]);
+    return [...state];
+  }
 
-	useEffect(() => {
-		if (typeof updateCount === "function") {
-			updateCount(ticketsList.length);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ticketsList]);
+  if (action.type === "RESET") {
+    return [];
+  }
+};
 
-	const loadMore = () => {
-		setPageNumber((prevState) => prevState + 1);
-	};
+const TicketsList = ({
+  status,
+  searchParam,
+  tags,
+  showAll,
+  selectedQueueIds,
+}) => {
+  const classes = useStyles();
+  const [pageNumber, setPageNumber] = useState(1);
+  const [ticketsList, dispatch] = useReducer(reducer, []);
+  const { user } = useContext(AuthContext);
 
-	const handleScroll = (e) => {
-		if (!hasMore || loading) return;
+  useEffect(() => {
+    dispatch({ type: "RESET" });
+    setPageNumber(1);
+  }, [status, searchParam, dispatch, showAll, selectedQueueIds]);
 
-		const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  const { tickets, hasMore, loading } = useTickets({
+    pageNumber,
+    searchParam,
+    tags: JSON.stringify(tags),
+    status,
+    showAll,
+    queueIds: JSON.stringify(selectedQueueIds),
+  });
 
-		if (scrollHeight - (scrollTop + 100) < clientHeight) {
-			loadMore();
-		}
-	};
+  useEffect(() => {
+    if (!status && !searchParam) return;
+    dispatch({
+      type: "LOAD_TICKETS",
+      payload: tickets,
+    });
+  }, [tickets, status, searchParam]);
 
-	return (
-		<Paper className={classes.ticketsListWrapper} style={style}>
-			<Paper
-				square
-				name="closed"
-				elevation={0}
-				className={classes.ticketsList}
-				onScroll={handleScroll}
-			>
-				<List style={{ paddingTop: 0 }}>
-					{ticketsList.length === 0 && !loading ? (
-						<div className={classes.noTicketsDiv}>
-							<span className={classes.noTicketsTitle}>
-								{i18n.t("ticketsList.noTicketsTitle")}
-							</span>
-							<p className={classes.noTicketsText}>
-								{i18n.t("ticketsList.noTicketsMessage")}
-							</p>
-						</div>
-					) : (
-						<>
-							{ticketsList.map((ticket) => (
-								<TicketListItem ticket={ticket} key={ticket.id} />
-							))}
-						</>
-					)}
-					{loading && <TicketsListSkeleton />}
-				</List>
-			</Paper>
-		</Paper>
-	);
+  useEffect(() => {
+    const companyId = localStorage.getItem("companyId");
+    const socket = socketConnection({ companyId });
+
+    const shouldUpdateTicket = (ticket) =>
+      (!ticket.userId || ticket.userId === user?.id || showAll) &&
+      (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+
+    const notBelongsToUserQueues = (ticket) =>
+      ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
+
+    socket.on("connect", () => {
+      if (status) {
+        socket.emit("joinTickets", status);
+      } else {
+        socket.emit("joinNotification");
+      }
+    });
+
+    socket.on(`company-${companyId}-ticket`, (data) => {
+      if (data.action === "updateUnread") {
+        dispatch({
+          type: "RESET_UNREAD",
+          payload: data.ticketId,
+        });
+      }
+
+      if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
+        dispatch({
+          type: "UPDATE_TICKET",
+          payload: data.ticket,
+        });
+      }
+
+      if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
+        dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
+      }
+
+      if (data.action === "delete") {
+        dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
+      }
+    });
+
+    socket.on(`company-${companyId}-appMessage`, (data) => {
+      if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
+        dispatch({
+          type: "UPDATE_TICKET_UNREAD_MESSAGES",
+          payload: data.ticket,
+        });
+      }
+    });
+
+    socket.on(`company-${companyId}-contact`, (data) => {
+      if (data.action === "update") {
+        dispatch({
+          type: "UPDATE_TICKET_CONTACT",
+          payload: data.contact,
+        });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [status, showAll, user, selectedQueueIds]);
+
+  const loadMore = () => {
+    setPageNumber((prevState) => prevState + 1);
+  };
+
+  const handleScroll = (e) => {
+    if (!hasMore || loading) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+
+    if (scrollHeight - (scrollTop + 100) < clientHeight) {
+      loadMore();
+    }
+  };
+
+  return (
+    <div className={classes.ticketsListWrapper}>
+      <Paper
+        square
+        name="closed"
+        elevation={0}
+        className={classes.ticketsList}
+        onScroll={handleScroll}
+      >
+        <List style={{ paddingTop: 0 }}>
+          {status === "open" && (
+            <ListSubheader className={classes.ticketsListHeader}>
+              <div>
+                {i18n.t("ticketsList.assignedHeader")}
+                <span className={classes.ticketsCount}>
+                  {ticketsList.length}
+                </span>
+              </div>
+            </ListSubheader>
+          )}
+          {status === "pending" && (
+            <ListSubheader className={classes.ticketsListHeader}>
+              <div>
+                {i18n.t("ticketsList.pendingHeader")}
+                <span className={classes.ticketsCount}>
+                  {ticketsList.length}
+                </span>
+              </div>
+            </ListSubheader>
+          )}
+          {ticketsList.length === 0 && !loading ? (
+            <div className={classes.noTicketsDiv}>
+              <span className={classes.noTicketsTitle}>
+                {i18n.t("ticketsList.noTicketsTitle")}
+              </span>
+              <p className={classes.noTicketsText}>
+                {i18n.t("ticketsList.noTicketsMessage")}
+              </p>
+            </div>
+          ) : (
+            <>
+              {ticketsList.map((ticket) => (
+                <TicketListItem ticket={ticket} key={ticket.id} />
+              ))}
+            </>
+          )}
+          {loading && <TicketsListSkeleton />}
+        </List>
+      </Paper>
+    </div>
+  );
 };
 
 export default TicketsList;

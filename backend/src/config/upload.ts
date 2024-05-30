@@ -1,38 +1,31 @@
 import path from "path";
 import multer from "multer";
 import fs from "fs";
-
-const publicFolder = path.resolve(__dirname, "..", "..", "public");
-
+import Whatsapp from "../models/Whatsapp";
+import { isEmpty, isNil } from "lodash";
+export const publicFolder = path.resolve(__dirname, "..", "..", "public");
 export default {
   directory: publicFolder,
   storage: multer.diskStorage({
     destination: async function (req, file, cb) {
-
-      const { typeArch, fileId } = req.body;      
-
-      let folder;
-
-      if (typeArch && typeArch !== "announcements") {
-        folder =  path.resolve(publicFolder , typeArch, fileId ? fileId : "") 
-      } else if (typeArch && typeArch === "announcements") {
-        folder =  path.resolve(publicFolder , typeArch) 
+      let companyId;
+      companyId = req.user?.companyId;
+      if (companyId === undefined && isNil(companyId) && isEmpty(companyId)) {
+        const authHeader = req.headers.authorization;
+        const [, token] = authHeader.split(" ");
+        const whatsapp = await Whatsapp.findOne({ where: { token } });
+        companyId = whatsapp.companyId;
       }
-      else
-      {
-        folder =  path.resolve(publicFolder) 
-      }
-
+      const folder = `${publicFolder}/company${companyId}/`;
       if (!fs.existsSync(folder)) {
-        fs.mkdirSync(folder,  { recursive: true })
-        fs.chmodSync(folder, 0o777)
+        fs.mkdirSync(folder);
+        fs.chmodSync(folder, 0o777);
       }
       return cb(null, folder);
     },
     filename(req, file, cb) {
-      const { typeArch } = req.body;
-
-      const fileName = typeArch && typeArch !== "announcements" ? file.originalname.replace('/','-').replace(/ /g, "_") : new Date().getTime() + '_' + file.originalname.replace('/','-').replace(/ /g, "_");
+      const fileName =
+        new Date().getTime() + "_" + file.originalname.replace("/", "-");
       return cb(null, fileName);
     }
   })

@@ -7,7 +7,6 @@ import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
-import { SocketContext, SocketManager } from './context/Socket/SocketContext';
 
 import Routes from "./routes";
 
@@ -38,7 +37,7 @@ const App = () => {
                 },
                 "&::-webkit-scrollbar-thumb": {
                     boxShadow: 'inset 0 0 6px rgba(0, 0, 0, 0.3)',
-                    backgroundColor: "#2DDD7F",
+                    backgroundColor: "#000",
                 },
             },
             scrollbarStylesSoft: {
@@ -46,38 +45,37 @@ const App = () => {
                     width: "8px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: mode === "light" ? "#F3F3F3" : "#333333",
+                    backgroundColor: mode === "light" ? "#000" : "#000",
                 },
             },
             palette: {
                 type: mode,
-                primary: { main: mode === "light" ? "#2DDD7F" : "#FFFFFF" },
-                textPrimary: mode === "light" ? "#2DDD7F" : "#FFFFFF",
-                borderPrimary: mode === "light" ? "#2DDD7F" : "#FFFFFF",
+                primary: { main: mode === "light" ? "#000" : "#F3F3F3" },
+                textPrimary: mode === "light" ? "#000" : "#FFFFFF",
+                borderPrimary: mode === "light" ? "#000" : "#FFFFFF",
                 dark: { main: mode === "light" ? "#333333" : "#F3F3F3" },
                 light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
-                tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
+                tabHeaderBackground: mode === "light" ? "#fff" : "#333",
                 optionsBackground: mode === "light" ? "#fafafa" : "#333",
-				options: mode === "light" ? "#fafafa" : "#666",
-				fontecor: mode === "light" ? "#128c7e" : "#fff",
+				options: mode === "light" ? "#fafafa" : "#333",
+				fontecor: mode === "light" ? "#000" : "#fff",
                 fancyBackground: mode === "light" ? "#fafafa" : "#333",
 				bordabox: mode === "light" ? "#eee" : "#333",
 				newmessagebox: mode === "light" ? "#eee" : "#333",
-				inputdigita: mode === "light" ? "#fff" : "#666",
-				contactdrawer: mode === "light" ? "#fff" : "#666",
+				inputdigita: mode === "light" ? "#fff" : "#333",
+				contactdrawer: mode === "light" ? "#fff" : "#333",
 				announcements: mode === "light" ? "#ededed" : "#333",
-				login: mode === "light" ? "#fff" : "#1C1C1C",
-				announcementspopover: mode === "light" ? "#fff" : "#666",
-				chatlist: mode === "light" ? "#eee" : "#666",
-				boxlist: mode === "light" ? "#ededed" : "#666",
+				login: mode === "light" ? "#fff" : "#333",
+				announcementspopover: mode === "light" ? "#fff" : "#333",
+				chatlist: mode === "light" ? "#eee" : "#333",
+				boxlist: mode === "light" ? "#ededed" : "#333",
 				boxchatlist: mode === "light" ? "#ededed" : "#333",
                 total: mode === "light" ? "#fff" : "#222",
                 messageIcons: mode === "light" ? "grey" : "#F3F3F3",
                 inputBackground: mode === "light" ? "#FFFFFF" : "#333",
-                barraSuperior: mode === "light" ? "linear-gradient(to right, #2DDD7F, #2DDD7F , #2DDD7F)" : "#666",
-				boxticket: mode === "light" ? "#EEE" : "#666",
-				campaigntab: mode === "light" ? "#ededed" : "#666",
-				mediainput: mode === "light" ? "#ededed" : "#1c1c1c",
+                barraSuperior: mode === "light" ? "#000" : "#000",
+				boxticket: mode === "light" ? "#EEE" : "#333",
+				campaigntab: mode === "light" ? "#ededed" : "#333",
             },
             mode,
         },
@@ -104,9 +102,7 @@ const App = () => {
         <ColorModeContext.Provider value={{ colorMode }}>
             <ThemeProvider theme={theme}>
                 <QueryClientProvider client={queryClient}>
-                  <SocketContext.Provider value={SocketManager}>
-                      <Routes />
-                  </SocketContext.Provider>
+                    <Routes />
                 </QueryClientProvider>
             </ThemeProvider>
         </ColorModeContext.Provider>

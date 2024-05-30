@@ -2,10 +2,13 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as ScheduleController from "../controllers/ScheduleController";
+
+//import media agendamento
 import multer from "multer";
 import uploadConfig from "../config/upload";
 
 const upload = multer(uploadConfig);
+//fim
 
 const scheduleRoutes = express.Router();
 

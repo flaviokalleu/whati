@@ -1,23 +1,26 @@
 import { Request, Response } from "express";
-
 import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
-
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
-
+import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-
-  // if (req.user.profile !== "admin") {
-  //   throw new AppError("ERR_NO_PERMISSION", 403);
-  // }
-
   const settings = await ListSettingsService({ companyId });
-
   return res.status(200).json(settings);
 };
-
+export const showOne = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+  const { settingKey: key } = req.params;
+  const settingsTransfTicket = await ListSettingsServiceOne({
+    companyId: companyId,
+    key: key
+  });
+  return res.status(200).json(settingsTransfTicket);
+};
 export const update = async (
   req: Request,
   res: Response
@@ -28,18 +31,8 @@ export const update = async (
   const { settingKey: key } = req.params;
   const { value } = req.body;
   const { companyId } = req.user;
-
-  const setting = await UpdateSettingService({
-    key,
-    value,
-    companyId
-  });
-
+  const setting = await UpdateSettingService({ key, value, companyId });
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-settings`, {
-    action: "update",
-    setting
-  });
-
+  io.emit(`company-${companyId}-settings`, { action: "update", setting });
   return res.status(200).json(setting);
 };

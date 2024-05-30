@@ -78,7 +78,7 @@ export function TagsContainer({ ticket }) {
     }
 
     return (
-        <Paper style={{ padding: 12 }}>
+        <Paper style={{ padding: 2 }}>
             <Autocomplete
                 multiple
                 size="small"
@@ -92,25 +92,30 @@ export function TagsContainer({ ticket }) {
                         <Chip
                             variant="outlined"
                             style={{
-                                background: option.color || '#eee',
+                                backgroundColor: option.color || '#eee',
                                 color: "#FFF",
                                 marginRight: 1,
-                                fontWeight: 600,
+                                padding: 1,
+                                fontWeight: 'bold',
+                                paddingLeft: 5,
+                                paddingRight: 5,
                                 borderRadius: 3,
                                 fontSize: "0.8em",
                                 whiteSpace: "nowrap"
                             }}
-                            label={option.name.toUpperCase()}
+                            label={option.name}
                             {...getTagProps({ index })}
                             size="small"
                         />
                     ))
                 }
                 renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Tags" />
+                    <TextField {...params} variant="outlined" placeholder="Tag" />
                 )}
                 PaperComponent={({ children }) => (
-                    <Paper style={{ width: 400, marginLeft: 12 }}>
+                    <Paper
+                        style={{ width: 400, marginLeft: 6 }}
+                    >
                         {children}
                     </Paper>
                 )}

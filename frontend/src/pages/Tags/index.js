@@ -22,6 +22,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
+
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
@@ -34,8 +35,7 @@ import TagModal from "../../components/TagModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Chip } from "@material-ui/core";
-import { Tooltip } from "@material-ui/core";
-import { SocketContext } from "../../context/Socket/SocketContext";
+import { socketConnection } from "../../services/socket";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
@@ -109,7 +109,7 @@ const Tags = () => {
   const fetchTags = useCallback(async () => {
     try {
       const { data } = await api.get("/tags/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber, kanban: 0 },
       });
       dispatch({ type: "LOAD_TAGS", payload: data.tags });
       setHasMore(data.hasMore);
@@ -118,8 +118,6 @@ const Tags = () => {
       toastError(err);
     }
   }, [searchParam, pageNumber]);
-
-  const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -135,7 +133,7 @@ const Tags = () => {
   }, [searchParam, pageNumber, fetchTags]);
 
   useEffect(() => {
-    const socket = socketManager.getSocket(user.companyId);
+    const socket = socketConnection({ companyId: user.companyId });
 
     socket.on("user", (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -143,14 +141,14 @@ const Tags = () => {
       }
 
       if (data.action === "delete") {
-        dispatch({ type: "DELETE_USER", payload: +data.tagId });
+        dispatch({ type: "DELETE_TAGS", payload: +data.tagId });
       }
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [socketManager, user]);
+  }, [user]);
 
   const handleOpenTagModal = () => {
     setSelectedTag(null);
@@ -199,7 +197,7 @@ const Tags = () => {
     }
   };
 
-return (
+  return (
     <MainContainer>
       <ConfirmationModal
         title={deletingTag && `${i18n.t("tags.confirmationModal.deleteTitle")}`}
@@ -215,9 +213,10 @@ return (
         reload={fetchTags}
         aria-labelledby="form-dialog-title"
         tagId={selectedTag && selectedTag.id}
+        kanban={0}
       />
       <MainHeader>
-        <Title>{i18n.t("tags.title")}</Title>
+        <Title>{i18n.t("tags.title")} ({tags.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
             placeholder={i18n.t("contacts.searchPlaceholder")}
@@ -238,7 +237,7 @@ return (
             onClick={handleOpenTagModal}
           >
             {i18n.t("tags.buttons.add")}
-          </Button>		  
+          </Button>
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
@@ -249,6 +248,7 @@ return (
         <Table size="small">
           <TableHead>
             <TableRow>
+            <TableCell align="center">{i18n.t("ID")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.name")}</TableCell>
               <TableCell align="center">
                 {i18n.t("tags.table.tickets")}
@@ -262,6 +262,7 @@ return (
             <>
               {tags.map((tag) => (
                 <TableRow key={tag.id}>
+                  <TableCell align="center">{tag.id}</TableCell>
                   <TableCell align="center">
                     <Chip
                       variant="outlined"

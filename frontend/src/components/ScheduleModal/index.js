@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react"; // Note que useEffect agora está sendo importado no início
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
@@ -14,21 +14,27 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import ConfirmationModal from "../ConfirmationModal"; // Certifique-se de que o caminho do arquivo está correto
+import AttachFileIcon from "@material-ui/icons/AttachFile";
+
+//import agendamento adc
+import { head } from "lodash";
+import { Grid, IconButton } from "@material-ui/core";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+
+
+
+//fim
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { FormControl, Grid, IconButton } from "@material-ui/core";
+import { FormControl } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import moment from "moment"
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import AttachFile from "@material-ui/icons/AttachFile";
-import { head } from "lodash";
-import ConfirmationModal from "../ConfirmationModal";
-import MessageVariablesPicker from "../MessageVariablesPicker";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -91,7 +97,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	const [attachment, setAttachment] = useState(null);
 	const attachmentFile = useRef(null);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const messageInputRef = useRef();
 
 	useEffect(() => {
 		if (contactId && contacts.length) {
@@ -108,9 +113,9 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 			try {
 				(async () => {
 					const { data: contactList } = await api.get('/contacts/list', { params: { companyId: companyId } });
-					let customList = contactList.map((c) => ({ id: c.id, name: c.name }));
+					let customList = contactList.map((c) => ({id: c.id, name: c.name}));
 					if (isArray(customList)) {
-						setContacts([{ id: "", name: "" }, ...customList]);
+						setContacts([{id: "", name: ""}, ...customList]);
 					}
 					if (contactId) {
 						setSchedule(prevState => {
@@ -134,7 +139,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 
 	const handleClose = () => {
 		onClose();
-		setAttachment(null);
 		setSchedule(initialState);
 	};
 
@@ -154,17 +158,17 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 					const formData = new FormData();
 					formData.append("file", attachment);
 					await api.post(
-						`/schedules/${scheduleId}/media-upload`,
-						formData
+					  `/schedules/${scheduleId}/media-upload`,
+					  formData
 					);
-				}
+				  }
 			} else {
 				const { data } = await api.post("/schedules", scheduleData);
 				if (attachment != null) {
 					const formData = new FormData();
 					formData.append("file", attachment);
 					await api.post(`/schedules/${data.id}/media-upload`, formData);
-				}
+				  }
 			}
 			toast.success(i18n.t("scheduleModal.success"));
 			if (typeof reload == 'function') {
@@ -182,17 +186,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 		setCurrentContact(initialContact);
 		setSchedule(initialState);
 		handleClose();
-	};
-	const handleClickMsgVar = async (msgVar, setValueFunc) => {
-		const el = messageInputRef.current;
-		const firstHalfText = el.value.substring(0, el.selectionStart);
-		const secondHalfText = el.value.substring(el.selectionEnd);
-		const newCursorPos = el.selectionStart + msgVar.length;
-
-		setValueFunc("body", `${firstHalfText}${msgVar}${secondHalfText}`);
-
-		await new Promise(r => setTimeout(r, 100));
-		messageInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
 	};
 
 	const deleteMedia = async () => {
@@ -218,7 +211,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 
 	return (
 		<div className={classes.root}>
-			<ConfirmationModal
+		<ConfirmationModal
 				title={i18n.t("scheduleModal.confirmationModal.deleteTitle")}
 				open={confirmationOpen}
 				onClose={() => setConfirmationOpen(false)}
@@ -239,7 +232,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 				<div style={{ display: "none" }}>
 					<input
 						type="file"
-						accept=".png,.jpg,.jpeg"
+						accept=".png,.jpg,.jpeg,.mp4,.mp3,.ogg"
 						ref={attachmentFile}
 						onChange={(e) => handleAttachmentFile(e)}
 					/>
@@ -255,7 +248,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 						}, 400);
 					}}
 				>
-					{({ touched, errors, isSubmitting, values, setFieldValue }) => (
+					{({ touched, errors, isSubmitting, values }) => (
 						<Form>
 							<DialogContent dividers>
 								<div className={classes.multFieldLine}>
@@ -288,7 +281,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										multiline={true}
 										label={i18n.t("scheduleModal.form.body")}
 										name="body"
-										inputRef={messageInputRef}
 										error={touched.body && Boolean(errors.body)}
 										helperText={touched.body && errors.body}
 										variant="outlined"
@@ -296,12 +288,6 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										fullWidth
 									/>
 								</div>
-								<Grid item>
-									<MessageVariablesPicker
-										disabled={isSubmitting}
-										onClick={value => handleClickMsgVar(value, setFieldValue)}
-									/>
-								</Grid>
 								<br />
 								<div className={classes.multFieldLine}>
 									<Field
@@ -310,7 +296,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										type="datetime-local"
 										name="sendAt"
 										InputLabelProps={{
-											shrink: true,
+										  shrink: true,
 										}}
 										error={touched.sendAt && Boolean(errors.sendAt)}
 										helperText={touched.sendAt && errors.sendAt}
@@ -320,27 +306,30 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 								</div>
 								{(schedule.mediaPath || attachment) && (
 									<Grid xs={12} item>
-										<Button startIcon={<AttachFile />}>
-											{attachment ? attachment.name : schedule.mediaName}
-										</Button>
+									<Button startIcon={<AttachFileIcon />}>
+										{attachment ? attachment.name : schedule.mediaName}
+									</Button>
+
+
 										<IconButton
-											onClick={() => setConfirmationOpen(true)}
-											color="secondary"
-										>
-											<DeleteOutline color="secondary" />
+   											onClick={() => setConfirmationOpen(true)}
+  											 color="secondary"
+											>
+  										 <DeleteOutlineIcon color="secondary" />
 										</IconButton>
+
 									</Grid>
 								)}
 							</DialogContent>
 							<DialogActions>
-								{!attachment && !schedule.mediaPath && (
+							{!attachment && !schedule.mediaPath && (
 									<Button
 										color="primary"
 										onClick={() => attachmentFile.current.click()}
 										disabled={isSubmitting}
 										variant="outlined"
 									>
-										{i18n.t("quickMessages.buttons.attach")}
+										{i18n.t("campaigns.dialog.buttons.attach")}
 									</Button>
 								)}
 								<Button
@@ -351,7 +340,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 								>
 									{i18n.t("scheduleModal.buttons.cancel")}
 								</Button>
-								{(schedule.sentAt === null || schedule.sentAt === "") && (
+								{ (schedule.sentAt === null || schedule.sentAt === "") && (
 									<Button
 										type="submit"
 										color="primary"
