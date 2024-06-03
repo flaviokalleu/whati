@@ -7,25 +7,21 @@ import AppError from "../errors/AppError";
 import options from "../config/Gn";
 import Company from "../models/Company";
 import Invoices from "../models/Invoices";
-import Subscriptions from "../models/Subscriptions";
 import { getIO } from "../libs/socket";
-import UpdateUserService from "../services/UserServices/UpdateUserService";
-import mercadopago from 'mercadopago';
 import axios from 'axios';
-import Setting from "../models/Setting";
-import Settings from "../models/Setting";
 
 dotenv.config();
 
 const app = express();
 
-
-
+const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+const keyMp = process.env.MERCADO_PAGO_KEYMP;
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const gerencianet = Gerencianet(options);
   return res.json(gerencianet.getSubscriptions());
 };
+
 export const createSubscription = async (
   req: Request,
   res: Response
@@ -42,12 +38,7 @@ export const createSubscription = async (
     console.log("Erro linha 32");
     throw new AppError("Validation fails", 400);
   }
-  const keyMp = await Setting.findOne({
-    where: {
-      key: "keyMp",
-      companyId: 1
-    }
-  });
+  
   const {
     firstName,
     price,
@@ -61,6 +52,7 @@ export const createSubscription = async (
     plan,
     invoiceId
   } = req.body;
+
   const body = {
     calendario: { expiracao: 3600 },
     valor: {
@@ -71,7 +63,7 @@ export const createSubscription = async (
     chave: process.env.GERENCIANET_PIX_KEY,
     solicitacaoPagador: `#Fatura:${invoiceId}`
   };
-  const accessToken = keyMp?.value;
+  
   const unitPrice = parseFloat(price);
   const data = {
     back_urls: {
@@ -92,9 +84,8 @@ export const createSubscription = async (
       }
     ]
   };
+  
   try {
-    //const pix = await gerencianet.pixCreateImmediateCharge(null, body);
-    //const qrcode = await gerencianet.pixGenerateQRCode({ id: pix.loc.id });
     const response = await axios.post('https://api.mercadopago.com/checkout/preferences', data, {
       headers: {
         'Content-Type': 'application/json',
@@ -116,6 +107,7 @@ export const createSubscription = async (
     );
   }
 };
+
 export const createWebhook = async (
   req: Request,
   res: Response
@@ -138,24 +130,25 @@ export const createWebhook = async (
     console.log(error);
   }
 };
+
 export const webhook = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const keyMp = await Setting.findOne({
-    where: {
-      key: "keyMp",
-      companyId: 1
-    }
-  });
+  const keyMp = process.env.MERCADO_PAGO_KEYMP;
+
+  if (!keyMp) {
+    throw new AppError("Mercado Pago key not found", 400);
+  }
+
   const { type } = req.params;
-  const { evento, data } = req.body; // Destructuring "data" from req.body
+  const { evento, data } = req.body; 
+
   if (evento === "teste_webhook") {
     return res.json({ ok: true });
   }
-  if (data && data.id) { // Checking if "data" exists and "id" exists within it
-    const accessToken = keyMp?.value;
 
+  if (data && data.id) { 
     const response = await axios.get(`https://api.mercadopago.com/v1/payments/${data.id}`,  {
       headers: {
         'Content-Type': 'application/json',
@@ -163,41 +156,50 @@ export const webhook = async (
       }
     });
 
-    const detahe = response.data; // Removing unnecessary ".status" access
-    if (detahe.status === "approved") {
-      const { additional_info } = detahe;
-if (additional_info && additional_info.items && additional_info.items.length > 0) {
-  const solicitacaoPagador = additional_info.items[0].title;
-  const invoiceID = solicitacaoPagador.replace("#Fatura:", "");
-  
-      const invoices = await Invoices.findByPk(invoiceID);
-      if (invoices) { // Check if invoice exists
-        const companyId = invoices.companyId;
-        const company = await Company.findByPk(companyId);
-        if (company) { // Check if company exists
-          const expiresAt = new Date(company.dueDate);
-          expiresAt.setDate(expiresAt.getDate() + 30);
-          const date = expiresAt.toISOString().split("T")[0];
-          
-          await company.update({ dueDate: date });
-          await invoices.update({
-            id: invoiceID,
-            status: "paid"
-          });
-          
-          const io = getIO();
-          const companyUpdate = await Company.findOne({
-            where: { id: companyId }
-          });
-          
-          io.emit(`company-${companyId}-payment`, {
-            action: detahe.status,
-            company: companyUpdate
-          });
+    const detalhe = response.data;
+
+    if (detalhe.status === "approved") {
+      const { additional_info } = detalhe;
+
+      if (additional_info && additional_info.items && additional_info.items.length > 0) {
+        const solicitacaoPagador = additional_info.items[0].title;
+        const invoiceID = solicitacaoPagador.replace("#Fatura:", "");
+
+        const invoices = await Invoices.findByPk(invoiceID);
+
+        if (invoices) { 
+          const companyId = invoices.companyId;
+          const company = await Company.findByPk(companyId);
+
+          if (company && company.dueDate) { 
+            const expiresAt = new Date(company.dueDate);
+            expiresAt.setDate(expiresAt.getDate() + 30);
+            const date = expiresAt.toISOString().split("T")[0];
+
+            await company.update({ dueDate: date });
+
+            await invoices.update({
+              status: "paid"
+            }, {
+              where: { id: invoiceID }
+            });
+
+            const io = getIO();
+            if (io) { 
+              const companyUpdate = await Company.findOne({
+                where: { id: companyId }
+              });
+
+              io.emit(`company-${companyId}-payment`, {
+                action: detalhe.status,
+                company: companyUpdate
+              });
+            }
+          }
         }
       }
     }
   }
-  }
+
   return res.json({ ok: true });
 };
