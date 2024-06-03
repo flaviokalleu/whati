@@ -29,7 +29,7 @@ module.exports = {
           "Companies",
           [
             {
-              name: "UNDER CONTROL TECHNOLOGY",
+              name: "ZAZAP",
               planId: 1,
               createdAt: new Date(),
               updatedAt: new Date()

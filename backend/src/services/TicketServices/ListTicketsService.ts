@@ -10,6 +10,7 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
+
 interface Request {
   searchParam?: string;
   pageNumber?: string;
@@ -33,11 +34,13 @@ interface Request {
   isGroup?: string;
   companyId: number;
 }
+
 interface Response {
   tickets: Ticket[];
   count: number;
   hasMore: boolean;
 }
+
 const ListTicketsService = async ({
   searchParam = "",
   pageNumber = "1",
@@ -61,12 +64,31 @@ const ListTicketsService = async ({
   isGroup,
   companyId
 }: Request): Promise<Response> => {
+  // Verifica se o usuário é administrador
+  const user = await ShowUserService(userId);
+  const isAdmin = user && user.profile === "admin";
+
+  // Condição inicial para onde (where)
   let whereCondition: Filterable["where"] = {
-    [Op.or]: [{ userId }, { status: "pending" }],
-    queueId: { [Op.or]: [queueIds, null] }
+    companyId
   };
-  let includeCondition: Includeable[];
-  includeCondition = [
+
+  // Ajusta a condição onde (where) com base no status do usuário
+  if (isAdmin) {
+    whereCondition = {
+      ...whereCondition,
+      queueId: { [Op.or]: [queueIds, null] },
+      status: "pending"
+    };
+  } else {
+    whereCondition = {
+      ...whereCondition,
+      userId
+    };
+  }
+
+  // Inclui as condições de associação (join)
+  let includeCondition: Includeable[] = [
     {
       model: Contact,
       as: "contact",
@@ -85,15 +107,21 @@ const ListTicketsService = async ({
     { model: Tag, as: "tags", attributes: ["id", "name", "color"] },
     { model: Whatsapp, as: "whatsapp", attributes: ["name", "expiresTicket"] }
   ];
-  if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+
+  // Ajusta a condição onde (where) se showAll for true e o usuário for administrador
+  if (showAll === "true" && isAdmin) {
+    whereCondition = { queueId: { [Op.or]: [queueIds, null] }, companyId };
   }
+
+  // Aplica filtros adicionais, se fornecidos
   if (status) {
     whereCondition = { ...whereCondition, status };
   }
+
   if (isGroup === "true") {
-    whereCondition = { isGroup: true };
+    whereCondition = { ...whereCondition, isGroup: true };
   }
+
   if (searchParam) {
     const sanitizedSearchParam = searchParam.toLocaleLowerCase().trim();
     includeCondition = [
@@ -134,15 +162,19 @@ const ListTicketsService = async ({
       ]
     };
   }
+
   if (date) {
     whereCondition = {
+      ...whereCondition,
       createdAt: {
         [Op.between]: [+startOfDay(parseISO(date)), +endOfDay(parseISO(date))]
       }
     };
   }
+
   if (dateStart && dateEnd) {
     whereCondition = {
+      ...whereCondition,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(dateStart)),
@@ -151,8 +183,10 @@ const ListTicketsService = async ({
       }
     };
   }
+
   if (updatedAt) {
     whereCondition = {
+      ...whereCondition,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(updatedAt)),
@@ -161,15 +195,17 @@ const ListTicketsService = async ({
       }
     };
   }
+
   if (withUnreadMessages === "true") {
-    const user = await ShowUserService(userId);
     const userQueueIds = user.queues.map(queue => queue.id);
     whereCondition = {
+      ...whereCondition,
       [Op.or]: [{ userId }, { status: "pending" }],
       queueId: { [Op.or]: [userQueueIds, null] },
       unreadMessages: { [Op.gt]: 0 }
     };
   }
+
   if (Array.isArray(tags) && tags.length > 0) {
     const ticketsTagFilter: any[] | null = [];
     for (let tag of tags) {
@@ -184,6 +220,7 @@ const ListTicketsService = async ({
       id: { [Op.in]: ticketsIntersection }
     };
   }
+
   if (Array.isArray(users) && users.length > 0) {
     const ticketsUserFilter: any[] | null = [];
     for (let user of users) {
@@ -198,9 +235,10 @@ const ListTicketsService = async ({
       id: { [Op.in]: ticketsIntersection }
     };
   }
+
   const limit = 40;
   const offset = limit * (+pageNumber - 1);
-  whereCondition = { ...whereCondition, companyId };
+
   const { count, rows: tickets } = await Ticket.findAndCountAll({
     where: whereCondition,
     include: includeCondition,
@@ -210,7 +248,9 @@ const ListTicketsService = async ({
     order: [["updatedAt", "DESC"]],
     subQuery: false
   });
+
   const hasMore = count > offset + tickets.length;
   return { tickets, count, hasMore };
 };
+
 export default ListTicketsService;
