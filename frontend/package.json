@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "nomeEmpresa": "UNDER CONTROL TECHNOLOGY",
+  "nomeEmpresa": "Zazap - Plataforma de multi atendimeto",
   "versionSystem": "1.0.0",
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",
