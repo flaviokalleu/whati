@@ -3,30 +3,41 @@ import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
-import Chatbot from "../../models/Chatbot";
+
 interface QueueData {
   name: string;
   color: string;
-  typebotUrl: string;
-  typebotName: string;
   companyId: number;
   greetingMessage?: string;
   outOfHoursMessage?: string;
   schedules?: any[];
-  chatbots?: Chatbot[];
+  orderQueue?: number;
+  integrationId?: number;
+  promptId?: number;
 }
+
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
   const { color, name, companyId } = queueData;
+
   const company = await Company.findOne({
-    where: { id: companyId },
+    where: {
+      id: companyId
+    },
     include: [{ model: Plan, as: "plan" }]
   });
+
   if (company !== null) {
-    const queuesCount = await Queue.count({ where: { companyId } });
+    const queuesCount = await Queue.count({
+      where: {
+        companyId
+      }
+    });
+
     if (queuesCount >= company.plan.queues) {
       throw new AppError(`Número máximo de filas já alcançado: ${queuesCount}`);
     }
   }
+
   const queueSchema = Yup.object().shape({
     name: Yup.string()
       .min(2, "ERR_QUEUE_INVALID_NAME")
@@ -39,6 +50,7 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
             const queueWithSameName = await Queue.findOne({
               where: { name: value, companyId }
             });
+
             return !queueWithSameName;
           }
           return false;
@@ -67,21 +79,16 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
         }
       )
   });
+
   try {
     await queueSchema.validate({ color, name });
   } catch (err: any) {
     throw new AppError(err.message);
   }
-  const queue = await Queue.create(queueData, {
-    include: [
-      {
-        model: Chatbot,
-        as: "chatbots",
-        attributes: ["id", "name", "greetingMessage", "isAgent"],
-        order: [[{ model: Chatbot, as: "chatbots" }, "id", "asc"]]
-      }
-    ]
-  });
+
+  const queue = await Queue.create(queueData);
+
   return queue;
 };
+
 export default CreateQueueService;

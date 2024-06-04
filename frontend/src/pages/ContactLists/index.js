@@ -199,7 +199,8 @@ const ContactLists = () => {
       <ConfirmationModal
         title={
           deletingContactList &&
-          `${i18n.t("contactLists.confirmationModal.deleteTitle")} ${deletingContactList.name
+          `${i18n.t("contactLists.confirmationModal.deleteTitle")} ${
+            deletingContactList.name
           }?`
         }
         open={confirmModalOpen}
@@ -259,9 +260,15 @@ const ContactLists = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">{i18n.t("contactLists.table.name")}</TableCell>
-              <TableCell align="center">{i18n.t("contactLists.table.contacts")}</TableCell>
-              <TableCell align="center">{i18n.t("contactLists.table.actions")}</TableCell>
+              <TableCell align="center">
+                {i18n.t("contactLists.table.name")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("contactLists.table.contacts")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("contactLists.table.actions")}
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -269,7 +276,9 @@ const ContactLists = () => {
               {contactLists.map((contactList) => (
                 <TableRow key={contactList.id}>
                   <TableCell align="center">{contactList.name}</TableCell>
-                  <TableCell align="center">{contactList.contactsCount || 0}</TableCell>
+                  <TableCell align="center">
+                    {contactList.contactsCount || 0}
+                  </TableCell>
                   <TableCell align="center">
                     <a href={planilhaExemplo} download="planilha.xlsx">
                       <IconButton size="small" title="Baixar Planilha Exemplo">

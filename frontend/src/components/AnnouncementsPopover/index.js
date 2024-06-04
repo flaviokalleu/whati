@@ -2,9 +2,8 @@ import React, { useEffect, useReducer, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
-import { useTheme } from "@material-ui/core/styles";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
-import Notifications from "@material-ui/icons/Notifications";
+import Notifications from "@material-ui/icons/Notifications"
 
 import {
   Avatar,
@@ -28,28 +27,20 @@ import { isArray } from "lodash";
 import moment from "moment";
 import { socketConnection } from "../../services/socket";
 
-const getMediaType = (filename) => {
-  const extension = filename.split('.').pop().toLowerCase();
-  if (['mp4', 'avi', 'mkv'].includes(extension)) {
-    return 'video';
-  } else {
-    return 'image';
-  }
-};
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
-    maxHeight: 300,
-    maxWidth: 500,
+    maxHeight: 3000,
+    maxWidth: 5000,
     padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles,
-    backgroundColor: theme.palette.background.default,
   },
 }));
+
 function AnnouncementDialog({ announcement, open, handleClose }) {
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}/public/company1/${filename}`;
+    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
   return (
     <Dialog
@@ -60,48 +51,25 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
     >
       <DialogTitle id="alert-dialog-title">{announcement.title}</DialogTitle>
       <DialogContent>
-  {announcement.mediaPath && (
-    <div
-      style={{
-        border: "1px solid #f1f1f1",
-        margin: "0 auto 20px",
-        textAlign: "center",
-        maxWidth: "90%",
-        maxHeight: "90vh",
-        overflow: "hidden",
-      }}
-    >
-      {getMediaType(announcement.mediaPath) === 'image' && (
-        <img
-          src={getMediaPath(announcement.mediaPath)}
-          alt="Media"
-          style={{
-            width: "100%",
-            height: "auto",
-            display: "block",
-            margin: "0 auto",
-          }}
-        />
-      )}
-      {getMediaType(announcement.mediaPath) === 'video' && (
-        <video
-          controls
-          width="100%"
-          style={{
-            display: "block",
-            margin: "0 auto",
-          }}
-        >
-          <source src={getMediaPath(announcement.mediaPath)} type="video/mp4" />
-          Seu navegador não suporta o elemento de vídeo.
-        </video>
-      )}
-    </div>
-  )}
-  <DialogContentText id="alert-dialog-description">
-    {announcement.text}
-  </DialogContentText>
-</DialogContent>
+        {announcement.mediaPath && (
+          <div
+            style={{
+              border: "1px solid #f1f1f1",
+              margin: "0 auto 20px",
+              textAlign: "center",
+              width: "400px",
+              height: 300,
+              backgroundImage: `url(${getMediaPath(announcement.mediaPath)})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "contain",
+              backgroundPosition: "center",
+            }}
+          ></div>
+        )}
+        <DialogContentText id="alert-dialog-description">
+          {announcement.text}
+        </DialogContentText>
+      </DialogContent>
       <DialogActions>
         <Button onClick={() => handleClose()} color="primary" autoFocus>
           Fechar
@@ -249,8 +217,9 @@ export default function AnnouncementsPopover() {
       return "4px solid grey";
     }
   };
+
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}/public/company1/${filename}`;
+    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
 
   const handleShowAnnouncementDialog = (record) => {
@@ -261,7 +230,6 @@ export default function AnnouncementsPopover() {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-  const theme = useTheme();
 
   return (
     <div>
@@ -280,7 +248,6 @@ export default function AnnouncementsPopover() {
           color="secondary"
           variant="dot"
           invisible={invisible || announcements.length < 1}
-          overlap="rectangular"
         >
           <Notifications />
         </Badge>
@@ -314,7 +281,7 @@ export default function AnnouncementsPopover() {
                 <ListItem
                   key={key}
                   style={{
-                    background: key % 2 === 0 ? theme.palette.background.default : theme.palette.background.paper,
+                    //background: key % 2 === 0 ? "#ededed" : "white",
                     border: "1px solid #eee",
                     borderLeft: borderPriority(item.priority),
                     cursor: "pointer",

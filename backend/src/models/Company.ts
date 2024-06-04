@@ -13,6 +13,7 @@ import {
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Message from "./Message";
+
 import Plan from "./Plan";
 import Queue from "./Queue";
 import Setting from "./Setting";
@@ -21,55 +22,56 @@ import TicketTraking from "./TicketTraking";
 import User from "./User";
 import UserRating from "./UserRating";
 import Whatsapp from "./Whatsapp";
-import Invoices from "./Invoices"; 
+
 @Table
 class Company extends Model<Company> {
   @PrimaryKey
   @AutoIncrement
   @Column
   id: number;
+
   @Column
   name: string;
+
   @Column
   phone: string;
+
   @Column
   email: string;
-  @Column({ defaultValue: "" })
-  document: string;
-  @Column({ defaultValue: "" })
-  paymentMethod: string;
-  @Column
-  lastLogin: Date;
+
   @Column
   status: boolean;
+
   @Column
   dueDate: string;
+
   @Column
   recurrence: string;
-  @Column({ type: DataType.JSONB })
+
+  @Column({
+    type: DataType.JSONB
+  })
   schedules: [];
+
   @ForeignKey(() => Plan)
   @Column
   planId: number;
+
   @BelongsTo(() => Plan)
   plan: Plan;
+
   @CreatedAt
   createdAt: Date;
+
   @UpdatedAt
   updatedAt: Date;
+
   @HasMany(() => User, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   users: User[];
-  
-  @HasMany(() => Invoices, {
-    onUpdate: "CASCADE",
-    onDelete: "CASCADE",
-    hooks: true
-  })
-  invoices: Invoices[];
 
   @HasMany(() => UserRating, {
     onUpdate: "CASCADE",
@@ -77,42 +79,49 @@ class Company extends Model<Company> {
     hooks: true
   })
   userRatings: UserRating[];
+
   @HasMany(() => Queue, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   queues: Queue[];
+
   @HasMany(() => Whatsapp, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   whatsapps: Whatsapp[];
+
   @HasMany(() => Message, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   messages: Message[];
+
   @HasMany(() => Contact, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   contacts: Contact[];
+
   @HasMany(() => Setting, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   settings: Setting[];
+
   @HasMany(() => Ticket, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
     hooks: true
   })
   tickets: Ticket[];
+
   @HasMany(() => TicketTraking, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
@@ -120,4 +129,5 @@ class Company extends Model<Company> {
   })
   ticketTrankins: TicketTraking[];
 }
+
 export default Company;

@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import { toast } from "react-toastify";
+
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
+
 import { Grid, LinearProgress, Typography } from "@material-ui/core";
 import api from "../../services/api";
 import { has, get, isNull } from "lodash";
@@ -20,15 +21,13 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import ListAltIcon from "@material-ui/icons/ListAlt";
 import { useDate } from "../../hooks/useDate";
-import usePlans from "../../hooks/usePlans";
 
 import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
-    // padding: theme.spacing(2),
-    padding: theme.padding,
+    padding: theme.spacing(2),
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
@@ -36,14 +35,12 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "right",
   },
   tabPanelsContainer: {
-    // padding: theme.spacing(2),
-    padding: theme.padding,
+    padding: theme.spacing(2),
   },
 }));
 
 const CampaignReport = () => {
   const classes = useStyles();
-  const history = useHistory();
 
   const { campaignId } = useParams();
 
@@ -57,22 +54,6 @@ const CampaignReport = () => {
   const mounted = useRef(true);
 
   const { datetimeToClient } = useDate();
-  const { getPlanCompany } = usePlans();
-
-  useEffect(() => {
-    async function fetchData() {
-      const companyId = localStorage.getItem("companyId");
-      const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs.plan.useCampaigns) {
-        toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
-        setTimeout(() => {          
-          history.push(`/`)
-        }, 1000);
-      }
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (mounted.current) {
@@ -119,7 +100,7 @@ const CampaignReport = () => {
     const socket = socketConnection({ companyId });
 
     socket.on(`company-${companyId}-campaign`, (data) => {
-      console.log(data);
+     
       if (data.record.id === +campaignId) {
         setCampaign(data.record);
 

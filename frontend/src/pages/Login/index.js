@@ -10,35 +10,19 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import IconButton from "@material-ui/core/IconButton";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import Visibility from "@material-ui/icons/Visibility";
-import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import { versionSystem } from "../../../package.json";
-import { nomeEmpresa } from "../../../package.json";
-import bk from "../../assets/bk.jpg"
+
+import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import logo from "../../assets/logologin.png";
-
+import logo from "../../assets/logo_login.png";
+import WhatsAppIcon from "@material-ui/icons/WhatsApp"; // Ícone do WhatsApp
 const randomImageURL = "https://source.unsplash.com/random/?tech";
-const Copyright = () => {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center" style={{ marginTop: "-21px" }}>
-      © {new Date().getFullYear()}
-      {" - "}
-      <Link color="inherit" href="#">
-        { nomeEmpresa } - v { versionSystem }
-      </Link>
-      {"."}
-    </Typography>
-  );
-};
+
 const useStyles = makeStyles((theme) => ({
   container: {
     position: "relative",
-    background: `url(${bk}) center/cover no-repeat`,
+    background: `url(${randomImageURL}) center/cover no-repeat`,
+    //background: "linear-gradient(to top, rgb(14 14 14) 0%, rgb(44 201 146) 100%)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -46,14 +30,16 @@ const useStyles = makeStyles((theme) => ({
     height: "100vh",
   },
   paper: {
-    backgroundColor: theme.palette.type === 'dark' ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.8)", // Fundo semi-transparente
+    //backgroundColor: "rgba(255, 255, 255, 0.8)", // Fundo semi-transparente
+    backgroundColor: theme.palette.background.paper,
     borderRadius: "35px",
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     border: "6px solid transparent", // Adiciona uma borda transparente
-    boxShadow: "0 0 180px rgba(0, 0, 0, 0.3)", // Adiciona um efeito de sombra azul
+    boxShadow: "0 0 180px rgba(0, 0, 255, 0.5)", // Adiciona um efeito de sombra azul
+    animation: "neonBorder 60s linear infinite", // Aplica a animação neonBorder
   },
   form: {
     width: "100%",
@@ -61,30 +47,12 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
-    borderRadius: "20px",
-    padding: "10px 20px",
-    fontSize: "1.2em",
   },
   logo: {
-    marginBottom: theme.spacing(4),
-    width: "200px",
-    height: "auto",
-  },
-  passwordIcon: {
-    cursor: "pointer",
+    marginBottom: theme.spacing(2),
   },
   whatsappButton: {
-    position: "fixed",
-    bottom: theme.spacing(2),
-    right: theme.spacing(2),
-    backgroundColor: "#25d366",
-    "&:hover": {
-      backgroundColor: "#128c7e",
-    },
-  },
-  whatsappIcon: {
-    fontSize: 40,
-    color: "#fff",
+    margin: theme.spacing(0, 0, 2)
   },
 }));
 
@@ -92,45 +60,46 @@ const Login = () => {
   const classes = useStyles();
 
   const [user, setUser] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
 
   const { handleLogin } = useContext(AuthContext);
 
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
+  	const openInNewTab = url => {
+		window.open(url, '_blank', 'noopener,noreferrer');
+	  };
 
-  const handleSubmit = (e) => {
+  const handlSubmit = (e) => {
     e.preventDefault();
     handleLogin(user);
   };
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
     <div className={classes.container}>
-      <img src={logo} alt="Logo da Empresa" className={classes.logo} />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
-            Faça login na sua conta
+          <div>
+          {/* <img src={logo} alt="Logo da Empresa" className={classes.logo} /> */}
+          <img style={{ margin: "0 auto", height: '100%', width: '100%',alignSelf: 'center' }} src={logo} alt="Whats" />
+          </div>
+          <Typography component="h1" variant="h6">
+            {i18n.t("login.titulo")}
           </Typography>
-          <form className={classes.form} noValidate onSubmit={handleSubmit}>
+          <form className={classes.form} noValidate onSubmit={handlSubmit}>
             <TextField
               variant="outlined"
               margin="normal"
               required
               fullWidth
               id="email"
-              label="Email"
+              label={i18n.t("login.form.email")}
               name="email"
-              autoComplete="email"
-              autoFocus
               value={user.email}
               onChange={handleChangeInput}
+              autoComplete="email"
+              autoFocus
             />
             <TextField
               variant="outlined"
@@ -138,62 +107,61 @@ const Login = () => {
               required
               fullWidth
               name="password"
-              label="Senha"
-              type={showPassword ? "text" : "password"}
+              label={i18n.t("login.form.password")}
+              type="password"
               id="password"
-              autoComplete="current-password"
               value={user.password}
               onChange={handleChangeInput}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      className={classes.passwordIcon}
-                      onClick={toggleShowPassword}
-                    >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+              autoComplete="current-password"
             />
-           <Grid container justify="flex-end">
-  <Grid item xs={6} style={{ textAlign: "right" }}>
-    <Link component={RouterLink} to="/forgetpsw" variant="body2">
-      Esqueceu sua senha?
-    </Link>
-  </Grid>
-</Grid>
+            <Grid container justify="flex-end">
+              <Grid item>
+                <Link
+                  href="#"
+                  variant="body2"
+                  component={RouterLink}
+                  to="/forgetpsw"
+                >
+                  {i18n.t("login.buttons.forgetpsw")}
+                </Link>
+              </Grid>
+            </Grid>
             <Button
-  type="submit"
-  fullWidth
-  variant="contained"
-  color="primary"
-  style={{ borderRadius: "10px", padding: "5px 12px", fontSize: "1em", marginTop: "20px" }}
->
-  Entrar
-</Button>
-<Grid container justify="center" style={{ marginTop: "20px" }}>
-  <Grid item>
-    <Link component={RouterLink} to="/signup" variant="body2">
-      {"Não tem uma conta? Registre-se"}
-    </Link>
-  </Grid>
-  <Box mt={8}><Copyright /></Box>
-</Grid>
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {i18n.t("login.buttons.submit")}
+            </Button>
+              <Button
+           //type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.whatsappButton}
+            onClick={() => openInNewTab("https://wa.me/5585998214849")}
+          >
+            {i18n.t("login.buttons.whatsapp")}
+          </Button>
+					<br/>
+            <Grid container>
+              <Grid item>
+                <Link
+                  href="#"
+                  variant="body2"
+                  component={RouterLink}
+                  to="/signup"
+                >
+                  {i18n.t("login.buttons.register")}
+                </Link>
+              </Grid>
+            </Grid>
+            
           </form>
-          
         </div>
       </Container>
-      <IconButton
-        href={`https://wa.me/${process.env.REACT_APP_NUMBER_SUPPORT}`}
-        className={classes.whatsappButton}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <WhatsAppIcon className={classes.whatsappIcon} />
-      </IconButton>
-      
     </div>
   );
 };

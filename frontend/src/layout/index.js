@@ -37,11 +37,10 @@ import { socketConnection } from "../services/socket";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
 import { useDate } from "../hooks/useDate";
-import UserLanguageSelector from "../components/UserLanguageSelector";
 
 import ColorModeContext from "../layout/themeContext";
-import Brightness4Icon from '@material-ui/icons/Brightness4';
-import Brightness7Icon from '@material-ui/icons/Brightness7';
+import Brightness2 from '@material-ui/icons/Brightness2';
+import Brightness5 from '@material-ui/icons/Brightness5';
 
 const drawerWidth = 240;
 
@@ -54,25 +53,26 @@ const useStyles = makeStyles((theme) => ({
     },
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
-      color: theme.mode === 'light' ? '#7252cc' : '#FFF',
-      border: theme.mode === 'light' ? '1px solid rgba(0 124 102)' : '1px solid rgba(255, 255, 255, 0.5)',
+      color: theme.mode === 'light' ? '#643570' : '#FFF',
+      border: theme.mode === 'light' ? '1px solid #060169' : '1px solid rgba(255, 255, 255, 0.5)',
     },
     '& .MuiTab-textColorPrimary.Mui-selected': {
-      color: theme.mode === 'light' ? '#7252cc' : '#FFF',
+      color: theme.mode === 'light' ? '#643570' : '#FFF',
     }
   },
   avatar: {
     width: "100%",
   },
   toolbar: {
-    paddingRight: 24,
+    paddingRight: 24, // keep right padding when drawer closed
     color: theme.palette.dark.main,
     background: theme.palette.barraSuperior,
   },
   toolbarIcon: {
+    background: theme.palette.fundologoLateral,
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     padding: "0 8px",
     minHeight: "48px",
     [theme.breakpoints.down("sm")]: {
@@ -109,6 +109,8 @@ const useStyles = makeStyles((theme) => ({
     color: "white",
   },
   drawerPaper: {
+    background: theme.palette.barraLateral,
+    color: theme.palette.corTextobarra,
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
@@ -116,10 +118,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    [theme.breakpoints.down("sm")]: {
-      width: "100%"
-    },
-    ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
     overflowX: "hidden",
@@ -141,6 +139,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flex: 1,
     overflow: "auto",
+
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -243,7 +242,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
-      setDrawerOpen(false);
+      setDrawerOpen(true);
     }
   }, []);
 
@@ -373,7 +372,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               classes.menuButton,
               drawerOpen && classes.menuButtonHidden
             )}
-            style={{ color: '#FFF' }}
           >
             <MenuIcon />
           </IconButton>
@@ -388,26 +386,23 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             {/* {greaterThenSm && user?.profile === "admin" && getDateAndDifDays(user?.company?.dueDate).difData < 7 ? ( */}
             {greaterThenSm && user?.profile === "admin" && user?.company?.dueDate ? (
               <>
-                Olá <b>{user.name}</b>, Bem vindo a <b>{user?.company?.name}</b>! (Ativo até {dateToClient(user?.company?.dueDate)})
+                Olá <b>{user.name}</b>, Seja Bem vindo(a) ao <b>ChatPlus</b>! (Ativo até {dateToClient(user?.company?.dueDate)})
               </>
             ) : (
               <>
-                Olá  <b>{user.name}</b>, Bem Vindo a <b>{user?.company?.name}</b>!
+                Olá <b>{user.name}</b>, Seja Bem vindo(a) ao <b>ChatPlus</b>!
               </>
             )}
           </Typography>
 
-          {/* DESABILITADO POIS TEM BUGS */}
-          { <UserLanguageSelector /> }
-
           <IconButton edge="start" onClick={toggleColorMode}>
-            {theme.mode === 'dark' ? <Brightness7Icon style={{ color: "white" }} /> : <Brightness4Icon style={{ color: "white" }} />}
+            {theme.mode === 'dark' ? <Brightness5 style={{ color: "white" }} /> : <Brightness2 style={{ color: "white" }} />}
           </IconButton>
 
-          {/*<NotificationsVolume
+          <NotificationsVolume
             setVolume={setVolume}
             volume={volume}
-            />*/}
+          />
 
           <IconButton
             onClick={handleRefreshPage}
@@ -416,8 +411,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
             <CachedIcon style={{ color: "white" }} />
           </IconButton>
-
-          {/* <DarkMode themeToggle={themeToggle} /> */}
 
           {user.id && <NotificationsPopOver volume={volume} />}
 
@@ -454,12 +447,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               <MenuItem onClick={handleOpenUserModal}>
                 {i18n.t("mainDrawer.appBar.user.profile")}
               </MenuItem>
-              <MenuItem onClick={handleClickLogout}>
-                {i18n.t("mainDrawer.appBar.user.logout")}
-              </MenuItem>
+
             </Menu>
           </div>
-
         </Toolbar>
       </AppBar>
       <main className={classes.content}>

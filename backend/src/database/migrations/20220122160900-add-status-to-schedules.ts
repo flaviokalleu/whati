@@ -1,4 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
+
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.addColumn("Schedules", "status", {
@@ -6,6 +7,7 @@ module.exports = {
       allowNull: true
     });
   },
+
   down: (queryInterface: QueryInterface) => {
     return queryInterface.removeColumn("Schedules", "status");
   }

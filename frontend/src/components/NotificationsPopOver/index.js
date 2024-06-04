@@ -11,6 +11,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
 import Badge from "@material-ui/core/Badge";
+//import ChatIcon from "@material-ui/icons/Chat";
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 
 import TicketListItem from "../TicketListItem";
@@ -221,23 +222,21 @@ const NotificationsPopOver = ({ volume }) => {
 
   return (
     <>
-      {profile === "admin" && (
-        <IconButton
-          className={classes.icons}
-          onClick={handleClick}
-          ref={anchorEl}
-          aria-label="Open Notifications"
-          variant="contained"
+      <IconButton
+        className={classes.icons}
+        onClick={handleClick}
+        ref={anchorEl}
+        aria-label="Open Notifications"
+        variant="contained"
+      >
+        <Badge
+          overlap="rectangular"
+          badgeContent={notifications.length}
+          classes={{ badge: classes.customBadge }}
         >
-          <Badge
-            overlap="rectangular"
-            badgeContent={notifications.length}
-            classes={{ badge: classes.customBadge }}
-          >
-            <WhatsAppIcon />
-          </Badge>
-        </IconButton>
-      )}
+          <WhatsAppIcon />
+        </Badge>
+      </IconButton>
       <Popover
         disableScrollLock
         open={isOpen}

@@ -16,11 +16,11 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     alignItems: "center",
-    padding: theme.padding,
+    padding: theme.spacing(4),
   },
 
   paper: {
-    padding: theme.padding,
+    padding: theme.spacing(2),
     display: "flex",
     alignItems: "center",
   },
@@ -29,8 +29,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
   },
   margin: {
-    // margin: theme.spacing(1),
-    margin: theme.padding,
+    margin: theme.spacing(1),
   },
 }));
 

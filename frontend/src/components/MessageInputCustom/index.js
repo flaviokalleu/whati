@@ -4,6 +4,7 @@ import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
 import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
+import { isNil } from "lodash";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -19,12 +20,20 @@ import ClearIcon from "@material-ui/icons/Clear";
 import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { FormControlLabel, Switch, Grid,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
+import axios from "axios";
+
 import RecordingTimer from "./RecordingTimer";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -33,13 +42,11 @@ import toastError from "../../errors/toastError";
 
 import useQuickMessages from "../../hooks/useQuickMessages";
 
-import Compressor from 'compressorjs';
-import LinearWithValueLabel from "./ProgressBarCustom";
-
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles((theme) => ({
   mainWrapper: {
+    backgroundColor: theme.palette.bordabox, //DARK MODE PLW DESIGN//
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -47,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   newMessageBox: {
+    backgroundColor: theme.palette.newmessagebox, //DARK MODE PLW DESIGN//
     width: "100%",
     display: "flex",
     padding: "7px",
@@ -56,8 +64,7 @@ const useStyles = makeStyles((theme) => ({
   messageInputWrapper: {
     padding: 6,
     marginRight: 7,
-    //background: "#fff",
-    border: "1px solid #ccc",
+    backgroundColor: theme.palette.inputdigita, //DARK MODE PLW DESIGN//
     display: "flex",
     borderRadius: 20,
     flex: 1,
@@ -78,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   viewMediaInputWrapper: {
+    maxHeight: "80%",
     display: "flex",
     padding: "10px 13px",
     position: "relative",
@@ -167,6 +175,31 @@ const useStyles = makeStyles((theme) => ({
     color: "#6bcbef",
     fontWeight: 500,
   },
+  avatar: {
+    width: "50px",
+    height: "50px",
+    borderRadius:"25%"
+  },
+
+  dropInfo: {
+    background: "#eee",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    padding: 15,
+    left: 0,
+    right: 0,
+  },
+
+  dropInfoOut: {
+    display: "none",
+  },
+
+  gridFiles: {
+    maxHeight: "100%",
+    overflow: "scroll",
+  },
 }));
 
 const EmojiOptions = (props) => {
@@ -230,7 +263,7 @@ const FileInput = (props) => {
         multiple
         type="file"
         id="upload-button"
-        disabled={disableOption}
+        disabled={disableOption()}
         className={classes.uploadInput}
         onChange={handleChangeMedias}
       />
@@ -238,7 +271,7 @@ const FileInput = (props) => {
         <IconButton
           aria-label="upload"
           component="span"
-          disabled={disableOption}
+          disabled={disableOption()}
         >
           <AttachFileIcon className={classes.sendMessageIcons} />
         </IconButton>
@@ -257,7 +290,6 @@ const ActionButtons = (props) => {
     handleCancelAudio,
     handleUploadAudio,
     handleStartRecording,
-    disableOption,
   } = props;
   const classes = useStyles();
   if (inputMessage) {
@@ -266,7 +298,7 @@ const ActionButtons = (props) => {
         aria-label="sendMessage"
         component="span"
         onClick={handleSendMessage}
-        disabled={disableOption}
+        disabled={loading}
       >
         <SendIcon className={classes.sendMessageIcons} />
       </IconButton>
@@ -278,7 +310,7 @@ const ActionButtons = (props) => {
           aria-label="cancelRecording"
           component="span"
           fontSize="large"
-          disabled={disableOption}
+          disabled={loading}
           onClick={handleCancelAudio}
         >
           <HighlightOffIcon className={classes.cancelAudioIcon} />
@@ -295,7 +327,7 @@ const ActionButtons = (props) => {
           aria-label="sendRecordedAudio"
           component="span"
           onClick={handleUploadAudio}
-          disabled={disableOption}
+          disabled={loading}
         >
           <CheckCircleOutlineIcon className={classes.sendAudioIcon} />
         </IconButton>
@@ -306,7 +338,7 @@ const ActionButtons = (props) => {
       <IconButton
         aria-label="showRecorder"
         component="span"
-        disabled={disableOption}
+        disabled={loading || ticketStatus !== "open"}
         onClick={handleStartRecording}
       >
         <MicIcon className={classes.sendMessageIcons} />
@@ -325,6 +357,7 @@ const CustomInput = (props) => {
     handleSendMessage,
     handleInputPaste,
     disableOption,
+    handleQuickAnswersClick,
   } = props;
   const classes = useStyles();
   const [quickMessages, setQuickMessages] = useState([]);
@@ -347,6 +380,7 @@ const CustomInput = (props) => {
         return {
           value: m.message,
           label: `/${m.shortcode} - ${truncatedMessage}`,
+          mediaPath: m.mediaPath,
         };
       });
       setQuickMessages(options);
@@ -394,6 +428,7 @@ const CustomInput = (props) => {
     return i18n.t("messagesInput.placeholderClosed");
   };
 
+
   const setInputRef = (input) => {
     if (input) {
       input.focus();
@@ -404,7 +439,6 @@ const CustomInput = (props) => {
   return (
     <div className={classes.messageInputWrapper}>
       <Autocomplete
-        disabled={disableOption}
         freeSolo
         open={popupOpen}
         id="grouped-demo"
@@ -419,8 +453,15 @@ const CustomInput = (props) => {
           }
         }}
         onChange={(event, opt) => {
-          if (isObject(opt) && has(opt, "value")) {
+         
+          if (isObject(opt) && has(opt, "value") && isNil(opt.mediaPath)) {
             setInputMessage(opt.value);
+            setTimeout(() => {
+              inputRef.current.scrollTop = inputRef.current.scrollHeight;
+            }, 200);
+          } else if (isObject(opt) && has(opt, "value") && !isNil(opt.mediaPath)) {
+            handleQuickAnswersClick(opt);
+
             setTimeout(() => {
               inputRef.current.scrollTop = inputRef.current.scrollHeight;
             }, 200);
@@ -440,7 +481,7 @@ const CustomInput = (props) => {
             <InputBase
               {...params.InputProps}
               {...rest}
-              disabled={disableOption}
+              disabled={disableOption()}
               inputRef={setInputRef}
               placeholder={renderPlaceholder()}
               multiline
@@ -463,9 +504,8 @@ const MessageInputCustom = (props) => {
   const [showEmoji, setShowEmoji] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [percentLoading, setPercentLoading] = useState(0);
-
   const inputRef = useRef();
+  const [onDragEnter, setOnDragEnter] = useState(false);
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
   const { user } = useContext(AuthContext);
@@ -486,13 +526,11 @@ const MessageInputCustom = (props) => {
     };
   }, [ticketId, setReplyingMessage]);
 
-  // const handleChangeInput = e => {
-  // 	if (isObject(e) && has(e, 'value')) {
-  // 		setInputMessage(e.value);
-  // 	} else {
-  // 		setInputMessage(e.target.value)
-  // 	}
-  // };
+  useEffect(() => {
+    setTimeout(() => {
+      setOnDragEnter(false);
+    }, 10000);
+  }, [onDragEnter === true]);
 
   const handleAddEmoji = (e) => {
     let emoji = e.native;
@@ -510,92 +548,83 @@ const MessageInputCustom = (props) => {
 
   const handleInputPaste = (e) => {
     if (e.clipboardData.files[0]) {
-      setMedias([e.clipboardData.files[0]]);
+      const selectedMedias = Array.from(e.clipboardData.files);
+      setMedias(selectedMedias);
     }
+  };
+
+  const handleInputDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) {
+      const selectedMedias = Array.from(e.dataTransfer.files);
+      setMedias(selectedMedias);
+    }
+  };
+
+  const handleUploadQuickMessageMedia = async (blob, message) => {
+    setLoading(true);
+    try {
+      const extension = blob.type.split("/")[1];
+
+      const formData = new FormData();
+      const filename = `${new Date().getTime()}.${extension}`;
+      formData.append("medias", blob, filename);
+      formData.append("body",  message);
+      formData.append("fromMe", true);
+
+      await api.post(`/messages/${ticketId}`, formData);
+    } catch (err) {
+      toastError(err);
+      setLoading(false);
+    }
+    setLoading(false);
+  };
+  
+  const handleQuickAnswersClick = async (value) => {
+    if (value.mediaPath) {
+      try {
+        const { data } = await axios.get(value.mediaPath, {
+          responseType: "blob",
+        });
+
+        handleUploadQuickMessageMedia(data, value.value);
+        setInputMessage("");
+        return;
+        //  handleChangeMedias(response)
+      } catch (err) {
+        toastError(err);
+      }
+    }
+
+    setInputMessage("");
+    setInputMessage(value.value);
   };
 
   const handleUploadMedia = async (e) => {
     setLoading(true);
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
 
     const formData = new FormData();
     formData.append("fromMe", true);
+    medias.forEach((media) => {
+      formData.append("medias", media);
+      formData.append("body", media.name);
+    });
 
-    medias.forEach(async (media, idx) => {
+    try {
+      await api.post(`/messages/${ticketId}`, formData);
+    } catch (err) {
+      toastError(err);
+    }
 
-      const file = media;
-
-      if (!file) { return; }
-
-      if (media?.type.split('/')[0] == 'image') {
-        new Compressor(file, {
-          quality: 0.7,
-
-          async success(media) {
-            //const formData = new FormData();
-            // The third parameter is required for server
-            //formData.append('file', result, result.name);
-
-            formData.append("medias", media);
-            formData.append("body", media.name);
-
-          },
-          error(err) {
-            alert('erro')
-            console.log(err.message);
-          },
-
-        });
-      } else {
-        formData.append("medias", media);
-        formData.append("body", media.name);
-
-      }
-
-
-    },);
-
-    setTimeout(async()=> {
-
-      try {
-        await api.post(`/messages/${ticketId}`, formData, {
-          onUploadProgress: (event) => {
-            let progress = Math.round(
-              (event.loaded * 100) / event.total
-            );
-            setPercentLoading(progress);
-            console.log(
-              `A imagem  está ${progress}% carregada... `
-            );
-          },
-        })
-          .then((response) => {
-            setLoading(false)
-            setMedias([])
-            setPercentLoading(0);
-            console.log(
-              `A imagem á foi enviada para o servidor!`
-
-            );
-          })
-          .catch((err) => {
-            console.error(
-              `Houve um problema ao realizar o upload da imagem.`
-            );
-            console.log(err);
-          });
-      } catch (err) {
-        toastError(err);
-      }
-
-
-    },2000)
-
-  }
+    setLoading(false);
+    setMedias([]);
+  };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
-    //if (disableOption) return
     setLoading(true);
 
     const message = {
@@ -620,7 +649,6 @@ const MessageInputCustom = (props) => {
   };
 
   const handleStartRecording = async () => {
-    if(disableOption)return;
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -667,7 +695,9 @@ const MessageInputCustom = (props) => {
     }
   };
 
-  const disableOption =  loading || recording || ticketStatus === "closed";
+  const disableOption = () => {
+    return loading || recording || ticketStatus !== "open";
+  };
 
   const renderReplyingMessage = (message) => {
     return (
@@ -690,7 +720,7 @@ const MessageInputCustom = (props) => {
         <IconButton
           aria-label="showRecorder"
           component="span"
-          disabled={disableOption}
+          disabled={loading || ticketStatus !== "open"}
           onClick={() => setReplyingMessage(null)}
         >
           <ClearIcon className={classes.sendMessageIcons} />
@@ -701,11 +731,13 @@ const MessageInputCustom = (props) => {
 
   if (medias.length > 0)
     return (
-      <Paper elevation={0} square className={classes.viewMediaInputWrapper}>
+      <Paper elevation={0} square className={classes.viewMediaInputWrapper}
+        onDragEnter={() => setOnDragEnter(true)}
+        onDrop={(e) => handleInputDrop(e)}
+      >
         <IconButton
           aria-label="cancel-upload"
           component="span"
-          disabled={disableOption}
           onClick={(e) => setMedias([])}
         >
           <CancelIcon className={classes.sendMessageIcons} />
@@ -713,20 +745,50 @@ const MessageInputCustom = (props) => {
 
         {loading ? (
           <div>
-            {/*<CircularProgress className={classes.circleLoading} />*/}
-            <LinearWithValueLabel progress={percentLoading} />
+            <CircularProgress className={classes.circleLoading} />
           </div>
         ) : (
-          <span>
-            {medias[0]?.name}
-            {/* <img src={media.preview} alt=""></img> */}
-          </span>
+          <Grid item className={classes.gridFiles}>
+            <Typography  variant="h6" component="div">
+              {i18n.t("uploads.titles.titleFileList")} ({medias.length})
+            </Typography>
+            <List>
+              {medias.map((value, index) => {
+                return (
+                  <ListItem key={index}>
+                    <ListItemAvatar>
+                      <Avatar className={classes.avatar} alt={value.name} src={URL.createObjectURL(value)}/>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={`${value.name}`}
+                      secondary={`${parseInt(value.size / 1024)} kB`}
+                      // color="secondary"
+                    />
+                  </ListItem>
+                );
+              })}
+            </List>
+            <InputBase
+              style={{ width: "0", height: "0" }}
+              inputRef={function (input) {
+                if (input != null) {
+                  input.focus();
+                }
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleUploadMedia();
+                }
+              }}
+              defaultValue={medias[0].name}
+            />
+          </Grid>
         )}
         <IconButton
           aria-label="send-upload"
           component="span"
           onClick={handleUploadMedia}
-          disabled={disableOption}
+          disabled={loading}
         >
           <SendIcon className={classes.sendMessageIcons} />
         </IconButton>
@@ -734,11 +796,14 @@ const MessageInputCustom = (props) => {
     );
   else {
     return (
-      <Paper square elevation={0} className={classes.mainWrapper}>
+      <Paper square elevation={0} className={classes.mainWrapper}
+        onDragEnter={() => setOnDragEnter(true)}
+        onDrop={(e) => handleInputDrop(e)} 
+      >
         {replyingMessage && renderReplyingMessage(replyingMessage)}
         <div className={classes.newMessageBox}>
           <EmojiOptions
-            disabled={disableOption}
+            disabled={disableOption()}
             handleAddEmoji={handleAddEmoji}
             showEmoji={showEmoji}
             setShowEmoji={setShowEmoji}
@@ -746,6 +811,7 @@ const MessageInputCustom = (props) => {
 
           <FileInput
             disableOption={disableOption}
+            onMouseOver={() => setOnDragEnter(true)}
             handleChangeMedias={handleChangeMedias}
           />
 
@@ -765,6 +831,7 @@ const MessageInputCustom = (props) => {
             handleSendMessage={handleSendMessage}
             handleInputPaste={handleInputPaste}
             disableOption={disableOption}
+            handleQuickAnswersClick={handleQuickAnswersClick}
           />
 
           <ActionButtons
@@ -772,7 +839,6 @@ const MessageInputCustom = (props) => {
             loading={loading}
             recording={recording}
             ticketStatus={ticketStatus}
-            disabeleOption={disableOption}
             handleSendMessage={handleSendMessage}
             handleCancelAudio={handleCancelAudio}
             handleUploadAudio={handleUploadAudio}

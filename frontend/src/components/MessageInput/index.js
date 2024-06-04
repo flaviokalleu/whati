@@ -19,7 +19,15 @@ import ClearIcon from "@material-ui/icons/Clear";
 import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { FormControlLabel,
+	Switch,
+	Grid,
+	Typography,
+	List,
+	ListItem,
+	ListItemText,
+	ListItemAvatar,
+	Avatar } from "@material-ui/core";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -33,7 +41,7 @@ const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles(theme => ({
 	mainWrapper: {
-		background: "#eee",
+		backgroundColor: theme.palette.bordabox, //DARK MODE PLW DESIGN//
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
@@ -57,6 +65,32 @@ const useStyles = makeStyles(theme => ({
 		flex: 1,
 	},
 
+	avatar: {
+		width: "50px",
+		height: "50px",
+		borderRadius:"25%"
+	  },
+	
+	  dropInfo: {
+		background: "#eee",
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "center",
+		width: "100%",
+		padding: 15,
+		left: 0,
+		right: 0,
+	  },
+	
+	  dropInfoOut: {
+		display: "none",
+	  },
+	
+	  gridFiles: {
+		maxHeight: "100%",
+		overflow: "scroll",
+	  },
+
 	messageInput: {
 		paddingLeft: 10,
 		flex: 1,
@@ -72,6 +106,7 @@ const useStyles = makeStyles(theme => ({
 	},
 
 	viewMediaInputWrapper: {
+		maxHeight: "80%",
 		display: "flex",
 		padding: "10px 13px",
 		position: "relative",
@@ -161,7 +196,6 @@ const useStyles = makeStyles(theme => ({
 		color: "#6bcbef",
 		fontWeight: 500,
 	},
-
 }));
 
 const MessageInput = ({ ticketStatus }) => {
@@ -174,7 +208,9 @@ const MessageInput = ({ ticketStatus }) => {
 	const [loading, setLoading] = useState(false);
 	const [recording, setRecording] = useState(false);
 	const inputRef = useRef();
+	const [onDragEnter, setOnDragEnter] = useState(false);
 	const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
+
 	const { user } = useContext(AuthContext);
 
 	const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
@@ -192,6 +228,12 @@ const MessageInput = ({ ticketStatus }) => {
 			setReplyingMessage(null);
 		};
 	}, [ticketId, setReplyingMessage]);
+
+	useEffect(() => {
+		setTimeout(() => {
+		  setOnDragEnter(false);
+		}, 10000);
+	  }, [onDragEnter === true]);
 
 	const handleChangeInput = e => {
 		setInputMessage(e.target.value);
@@ -213,13 +255,24 @@ const MessageInput = ({ ticketStatus }) => {
 
 	const handleInputPaste = e => {
 		if (e.clipboardData.files[0]) {
-			setMedias([e.clipboardData.files[0]]);
+			const selectedMedias = Array.from(e.clipboardData.files);
+			setMedias(selectedMedias);
+		}
+	};
+	  
+	const handleInputDrop = (e) => {
+		e.preventDefault();
+		if (e.dataTransfer.files[0]) {
+			const selectedMedias = Array.from(e.dataTransfer.files);
+			setMedias(selectedMedias);
 		}
 	};
 
 	const handleUploadMedia = async e => {
 		setLoading(true);
-		e.preventDefault();
+		if (e) {
+			e.preventDefault();
+		}
 
 		const formData = new FormData();
 		formData.append("fromMe", true);
@@ -342,7 +395,13 @@ const MessageInput = ({ ticketStatus }) => {
 
 	if (medias.length > 0)
 		return (
-			<Paper elevation={0} square className={classes.viewMediaInputWrapper}>
+			<Paper 
+			elevation={0}
+			square
+			className={classes.viewMediaInputWrapper}
+			onDragEnter={() => setOnDragEnter(true)}
+			onDrop={(e) => handleInputDrop(e)}
+		  >
 				<IconButton
 					aria-label="cancel-upload"
 					component="span"
@@ -356,10 +415,41 @@ const MessageInput = ({ ticketStatus }) => {
 						<CircularProgress className={classes.circleLoading} />
 					</div>
 				) : (
-					<span>
-						{medias[0]?.name}
-						{/* <img src={media.preview} alt=""></img> */}
-					</span>
+					<Grid item className={classes.gridFiles}>
+					<Typography  variant="h6" component="div">
+					  {i18n.t("uploads.titles.titleFileList")} ({medias.length})
+					</Typography>
+					<List>
+					  {medias.map((value, index) => {
+						return (
+						  <ListItem key={index}>
+							<ListItemAvatar>
+							  <Avatar className={classes.avatar} alt={value.name} src={URL.createObjectURL(value)}/>
+							</ListItemAvatar>
+							<ListItemText
+							  primary={`${value.name}`}
+							  secondary={`${parseInt(value.size / 1024)} kB`}
+							  // color="secondary"
+							/>
+						  </ListItem>
+						);
+					  })}
+					</List>
+					<InputBase
+					  style={{ width: "0", height: "0" }}
+					  inputRef={function (input) {
+						if (input != null) {
+						  input.focus();
+						}
+					  }}
+					  onKeyPress={(e) => {
+						if (e.key === "Enter") {
+						  handleUploadMedia();
+						}
+					  }}
+					  defaultValue={medias[0].name}
+					/>
+				  </Grid>
 				)}
 				<IconButton
 					aria-label="send-upload"
@@ -373,7 +463,16 @@ const MessageInput = ({ ticketStatus }) => {
 		);
 	else {
 		return (
-			<Paper square elevation={0} className={classes.mainWrapper}>
+			<Paper 
+			square
+			elevation={0}
+			className={classes.mainWrapper}
+			onDragEnter={() => setOnDragEnter(true)}
+			onDrop={(e) => handleInputDrop(e)}  
+		  >
+			<div className={ onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
+			  ⬇️ {i18n.t("uploads.titles.titleUploadMsgDragDrop")} ⬇️
+			</div>
 				{replyingMessage && renderReplyingMessage(replyingMessage)}
 				<div className={classes.newMessageBox}>
 					<IconButton
@@ -381,6 +480,7 @@ const MessageInput = ({ ticketStatus }) => {
 						component="span"
 						disabled={loading || recording || ticketStatus !== "open"}
 						onClick={e => setShowEmoji(prevState => !prevState)}
+						onMouseOver={() => setOnDragEnter(true)}
 					>
 						<MoodIcon className={classes.sendMessageIcons} />
 					</IconButton>

@@ -14,8 +14,6 @@ import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles((theme) => ({
   ticketsListWrapper: {
-    backgroundColor: theme.palette.tabHeaderBackground,
-    background: theme.palette.optionsBackground,
     position: "relative",
     display: "flex",
     height: "100%",

@@ -67,22 +67,25 @@ const Ticket = () => {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
-
+  const [showSelectMessageCheckbox, setShowSelectMessageCheckbox] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState([]);
+  const [forwardMessageModalOpen, setForwardMessageModalOpen] = useState(false);
+  
   useEffect(() => {
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchTicket = async () => {
         try {
           const { data } = await api.get("/tickets/u/" + ticketId);
-          // const { queueId } = data;
-          // const { queues, profile } = user;
+          const { queueId } = data;
+          const { queues, profile } = user;
 
-          // const queueAllowed = queues.find((q) => q.id === queueId);
-          // if (queueAllowed === undefined && profile !== "admin") {
-          //   toast.error("Acesso não permitido");
-          //   history.push("/tickets");
-          //   return;
-          // }
+          const queueAllowed = queues.find((q) => q.id === queueId);
+          if (queueAllowed === undefined && profile !== "admin") {
+            toast.error("Acesso não permitido");
+            history.push("/tickets");
+            return;
+          }
 
           setContact(data.contact);
           setTicket(data);
@@ -157,6 +160,12 @@ const Ticket = () => {
           ticket={ticket}
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
+          showSelectMessageCheckbox={showSelectMessageCheckbox}
+          setShowSelectMessageCheckbox={setShowSelectMessageCheckbox}
+          setSelectedMessagesList={setSelectedMessages}
+          selectedMessagesList={selectedMessages}
+          forwardMessageModalOpen={forwardMessageModalOpen}
+          setForwardMessageModalOpen={setForwardMessageModalOpen}
         ></MessagesList>
         <MessageInput ticketId={ticket.id} ticketStatus={ticket.status} />
       </>
@@ -174,7 +183,13 @@ const Ticket = () => {
       >
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
-          <TicketActionButtons ticket={ticket} />
+          <TicketActionButtons 
+            ticket={ticket} 
+            showSelectMessageCheckbox={showSelectMessageCheckbox} 
+            selectedMessages={selectedMessages} 
+            forwardMessageModalOpen={forwardMessageModalOpen}
+            setForwardMessageModalOpen={setForwardMessageModalOpen}
+          />
         </TicketHeader>
         <Paper>
           <TagsContainer ticket={ticket} />

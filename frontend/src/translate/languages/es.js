@@ -1,415 +1,428 @@
 const messages = {
 	es: {
 		translations: {
-			dashboard: {
-				title: {
-				  inservice: "EN SERVICIO",
-				  waiting: "ESPERANDO SERVICIO",
-				  onlineAgents: "AGENTES EN LÍNEA",
-				  completedTickets: "TICKETS COMPLETADOS",
-				  totalSentMessages: "TOTAL DE MENSAJES ENVIADOS",
-				  totalReceivedMessages: "TOTAL DE MENSAJES RECIBIDOS",
-				  newLeads: "NUEVOS LEADS",
-				  averageHandlingTime: "TIEMPO PROMEDIO DE ATENCIÓN",
-				  averageWaitTime: "TIEMPO PROMEDIO DE ESPERA",
-				  totalUserInteractions: "TOTAL DE INTERACCIONES POR USUARIO",
-				  totalInteractions: "TOTAL DE INTERACCIONES",
-				  startDate: "Fecha de Inicio",
-				  endDate: "Fecha de Fin",
-				  filter: "FILTRAR",
-				}
-			  },
-			  
-			  
-			messageVariablesPicker: {
-				label: "Variables Disponibles",
-				vars: {
-				  contactFirstName: "Primer Nombre",
-				  contactName: "Nombre",
-				  user: "Agente",
-				  greeting: "Saludo",
-				  protocolNumber: "Protocolo",
-				  date: "Fecha",
-				  hour: "Hora",
-				  ticket_id: "Número de Ticket",
-				  queue: "Departamento",
-				  connection: "Conexión"
-				}
-			  },
-			  
-			  quickemessage: {
-				toasts: {
-				  success: "Atajo agregado exitosamente",
-				  deleted: "Atajo eliminado exitosamente",
-				},
-				title: "Respuestas Rápidas",
-				buttons: {
-				  add: "Nueva Respuesta",
-				},
-				dialog: {
-				  add: "Agregar",
-				  edit: "Editar",
-				  form: {
-					shortcode: "Atajo",
-					message: "Mensaje",
-					global: "Global",
-				  },
-				  buttons: {
-					cancel: "Cancelar",
-					edit: "Guardar",
-					attach: "Adjuntar",
-					add: "Guardar",
-				  },
-				},
-				confirmationModal: {
-				  deleteTitle: "Eliminación",
-				  deleteMessage: "¡Esta acción es irreversible! ¿Desea continuar?",
-				},
-			  },
-			  
-			  quickemessages: {
-				toasts: {
-				  success: "Atajo agregado exitosamente",
-				  deleted: "Atajo eliminado exitosamente",
-				},
-				title: "Respuestas Rápidas",
-				table: {
-				  shortcode: "Atajo",
-				  mediaName: "Archivo",
-				  status: "Global",
-				  actions: "Acción",
-				},
-				searchPlaceholder: "Buscar",
-				buttons: {
-				  add: "Agregar",
-				  attach: "Adjuntar Archivo",
-				  cancel: "Cancelar",
-				  edit: "Guardar",
-				},
-				confirmationModal: {
-				  deleteTitle: "Eliminación",
-				  deleteMessage: "¡Esta acción es irreversible! ¿Desea continuar?",
-				},
-			  },
-			  
 			signup: {
-				title: "Registrar",
+				title: "Registro",
 				toasts: {
-					success: "¡Usuario creado con éxito! Haz tu login!!!.",
-					fail: "Error al crear usuario. Verifique los datos ingresados.",
+					success:
+						"¡El usuario ha sido creado satisfactoriamente! ¡Ahora inicia sesión!",
+					fail: "Error creando el usuario. Verifica la data reportada.",
 				},
 				form: {
-					name: "Nonbre",
-					email: "Email",
+					name: "Nombre",
+					email: "Correo Electrónico",
 					password: "Contraseña",
-					company: "Nombre de la empresa",
-					phone: "Número Whatsapp"
 				},
 				buttons: {
-					submit: "Registrar",
-					login: "¿Ya tienes una cuenta? Inicia sesión!",
+					submit: "Regístrate",
+					login: "¿Ya tienes una cuenta? ¡Inicia sesión!",
 				},
 			},
 			login: {
-				title: "Login",
+				title: "Inicio de Sesión",
 				form: {
-					email: "Email",
+					email: "Correo Electrónico",
 					password: "Contraseña",
 				},
 				buttons: {
-					submit: "Login",
-					register: "¿No tienes una cuenta? Regístrate!",
+					submit: "Ingresa",
+					register: "¿No tienes cuenta? ¡Regístrate!",
 				},
 			},
-			companies: {
-				title: "Registro de Empresas",
+			plans: {
 				form: {
-					name: "Nombre de la empresa",
-					plan: "Plan",
-					token: "Token",
-					submit: "Crear",
-					success: "Empresa creada con éxito!",
+				  name: "Nombre",
+				  users: "Usuarios",
+				  connections: "Conexiones",
+				  campaigns: "Campañas",
+				  schedules: "Programaciones",
+				  enabled: "Habilitadas",
+				  disabled: "Deshabilitadas",
+				  clear: "Cancelar",
+				  delete: "Eliminar",
+				  save: "Guardar",
+				  yes: "Sí",
+				  no: "No",
+				  money: "R$",
 				},
-			},
+			  },
+			  companies: {
+				title: "Registrar Empresa",
+				form: {
+				  name: "Nombre de la Empresa",
+				  plan: "Plan",
+				  token: "Token",
+				  submit: "Registrar",
+				  success: "Empresa creada con éxito",
+				},
+			  },
 			auth: {
 				toasts: {
-					success: "Login exitoso!",
-				},
-				dueDate: {
-					expiration: "Su suscripción expira en",
-					days: "dias!",
-					day: "dia!",
-					expirationToday: "Su suscripción expira hoy!",
+					success: "¡Inicio de sesión exitoso!",
 				},
 				token: "Token",
+			},		
+			dashboard: {
+				charts: {
+				  perDay: {
+					title: "Atenciones hoy: ",
+				  },
+				  filters: {
+					startDate: "Fecha de Inicio",
+					endDate: "Fecha Final",
+					periodText: "Período",
+					periodOptions: {
+					  input: "Seleccione el período deseado",
+					  zero: "Ningún período seleccionado",
+					  three: "Últimos tres días",
+					  seven: "Últimos siete días",
+					  fifteen: "Últimos quince días",
+					  thirty: "Últimos treinta días",
+					  sixty: "Últimos sesenta días",
+					  ninety: "Últimos noventa días"
+					},
+					duedate: "Fecha de Vencimiento",
+					filtertype: {
+					  title: "Tipo de Filtro",
+					  valueA: "Filtro por Fecha",
+					  valueB: "Filtro por Período",
+					  helperText: "Seleccione el período deseado",
+					},
+				  },
+				},
+				cards: {
+				  attdPendants: "Atd. Pendientes",
+				  attdHappening: "Atd. En Curso",
+				  attdPerformed: "Atd. Realizados",
+				  leads: "Leads",
+				  mtofService: "T.M. de Atención",
+				  mtofwaiting: "T.M. de Espera",
+				}
+			  },
+			  kanban: {
+				inopen: "En abierto",
 			},
+			todo: {
+				newtask: "Nueva tarea",
+				buttons: {
+					add: "Agregar",
+					edit: "Guardar",
+				},
+			},
+			
+			  
 			connections: {
 				title: "Conexiones",
 				toasts: {
-					deleted: "Conexión eliminada con éxito!",
+					deleted:
+						"¡La conexión de WhatsApp ha sido borrada satisfactoriamente!",
 				},
 				confirmationModal: {
-					deleteTitle: "Borrar conexión",
-					deleteMessage: "Usted está seguro? Esta acción no se puede deshacer.",
-					disconnectTitle: "Desconectar WhatsApp",
-					disconnectMessage: "Usted está seguro? Esta acción no se puede deshacer.",
+					deleteTitle: "Borrar",
+					deleteMessage: "¿Estás seguro? Este proceso no puede ser revertido.",
+					disconnectTitle: "Desconectar",
+					disconnectMessage: "Estás seguro? Deberá volver a leer el código QR",
 				},
 				buttons: {
-					add: "Agregar WhatsApp",
+					add: "Agrega WhatsApp",
 					disconnect: "Desconectar",
-					tryAgain: "Intentar de nuevo",
+					tryAgain: "Inténtalo de nuevo",
 					qrcode: "QR CODE",
 					newQr: "Nuevo QR CODE",
 					connecting: "Conectando",
 				},
 				toolTips: {
 					disconnected: {
-						title: "Falló la conexión con el celular",
-						content: "Verifique que su celular esté conectado a internet y que WhatsApp esté abierto",
+						title: "No se pudo iniciar la sesión de WhatsApp",
+						content:
+							"Asegúrese de que su teléfono celular esté conectado a Internet y vuelva a intentarlo o solicite un nuevo código QR",
 					},
 					qrcode: {
-						title: "Esperando lectura del QR Code",
-						content: "Click en el botón 'QR CODE' para obtener un nuevo QR Code",
+						title: "Esperando la lectura del código QR",
+						content:
+							"Haga clic en el botón 'CÓDIGO QR' y lea el Código QR con su teléfono celular para iniciar la sesión",
 					},
 					connected: {
-						title: "Conexión exitosa",
+						title: "Conexión establecida",
 					},
 					timeout: {
-						title: "Se ha perdido la conexión con el teléfono móvil.",
-						content: "Asegúrese de que su teléfono esté conectado a Internet y WhatsApp esté abierto, o haga clic en el botón 'Desconectar' para obtener un nuevo código QR",
+						title: "Se perdió la conexión con el teléfono celular",
+						content:
+							"Asegúrese de que su teléfono celular esté conectado a Internet y que WhatsApp esté abierto, o haga clic en el botón 'Desconectar' para obtener un nuevo código QR",
 					},
 				},
 				table: {
 					name: "Nombre",
 					status: "Estado",
-					lastUpdate: "Última actualización",
-					default: "Por defecto",
+					lastUpdate: "Última Actualización",
+					default: "Por Defecto",
 					actions: "Acciones",
-					session: "Session",
-					number: "Número do Whatsapp"
+					session: "Sesión",
 				},
 			},
 			whatsappModal: {
 				title: {
-					add: "Añadir WhatsApp",
-					edit: "Editar WhatsApp",
+					add: "Agrega WhatsApp",
+					edit: "Edita WhatsApp",
 				},
 				form: {
 					name: "Nombre",
-					default: "Por defecto",
-					maxUseBotQueues: "Número máximo de veces que se enviará el chatbot",
-					expiresTicket: "Finalizar chats abiertos después de x horas",
-					maxUseBotQueuesRedirect: "Enviar a la cola después de la cantidad máxima",
-					outOfHoursMessage: "Mensaje fuera de horario",
-					greetingMessage: "Mensaje de bienvenida",
-					complationMessage: "Mensaje de finalización",
-					token: "Token para API",
+					default: "Por Defecto",
+					sendIdQueue: "Cola",
+					timeSendQueue: "Redirigir a cola en X minutos",
+					queueRedirection: "Redirección de Cola",
+					queueRedirectionDesc: "Seleccione una cola para redirigir a los contactos que no tienen cola asignada",
+					prompt: "Indicación",
+					maxUseBotQueues: "Enviar bot X veces",
+					timeUseBotQueues: "Intervalo en minutos entre envíos de bot",
+					expiresTicket: "Cerrar chats abiertos después de X minutos",
+					expiresInactiveMessage: "Mensaje de cierre por inactividad",
 				},
 				buttons: {
-					okAdd: "Añadir",
+					okAdd: "Agregar",
 					okEdit: "Guardar",
 					cancel: "Cancelar",
 				},
-				success: "WhatsApp creado con éxito!",
+				success: "WhatsApp guardado satisfactoriamente.",
 			},
 			qrCode: {
-				message: "Lea el código QR con su teléfono móvil",
+				message: "Lée el código QR para empezar la sesión.",
 			},
 			contacts: {
 				title: "Contactos",
 				toasts: {
-					deleted: "Contacto eliminado con éxito!",
+					deleted: "¡Contacto borrado satisfactoriamente!",
 				},
-				searchPlaceholder: "Buscar contato...",
+				searchPlaceholder: "Buscar...",
 				confirmationModal: {
-					deleteTitle: "Borrar contato ",
-					importTitlte: "Importar contatos",
-					deleteMessage: "¿Está seguro de que desea eliminar este contacto? Todas las citas relacionadas se perderán.",
-					importMessage: "Desear importar los contactos de su teléfono?",
+					deleteTitle: "Borrar",
+					importTitlte: "Importar contactos",
+					deleteMessage:
+						"¿Estás seguro que deseas borrar este contacto? Todos los tickets relacionados se perderán.",
+					importMessage:
+						"¿Quieres importar todos los contactos desde tu teléfono?",
 				},
 				buttons: {
-					import: "Importar Contacto",
-					add: "Agregar Contato",
-					export: "Exportar Contacto",
+					import: "Importar Contactos",
+					add: "Agregar Contacto",
 				},
 				table: {
 					name: "Nombre",
 					whatsapp: "WhatsApp",
-					email: "Email",
+					email: "Correo Electrónico",
 					actions: "Acciones",
 				},
 			},
-			forwardMessage: {
-				text: "Reenviar",
-			},
-			forwardMessageModal: {
-				title: "Reenviar mensaje",
-				buttons: {
-					ok: "Reenviar",
-				}
-			},
-			contactModal: {
+			queueIntegrationModal: {
 				title: {
-					add: "Añadir contato",
-					edit: "Editar contato",
+				  add: "Agregar proyecto",
+				  edit: "Editar proyecto",
 				},
 				form: {
-					mainInfo: "Datos de contacto",
-					extraInfo: "Información adicional",
-					name: "Nombre",
-					number: "Número de Whatsapp",
-					email: "Email",
-					extraName: "Nombre del campo",
-					extraValue: "Valor",
+				  id: "ID",
+				  type: "Tipo",
+				  name: "Nombre",
+				  projectName: "Nombre del Proyecto",
+				  language: "Idioma",
+				  jsonContent: "Contenido JSON",
+				  urlN8N: "URL",
+				  typebotSlug: "Typebot - Slug",
+				  typebotExpires: "Tiempo en minutos para expirar una conversación",
+				  typebotKeywordFinish: "Palabra para finalizar el ticket",
+				  typebotKeywordRestart: "Palabra para reiniciar el flujo",
+				  typebotRestartMessage: "Mensaje al reiniciar la conversación",
+				  typebotUnknownMessage: "Mensaje de opción inválida",
+				  typebotDelayMessage: "Intervalo (ms) entre mensajes",
 				},
 				buttons: {
-					addExtraInfo: "Añadir campo",
-					okAdd: "Añadir",
-					okEdit: "Guardar",
-					cancel: "Cancelar",
+				  okAdd: "Agregar",
+				  okEdit: "Guardar",
+				  cancel: "Cancelar",
+				  test: "Probar Bot",
 				},
-				success: "Contacto creado con éxito!",
-			},
-			queueModal: {
-				title: {
-					add: "Añadir fila",
-					edit: "Editar fila",
+				messages: {
+				  testSuccess: "Integración probada con éxito",
+				  addSuccess: "Integración agregada con éxito",
+				  editSuccess: "Integración editada con éxito",
 				},
-				form: {
-					name: "Nombre",
-					color: "Cor",
-					greetingMessage: "Mensaje de bienvenida",
-					complationMessage: "Mensaje de finalización",
-					outOfHoursMessage: "Mensaje fuera de horario",
-					token: "Token API",
-				},
-				buttons: {
-					okAdd: "Añadir",
-					okEdit: "Guardar",
-					cancel: "Cancelar",
-				},
-			},
-			userModal: {
-				title: {
-				  add: "Agregar usuario",
-				  edit: "Editar usuario",
-				},
+			  },
+			  promptModal: {
 				form: {
 				  name: "Nombre",
-				  email: "Correo Electrónico",
-				  password: "Contraseña",
-				  farewellMessage: "Mensaje de Despedida",
-				  profile: "Perfil",
-				  whatsapp: "Conexión Predeterminada",
-				  startWork: "Inicio de Trabajo",
-				  endWork: "Fin de Trabajo"
+				  prompt: "Prompt",
+				  voice: "Voz",
+				  max_tokens: "Máximo de Tokens en la respuesta",
+				  temperature: "Temperatura",
+				  apikey: "Clave API",
+				  max_messages: "Máximo de mensajes en el Historial",
+				  voiceKey: "Clave de la API de Voz",
+				  voiceRegion: "Región de Voz",
+				},
+				success: "Prompt guardado con éxito",
+				title: {
+				  add: "Agregar Prompt",
+				  edit: "Editar Prompt",
 				},
 				buttons: {
 				  okAdd: "Agregar",
 				  okEdit: "Guardar",
 				  cancel: "Cancelar",
 				},
-				success: "Usuario guardado exitosamente.",
 			  },
-			  
-			companyModal: {
+			  prompts: {
+				title: "Prompts",
+				table: {
+				  name: "Nombre",
+				  queue: "Sector/Cola",
+				  max_tokens: "Máximo Tokens Respuesta",
+				  actions: "Acciones",
+				},
+				confirmationModal: {
+				  deleteTitle: "Eliminar",
+				  deleteMessage: "¿Estás seguro? ¡Esta acción no se puede deshacer!",
+				},
+				buttons: {
+				  add: "Agregar Prompt",
+				},
+			  },
+			contactModal: {
 				title: {
-					add: "Añadir empresa",
-					edit: "Editar empresa",
+					add: "Agregar contacto",
+					edit: "Editar contacto",
 				},
 				form: {
+					mainInfo: "Detalles del contacto",
+					extraInfo: "Información adicional",
 					name: "Nombre",
-					email: "Email",
-					passwordDefault: "Contraseña",
-					numberAttendants: "Usuarios",
-					numberConections: "Conexiones",
-				},
-				buttons: {
-					okAdd: "Añadir",
-					okEdit: "Guardar",
-					cancel: "Cancelar",
-				},
-				success: "Empresa creada con éxito!",
-			},
-			scheduleModal: {
-				title: {
-					add: "Nueva Agenda",
-					edit: "Editar Agenda",
-				},
-				form: {
-					body: "Mensaje",
-					contact: "Contacto",
-					sendAt: "Fecha de Agenda",
-					sentAt: "Fecha de Envío",
-				},
-				buttons: {
-					okAdd: "Añadir",
-					okEdit: "Guardar",
-					cancel: "Cancelar",
-				},
-				success: "Agenda creada con éxito!",
-			},
-			tagModal: {
-				title: {
-					add: "Nuevo Tag",
-					edit: "Editar Tag",
-				},
-				form: {
-					name: "Nombre",
-					color: "Cor",
-				},
-				buttons: {
-					okAdd: "Añaadir",
-					okEdit: "Guardar",
-					cancel: "Cancelar",
-				},
-				success: "Tag creado con éxito!",
-			},
-			ratingModal: {
-				title: {
-					add: "Añaadir menu de calificación",
-					edit: "Editar menu de calificación",
-				},
-				buttons: {
-					okAdd: "Guardar",
-					okEdit: "Editar",
-					cancel: "Cancelar",
-					options: "Añadir opción",
-				},
-				form: {
-					name: "Nombre",
-					message: "Mensaje de calificación",
-					options: "Opciones de calificación",
-					extraName: "Nombre del campo",
+					number: "Número de Whatsapp",
+					email: "Correo Electrónico",
+					extraName: "Nombre del Campo",
+					whatsapp: "Conexión de Origen:",
 					extraValue: "Valor",
 				},
-				success: "Calificación creada con éxito!",
+				buttons: {
+					addExtraInfo: "Agregar información",
+					okAdd: "Agregar",
+					okEdit: "Guardar",
+					cancel: "Cancelar",
+					greetingMessage: "Mensaje de bienvenida",
+					complationMessage: "Mensaje de finalización",
+					outOfHoursMessage: "Mensaje fuera del horario laboral",
+					ratingMessage: "Mensaje de calificación",
+					token: "Token",
+					orderQueue: "Orden de la cola (Bot)",
+					integrationId: "ID de integración",
+				},
+				success: "Contacto guardado satisfactoriamente.",
+			},
+			queueModal: {
+				title: {
+					add: "Agregar cola",
+					edit: "Editar cola",
+				},
+				form: {
+					name: "Nombre",
+					color: "Color",
+					greetingMessage: "Mensaje de saludo",
+				},
+				buttons: {
+					okAdd: "Añadir",
+					okEdit: "Ahorrar",
+					cancel: "Cancelar",
+					attach: "Anexar Arquivo",
+				},
+			},
+			userModal: {
+				title: {
+					add: "Agregar usuario",
+					edit: "Editar usuario",
+				},
+				form: {
+					name: "Nombre",
+					email: "Correo Electrónico",
+					password: "Contraseña",
+					profile: "Perfil",
+					startWork: "Empezar a trabajar",
+					endWork: "Fin del trabajo",
+				},
+				buttons: {
+					okAdd: "Agregar",
+					okEdit: "Guardar",
+					cancel: "Cancelar",
+				},
+				success: "Usuario guardado satisfactoriamente.",
 			},
 			chat: {
-				noTicketMessage: "Selecione una Conversación",
+				noTicketMessage: "Selecciona un ticket para empezar a chatear.",
 			},
+			uploads: {
+				titles: {
+				  titleUploadMsgDragDrop: "ARRASTRA Y SUELTA LOS ARCHIVOS EN EL CAMPO DE ABAJO",
+				  titleFileList: "Lista de archivos"
+				},
+			  },
+			scheduleModal: {
+				title: {
+				  add: "Nueva Programación",
+				  edit: "Editar Programación",
+				},
+				form: {
+				  body: "Mensaje",
+				  contact: "Contacto",
+				  sendAt: "Fecha de Programación",
+				  sentAt: "Fecha de Envío",
+				},
+				buttons: {
+				  okAdd: "Agregar",
+				  okEdit: "Guardar",
+				  cancel: "Cancelar",
+				},
+				success: "Programación guardada con éxito.",
+			  },
+			  tagModal: {
+				title: {
+				  add: "Nueva Etiqueta",
+				  edit: "Editar Etiqueta",
+				},
+				form: {
+				  name: "Nombre",
+				  color: "Color",
+				},
+				buttons: {
+				  okAdd: "Agregar",
+				  okEdit: "Guardar",
+				  cancel: "Cancelar",
+				},
+				success: "Etiqueta guardada con éxito.",
+			  },
+			  uploads: {
+				titles: {
+				  titleUploadMsgDragDrop: "ARRASTRA Y SUELTA ARCHIVOS EN EL CAMPO ABAJO",
+				  titleFileList: "Lista de archivo(s)"
+				},
+			  },	
 			ticketsManager: {
 				buttons: {
 					newTicket: "Nuevo",
 				},
 			},
 			ticketsQueueSelect: {
-				placeholder: "Filas",
+				placeholder: "Linhas",
 			},
 			tickets: {
 				toasts: {
-					deleted: "Conversación eliminada",
+					deleted: "El ticket en el que estabas ha sido borrado.",
 				},
 				notification: {
 					message: "Mensaje de",
 				},
 				tabs: {
-					open: { title: "Abierto" },
+					open: { title: "Bandeja" },
 					closed: { title: "Resueltos" },
 					search: { title: "Buscar" },
 				},
 				search: {
-					placeholder: "Buscar Conversación",
+					placeholder: "Buscar tickets y mensajes.",
 				},
 				buttons: {
 					showAll: "Todos",
@@ -417,33 +430,30 @@ const messages = {
 			},
 			transferTicketModal: {
 				title: "Transferir Ticket",
-				fieldLabel: "Escribe para buscar usuarios",
-				fieldQueueLabel: "Transferir a la cola",
-				fieldQueuePlaceholder: "Selecciona una cola",
+				fieldLabel: "Escriba para buscar usuarios",
+				fieldQueueLabel: "Transferir a cola",
+				fieldQueuePlaceholder: "Seleccione una cola",
 				noOptions: "No se encontraron usuarios con ese nombre",
 				buttons: {
-				  ok: "Transferir",
-				  cancel: "Cancelar",
+					ok: "Transferir",
+					cancel: "Cancelar",
 				},
-			  },
-			  
+			},
 			ticketsList: {
-				pendingHeader: "Esperando",
-				assignedHeader: "Atendiendo",
-				noTicketsTitle: "Nada aqui!",
-				noqueue: "Sin Cola",
-				Assigned: "Asignado:",
-				noTicketsMessage: "No se encontró ningún servicio con este estado o término de búsqueda",
+				pendingHeader: "Pendientes",
+				assignedHeader: "En atención",
+				noTicketsTitle: "¡Nada aquí!",
+				noTicketsMessage: "No se encontraron tickets con este estado o término de búsqueda",
+				
 				buttons: {
 					accept: "Aceptar",
-					reopen: "Reabrir",
 					closed: "Cerrar",
+					reopen: "Reabrir"
 				},
 			},
 			newTicketModal: {
-				title: "Crear Conversación",
-				fieldLabel: "Escriba para buscar un usuario",
-				fieldQueuePlaceholder: "Seleccione una cola",
+				title: "Crear Ticket",
+				fieldLabel: "Escribe para buscar un contacto",
 				add: "Añadir",
 				buttons: {
 					ok: "Guardar",
@@ -452,443 +462,543 @@ const messages = {
 			},
 			mainDrawer: {
 				listItems: {
-					dashboard: "Dashboard",
+					dashboard: "Tablero",
 					connections: "Conexiones",
-					tickets: "Conversaciones",
+					tickets: "Tickets",
 					quickMessages: "Respuestas Rápidas",
 					contacts: "Contactos",
-					queues: "Filas & Chatbot",
-					tags: "Tags",
+					queues: "Colas y Chatbot",
+					tags: "Etiquetas",
 					administration: "Administración",
-					companies: "Empresas",
 					users: "Usuarios",
-					settings: "Configuraciónes",
-					ratings: "Formularios de Calificación",
+					settings: "Configuraciones",
 					helps: "Ayuda",
 					messagesAPI: "API",
-					schedules: "Agendamientos",
+					schedules: "Programaciones",
 					campaigns: "Campañas",
-					annoucements: "Informaciones",
+					annoucements: "Anuncios",
 					chats: "Chat Interno",
-					financeiro: "Financeiro",
+					financeiro: "Financiero",
+					files: "Lista de archivos",
+					prompts: "Open.Ai",
+					queueIntegration: "Integraciones de Cola",	
 				},
 				appBar: {
 					user: {
 						profile: "Perfil",
-						logout: "Salir",
+						logout: "Cerrar Sesión",
 					},
-					refresh: "Atualizar",
 				},
 			},
-			languages: {
-				undefined: "Idioma",
-				"pt-BR": "Português",
-				es: "Español",
-				en: "English",
-				tr: "Türkçe"
-			},
-			messagesAPI: {
+			queueIntegration: {
+				title: "Integraciones",
+				table: {
+				  id: "ID",
+				  type: "Tipo",
+				  name: "Nombre",
+				  projectName: "Nombre del Proyecto",
+				  language: "Idioma",
+				  lastUpdate: "Última actualización",
+				  actions: "Acciones",
+				},
+				buttons: {
+				  add: "Agregar Proyecto",
+				},
+				searchPlaceholder: "Buscar...",
+				confirmationModal: {
+				  deleteTitle: "Eliminar",
+				  deleteMessage:
+					"¿Estás seguro? ¡Esta acción no se puede revertir! y se eliminará de las colas y conexiones vinculadas",
+				},
+			  },
+			  files: {
+				title: "Lista de archivos",
+				table: {
+				  name: "Nombre",
+				  contacts: "Contactos",
+				  actions: "Acción",
+				},
+				toasts: {
+				  deleted: "Lista eliminada con éxito",
+				  deletedAll: "Todas las listas se eliminaron con éxito",
+				},
+				buttons: {
+				  add: "Agregar",
+				  deleteAll: "Eliminar Todos",
+				},
+				confirmationModal: {
+				  deleteTitle: "Eliminar",
+				  deleteAllTitle: "Eliminar Todos",
+				  deleteMessage: "¿Estás seguro de que deseas eliminar esta lista?",
+				  deleteAllMessage: "¿Estás seguro de que deseas eliminar todas las listas?",
+				},
+			  },
+			  messagesAPI: {
 				title: "API",
+				doc: "Documentación para el envío de mensajes:",
+				formMethod: "Método de envío:",
 				textMessage: {
 					number: "Número",
 					body: "Mensaje",
-					token: "Token Adicionado",
+					token: "Token registrado",
 				},
 				mediaMessage: {
 					number: "Número",
 					body: "Nombre del archivo",
 					media: "Archivo",
-					token: "Token Adicionado",
+					token: "Token registrado",
+				},
+				buttons: {
+					submit: "Enviar",
+				},
+				helpTexts: {
+					textMsg: {
+						title: "Mensaje de Texto",
+						info: "A continuación, se presenta la lista de información necesaria para el envío de mensajes de texto:",
+						endpoint: "Endpoint: ",
+						method: "Método: ",
+						headers: "Encabezados: ",
+						body: "Cuerpo: ",
+					},
+					test: "Prueba de envío: ",
+					mediaMsg: {
+						title: "Mensaje Multimedia",
+						info: "A continuación, se presenta la lista de información necesaria para el envío de mensajes multimedia:",
+						endpoint: "Endpoint: ",
+						method: "Método: ",
+						headers: "Encabezados: ",
+						body: "Cuerpo: ",
+						formData: "FormData: ",
+					},
+					instructions: "Instrucciones",
+					notes: {
+						title: "Observaciones importantes",
+						textA: "Antes de enviar mensajes, es necesario registrar el token vinculado a la conexión que enviará los mensajes. <br/>Para realizar el registro, acceda al menú 'Conexiones', haga clic en el botón editar de la conexión e inserte el token en el campo correspondiente.",
+						textB: {
+							title: "El número para el envío no debe tener máscara ni caracteres especiales y debe estar compuesto por:",
+							partA: "Código de País",
+							partB: "Código de Área",
+							partC: "Número",
+						},
+					},
 				},
 			},
-			notifications: {
-				noTickets: "Ninguna notificación",
-			},
-			quickMessages: {
+			
+			  notifications: {
+				noTickets: "Ninguna notificación.",
+			  },
+			  quickMessages: {
 				title: "Respuestas Rápidas",
-				buttons: {
-					add: "Nueva Respuesta",
-				},
-				dialog: {
-					shortcode: "Atajo",
-					message: "Respuesta",
-				},
-			},
-			contactLists: {
-				title: "Listas de Contatos",
-				table: {
-					name: "Nombre",
-					contacts: "Contactos",
-					actions: "Acciones",
-				},
-				buttons: {
-					add: "Nueva Lista",
-				},
-				dialog: {
-					name: "Nombre",
-					company: "Empresa",
-					okEdit: "Editar",
-					okAdd: "Añadir",
-					add: "Añadir",
-					edit: "Editar",
-					cancel: "Cancelar",
-				},
+				searchPlaceholder: "Buscar...",
+				noAttachment: "Sin adjunto",
 				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "Esta seguro que desea borrar esta lista?",
+				  deleteTitle: "Eliminación",
+				  deleteMessage: "¡Esta acción es irreversible! ¿Desea continuar?",
+				},
+				buttons: {
+				  add: "Agregar",
+				  attach: "Adjuntar Archivo",
+				  cancel: "Cancelar",
+				  edit: "Editar",
 				},
 				toasts: {
-					deleted: "Registro eliminado",
+				  success: "Acceso directo agregado con éxito",
+				  deleted: "Acceso directo eliminado con éxito",
 				},
-			},
-			contactListItems: {
+				dialog: {
+				  title: "Respuesta Rápida",
+				  shortcode: "Acceso directo",
+				  message: "Respuesta",
+				  save: "Guardar",
+				  cancel: "Cancelar",
+				  geral: "Permitir edición",
+				  add: "Agregar",
+				  edit: "Editar",
+				  visao: "Permitir visión",
+				},
+				table: {
+				  shortcode: "Acceso directo",
+				  message: "Mensaje",
+				  actions: "Acciones",
+				  mediaName: "Nombre del Archivo",
+				  status: "Estado",
+				},
+			  },
+			  messageVariablesPicker: {
+				label: "Variables disponibles",
+				vars: {
+				  contactFirstName: "Primer Nombre",
+				  contactName: "Nombre",
+				  greeting: "Saludo",
+				  protocolNumber: "Protocolo",
+				  date: "Fecha",
+				  hour: "Hora",
+				},
+			  },
+			  contactLists: {
+				title: "Listas de Contactos",
+				table: {
+				  name: "Nombre",
+				  contacts: "Contactos",
+				  actions: "Acciones",
+				},
+				buttons: {
+				  add: "Nueva Lista",
+				},
+				dialog: {
+				  name: "Nombre",
+				  company: "Empresa",
+				  okEdit: "Editar",
+				  okAdd: "Agregar",
+				  add: "Agregar",
+				  edit: "Editar",
+				  cancel: "Cancelar",
+				},
+				confirmationModal: {
+				  deleteTitle: "Eliminar",
+				  deleteMessage: "Esta acción no se puede revertir.",
+				},
+				toasts: {
+				  deleted: "Registro eliminado",
+				},
+			  },
+			  contactListItems: {
 				title: "Contactos",
-				searchPlaceholder: "Buscar Contacto",
+				searchPlaceholder: "Búsqueda",
 				buttons: {
-					add: "Nueva Contacto",
-					lists: "Listas",
-					import: "Importar",
+				  add: "Nuevo",
+				  lists: "Listas",
+				  import: "Importar",
 				},
 				dialog: {
-					name: "Nombre",
-					number: "Número",
-					whatsapp: "Whatsapp",
-					email: "E-mail",
-					okEdit: "Editar",
-					okAdd: "Añadir",
-					add: "Añadir",
-					edit: "Editar",
-					cancel: "Cancelar",
+				  name: "Nombre",
+				  number: "Número",
+				  whatsapp: "Whatsapp",
+				  email: "Correo Electrónico",
+				  okEdit: "Editar",
+				  okAdd: "Agregar",
+				  add: "Agregar",
+				  edit: "Editar",
+				  cancel: "Cancelar",
 				},
 				table: {
-					name: "Nombre",
-					number: "Número",
-					whatsapp: "Whatsapp",
-					email: "E-mail",
-					actions: "Acciones",
+				  name: "Nombre",
+				  number: "Número",
+				  whatsapp: "Whatsapp",
+				  email: "Correo Electrónico",
+				  actions: "Acciones",
 				},
 				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "Esta a punto de borrar este contacto, esta seguro?",
-					importMessage: "Desear importar los contactos?",
-					importTitlte: "Importar",
+				  deleteTitle: "Eliminar",
+				  deleteMessage: "Esta acción no se puede revertir.",
+				  importMessage: "¿Desea importar los contactos de esta hoja de cálculo?",
+				  importTitlte: "Importar",
 				},
 				toasts: {
-					deleted: "Registro eliminado",
+				  deleted: "Registro eliminado",
 				},
-			},
-			campaigns: {
+			  },
+			  campaigns: {
 				title: "Campañas",
-				searchPlaceholder: "Buscar Campaña",
+				searchPlaceholder: "Búsqueda",
 				buttons: {
-					add: "Nueva Campaña",
-					contactLists: "Listas de Contatos",
+				  add: "Nueva Campaña",
+				  contactLists: "Listas de Contactos",
 				},
 				table: {
+				  name: "Nombre",
+				  whatsapp: "Conexión",
+				  contactList: "Lista de Contactos",
+				  status: "Estado",
+				  scheduledAt: "Programada",
+				  completedAt: "Completada",
+				  confirmation: "Confirmación",
+				  actions: "Acciones",
+				},
+				dialog: {
+				  new: "Nueva Campaña",
+				  update: "Editar Campaña",
+				  readonly: "Solo Lectura",
+				  form: {
 					name: "Nombre",
+					message1: "Mensaje 1",
+					message2: "Mensaje 2",
+					message3: "Mensaje 3",
+					message4: "Mensaje 4",
+					message5: "Mensaje 5",
+					confirmationMessage1: "Mensaje de Confirmación 1",
+					confirmationMessage2: "Mensaje de Confirmación 2",
+					confirmationMessage3: "Mensaje de Confirmación 3",
+					confirmationMessage4: "Mensaje de Confirmación 4",
+					confirmationMessage5: "Mensaje de Confirmación 5",
+					messagePlaceholder: "Contenido del mensaje",
 					whatsapp: "Conexión",
-					contactList: "Lista de Contatos",
 					status: "Estado",
-					scheduledAt: "Agendamentos",
-					completedAt: "Concluído",
+					scheduledAt: "Programada",
 					confirmation: "Confirmación",
-					actions: "Acciones",
-				},
-				dialog: {
-					new: "Nuevo Campaña",
-					update: "Editar Campaña",
-					readonly: "Visualizar Campaña",
-					form: {
-						name: "Nombre",
-						message1: "Mensaje 1",
-						message2: "Mensaje 2",
-						message3: "Mensaje 3",
-						message4: "Mensaje 4",
-						message5: "Mensaje 5",
-						confirmationMessage1: "Mensaje de Confirmación 1",
-						confirmationMessage2: "Mensaje de Confirmación 2",
-						confirmationMessage3: "Mensaje de Confirmación 3",
-						confirmationMessage4: "Mensaje de Confirmación 4",
-						confirmationMessage5: "Mensaje de Confirmación 5",
-						messagePlaceholder: "Contenido del Mensaje",
-						whatsapp: "Conexión",
-						status: "Estado",
-						scheduledAt: "Agendamientos",
-						confirmation: "Confirmación",
-						contactList: "Lista de Contatos",
-					},
-					buttons: {
-						add: "Añadir",
-						edit: "Actualizar",
-						okadd: "Ok",
-						cancel: "Cancelar Campaña",
-						restart: "Reiniciar Campaña",
-						close: "Cerrar",
-						attach: "Adjuntar Archivo",
-					},
+					contactList: "Lista de Contactos",
+					tagList: "Lista de Etiquetas",
+					fileList: "Lista de Archivos"
+				  },
+				  buttons: {
+					add: "Agregar",
+					edit: "Actualizar",
+					okadd: "Ok",
+					cancel: "Cancelar Disparos",
+					restart: "Reiniciar Disparos",
+					close: "Cerrar",
+					attach: "Adjuntar Archivo",
+				  },
 				},
 				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "Esta accion no se puede deshacer, esta seguro?",
+				  deleteTitle: "Eliminar",
+				  deleteMessage: "Esta acción no se puede revertir.",
 				},
 				toasts: {
-					success: "Operación exitosa",
-					cancel: "Campaña cancelada",
-					restart: "Campaña reiniciada",
-					deleted: "Registro eliminado",
+				  success: "Operación realizada con éxito",
+				  cancel: "Campaña cancelada",
+				  restart: "Campaña reiniciada",
+				  deleted: "Registro eliminado",
 				},
-			},
-			announcements: {
-				title: "Informativos",
-				searchPlaceholder: "Buscar",
+			  },
+			  announcements: {
+				active: 'Activo',
+				inactive: 'Inactivo',
+				title: "Anuncios",
+				searchPlaceholder: "Búsqueda",
 				buttons: {
-					add: "Nuevo Informativo",
-					contactLists: "Listas de Informativos",
+				  add: "Nuevo Anuncio",
+				  contactLists: "Listas de Anuncios",
 				},
 				table: {
-					priority: "Prioridad",
-					title: "Titulo",
-					text: "Texto",
-					mediaName: "Archivo",
-					status: "Estado",
-					actions: "Acciones",
+				  priority: "Prioridad",
+				  title: "Título",
+				  text: "Texto",
+				  mediaName: "Archivo",
+				  status: "Estado",
+				  actions: "Acciones",
 				},
 				dialog: {
-					edit: "Editar Informativo",
-					add: "Nuevo Informativo",
-					update: "Editar Informativo",
-					readonly: "Solo visualizar",
-					form: {
-						priority: "Prioridad",
-						title: "Titulo",
-						text: "Texto",
-						mediaPath: "Archivo",
-						status: "Estado",
-					},
-					buttons: {
-						add: "Añadir",
-						edit: "Atualizar",
-						okadd: "Ok",
-						cancel: "Cancelar",
-						close: "Cerrar",
-						attach: "Adjuntar Archivo",
-					},
+				  edit: "Edición de Anuncio",
+				  add: "Nuevo Anuncio",
+				  update: "Editar Anuncio",
+				  readonly: "Solo Lectura",
+				  form: {
+					priority: "Prioridad",
+					title: "Título",
+					text: "Texto",
+					mediaPath: "Archivo",
+					status: "Estado",
+				  },
+				  buttons: {
+					add: "Agregar",
+					edit: "Actualizar",
+					okadd: "Ok",
+					cancel: "Cancelar",
+					close: "Cerrar",
+					attach: "Adjuntar Archivo",
+				  },
 				},
 				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "Esta accion no se puede deshacer, esta seguro?",
+				  deleteTitle: "Eliminar",
+				  deleteMessage: "Esta acción no se puede revertir.",
 				},
 				toasts: {
-					success: "Operación exitosa",
-					deleted: "Registro eliminado",
+				  success: "Operación realizada con éxito",
+				  deleted: "Registro eliminado",
 				},
-			},
-			campaignsConfig: {
-				title: "Configuración de Campañas",
+			  },
+			  campaignsConfig: {
+				title: "Configuraciones de Campañas",
+			  },
+			notifications: {
+				noTickets: "Sin notificaciones.",
 			},
 			queues: {
-				title: "Filas & Chatbot",
+				title: "Linhas",
 				table: {
 					name: "Nombre",
-					color: "Cor",
-					greeting: "Mensaje de bienvenida",
-					actions: "Acciones",
+					color: "Color",
+					greeting: "Mensaje de saludo",
+					actions: "Comportamiento",
 				},
 				buttons: {
-					add: "Añadir fila",
+					add: "Agregar cola",
 				},
 				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Las llamadas en esta cola seguirán existiendo, pero ya no tendrán ninguna cola asignada.",
+					deleteTitle: "Eliminar",
+					deleteMessage:
+						"¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets en esa cola seguirán existiendo, pero ya no tendrán ninguna cola asignada.",
 				},
 			},
 			queueSelect: {
-				inputLabel: "Filas",
-				unique: {
-					inputLabel: "Fila"
-				}
+				inputLabel: "Linhas",
 			},
 			users: {
-				title: "Usuários",
+				title: "Usuarios",
 				table: {
-					id: "ID",
-					status: "Estado",
 					name: "Nombre",
-					email: "Email",
+					email: "Correo Electrónico",
 					profile: "Perfil",
-					whatsapp: "Whatsapp por defecto",
-					startWork: "Inicio de trabajo",
-					endWork: "Fin de trabajo",
 					actions: "Acciones",
+					startWork: "Empezar a trabajar",
+					endWork: "Fin del trabajo",
 				},
 				buttons: {
-					add: "Añadir usuario",
+					add: "Agregar usuario",
 				},
 				toasts: {
-					deleted: "Usuario eliminado con éxito.",
+					deleted: "Usuario borrado satisfactoriamente.",
 				},
 				confirmationModal: {
 					deleteTitle: "Borrar",
-					deleteMessage: "Todos los datos del usuario se perderán. Las llamadas abiertas de este usuario se moverán a la cola.",
-				},
-			},
-			compaies: {
-				title: "Empresas",
-				table: {
-					status: "Activo",
-					name: "Nombre",
-					email: "Email",
-					numberAttendants: "Convenciones",
-					numberConections: "Conexiones",
-					value: "Valor",
-					namePlan: "Nombre Plan",
-					numberQueues: "Filas",
-					useCampaigns: "Campañas",
-					useExternalApi: "Rest API",
-					useFacebook: "Facebook",
-					useInstagram: "Instagram",
-					useWhatsapp: "Whatsapp",
-					useInternalChat: "Chat Interno",
-					useSchedules: "Agendamientos",
-					createdAt: "Creado en",
-					dueDate: "Vencimiento",
-					lastLogin: "Ult. Login",
-					actions: "Acciones",
-				},
-				buttons: {
-					add: "Añadir Empresa",
-				},
-				toasts: {
-					deleted: "Empresa eliminado con éxito",
-				},
-				confirmationModal: {
-					deleteTitle: "Borrar",
-					deleteMessage: "Se perderán todos los datos de la empresa. Los tickets abiertos de este usuario se moverán a la cola.",
+					deleteMessage:
+						"Toda la información del usuario se perderá. Los tickets abiertos de los usuarios se moverán a la cola.",
 				},
 			},
 			helps: {
-				title: "Central de Ayuda",
-			},
-			schedules: {
+				title: "Centro de Ayuda",
+			  },
+			  schedules: {
 				title: "Agendamientos",
 				confirmationModal: {
-					deleteTitle: "¿Está seguro de que desea eliminar este Agendamiento?",
-					deleteMessage: "Esta acción no se puede revertir.",
+				  deleteTitle: "¿Estás seguro de que quieres eliminar este Agendamiento?",
+				  deleteMessage: "Esta acción no se puede deshacer.",
 				},
 				table: {
-					contact: "Contacto",
-					body: "Mensaje",
-					sendAt: "Fecha de Agendamiento",
-					sentAt: "Fecha de Envío",
-					status: "Estado",
-					actions: "Acciones",
+				  contact: "Contacto",
+				  body: "Mensaje",
+				  sendAt: "Fecha de Agendamiento",
+				  sentAt: "Fecha de Envío",
+				  status: "Estado",
+				  actions: "Acciones",
 				},
+				calendar: {
+					date: "Fecha",
+					time: "Hora",
+					event: "Evento",
+					allDay: "Todo el día",
+					week: "Semana",
+					work_week: "Agendamientos",
+					day: "Día",
+					month: "Mes",
+					previous: "Anterior",
+					next: "Siguiente",
+					yesterday: "Ayer",
+					tomorrow: "Mañana",
+					today: "Hoy",
+					agenda: "Agenda",
+					noEventsInRange: "No hay eventos en el rango de fechas.",
+				},				  
 				buttons: {
-					add: "Nuevo Agendamiento",
+				  add: "Nuevo Agendamiento",
 				},
 				toasts: {
-					deleted: "Agendamento excluído com sucesso.",
+				  deleted: "Agendamiento eliminado con éxito.",
 				},
-			},
-			tags: {
-				title: "Tags",
+			  },
+			  tags: {
+				title: "Etiquetas",
 				confirmationModal: {
-					deleteTitle: "¿Está seguro de que desea eliminar esta tag?",
-					deleteMessage: "Esta acción no se puede revertir.",
+				  deleteTitle: "¿Estás seguro de que quieres eliminar esta Etiqueta?",
+				  deleteMessage: "Esta acción no se puede deshacer.",
 				},
 				table: {
-					name: "Nombre",
-					color: "Cor",
-					tickets: "Registros Tagdos",
-					actions: "Acciones",
+				  name: "Nombre",
+				  color: "Color",
+				  tickets: "Registros Etiquetados",
+				  actions: "Acciones",
 				},
 				buttons: {
-					add: "Nueva Tag",
+				  add: "Nueva Etiqueta",
 				},
 				toasts: {
-					deleted: "Tag excluída com sucesso.",
+				  deleted: "Etiqueta eliminada con éxito.",
 				},
-			},
-			ratings: {
-				title: "Classificações",
-				table: {
-					name: "Nombre",
-					contacts: "Contactos",
-					actions: "Acciones",
-				},
-				toasts: {
-					deleted: "Calificación eliminada con éxito.",
-					deletedAll: "Todas las calificaciones eliminadas con éxito.",
-				},
-				buttons: {
-					add: "Añadir Calificación",
-					deleteAll: "Boorar Todas",
-				},
-				confirmationModal: {
-					deleteTitle: "Boorar",
-					deleteAllTitle: "Borar Todas",
-					deleteMessage: "Ten cuidado, esta acción no se puede deshacer. ¿Estás seguro?",
-					deleteAllMessage: "¿Está seguro de que desea eliminar todas las calificaciones?",
-				},
-			},
-			settings: {
-				success: "Configuración guardada con éxito.",
+			  },	
+			  settings: {
+				success: "Configuraciones guardadas exitosamente.",
 				title: "Configuraciones",
 				settings: {
 					userCreation: {
-						name: "Crear usuarios",
+						name: "Creación de usuario",
 						options: {
 							enabled: "Activado",
 							disabled: "Desactivado",
 						},
 					},
+					tabs: {
+						options: "Opciones",
+						schedules: "Horarios",
+						companies: "Empresas",
+						plans: "Planes",
+						helps: "Ayuda",
+					},
 				},
-			},
+			},			
 			messagesList: {
 				header: {
-					assignedTo: "Asignado a: ",
-					dialogRatingTitle: "¿Quieres dejar una reseña de servicio al cliente?",
-					dialogClosingTitle: "Finalizar Conversación con el Cliente",
-					dialogRatingCancel: "Resolver con mensaje de despedida",
-					dialogRatingSuccess: "Resolver y enviar Calificación",
-					dialogRatingWithoutFarewellMsg: "Resolver sin mensaje de despedida",
-					ratingTitle: "Elija un menú de Calificación",
+					assignedTo: "Asignado a:",
 					buttons: {
 						return: "Devolver",
 						resolve: "Resolver",
 						reopen: "Reabrir",
 						accept: "Aceptar",
-						rating: "Enviar Calificación",
 					},
 				},
 			},
 			messagesInput: {
-				placeholderOpen: "Escriba un mensaje",
-				placeholderClosed: "Reabrir o aceptar este ticket para enviar un mensaje.",
+				placeholderOpen: "Escribe un mensaje",
+				placeholderClosed:
+					"Vuelva a abrir o acepte este ticket para enviar un mensaje.",
 				signMessage: "Firmar",
 			},
 			contactDrawer: {
-				header: "Detalles de contacto",
+				header: "Detalles del contacto",
 				buttons: {
-					edit: "Editar contato",
+					edit: "Editar contacto",
 				},
-				extraInfo: "Outras informações",
+				extraInfo: "Otra información",
 			},
-			ticketOptionsMenu: {
+			fileModal: {
+				title: {
+				  add: "Agregar lista de archivos",
+				  edit: "Editar lista de archivos",
+				},
+				buttons: {
+				  okAdd: "Guardar",
+				  okEdit: "Editar",
+				  cancel: "Cancelar",
+				  fileOptions: "Agregar archivo",
+				},
+				form: {
+				  name: "Nombre de la lista de archivos",
+				  message: "Detalles de la lista",
+				  fileOptions: "Lista de archivos",
+				  extraName: "Mensaje para enviar con el archivo",
+				  extraValue: "Valor de la opción",
+				},
+				success: "Lista de archivos guardada exitosamente",
+			  },
+			  ticketOptionsMenu: {
 				schedule: "Agendamiento",
+				delete: "Eliminar",
+				transfer: "Transferir",
+				registerAppointment: "Observaciones del Contacto",
+				appointmentsModal: {
+				  title: "Observaciones del Contacto",
+				  textarea: "Observación",
+				  placeholder: "Ingrese aquí la información que desea registrar",
+				},
+			  },
+			ticketOptionsMenu: {
 				delete: "Borrar",
 				transfer: "Transferir",
-				registerAppointment: "Notas de contacto",
-				resolveWithNoFarewell: "Final sin despedida",
-				acceptAudioMessage: "¿Aceptar audio del contacto?",
-				appointmentsModal: {
-					title: "Notas de contacto",
-					textarea: "Observación",
-					placeholder: "Ingresa los datos que deseas registrar aquí",
-				},
 				confirmationModal: {
-					title: "Eliminar conversación de contacto",
-					message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
+					title: "¿Borrar ticket #",
+					titleFrom: "del contacto ",
+					message:
+						"¡Atención! Todos los mensajes Todos los mensajes relacionados con el ticket se perderán.",
 				},
 				buttons: {
 					delete: "Borrar",
@@ -904,40 +1014,47 @@ const messages = {
 			messageOptionsMenu: {
 				delete: "Borrar",
 				reply: "Responder",
-				forward: "Reenviar",
-				toForward: "Reenviar",
-				talkTo: "Hablar con",
 				confirmationModal: {
 					title: "¿Borrar mensaje?",
-					message: "Esta acción no se puede revertir.",
+					message: "Esta acción no puede ser revertida.",
 				},
 			},
 			backendErrors: {
-				ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
-				ERR_NO_DEF_WAPP_FOUND: "No se encontró WhatsApp predeterminado. Revisa la página de conexiones.",
-				ERR_WAPP_NOT_INITIALIZED: "Esta sesión de WhatsApp no ​​se ha inicializado. Revisa la página de conexiones.",
-				ERR_WAPP_CHECK_CONTACT: "No se puede verificar el contacto de WhatsApp. Revisa la página de conexiones",
+				ERR_NO_OTHER_WHATSAPP:
+					"Debe haber al menos una conexión de WhatsApp predeterminada.",
+				ERR_NO_DEF_WAPP_FOUND:
+					"No se encontró WhatsApp predeterminado. Verifique la página de conexiones.",
+				ERR_WAPP_NOT_INITIALIZED:
+					"Esta sesión de WhatsApp no ​​está inicializada. Verifique la página de conexiones.",
+				ERR_WAPP_CHECK_CONTACT:
+					"No se pudo verificar el contacto de WhatsApp. Verifique la página de conexiones.",
 				ERR_WAPP_INVALID_CONTACT: "Este no es un número de whatsapp válido.",
-				ERR_WAPP_DOWNLOAD_MEDIA: "No se pueden descargar medios de WhatsApp. Consulte la página de conexiones.",
-				ERR_INVALID_CREDENTIALS: "Error de autenticación. Inténtalo de nuevo.",
-				ERR_SENDING_WAPP_MSG: "Error al enviar mensaje de WhatsApp. Revisa la página de conexiones.",
-				ERR_DELETE_WAPP_MSG: "No se puede eliminar el mensaje de WhatsApp.",
-				ERR_OTHER_OPEN_TICKET: "Ya hay un conversación abierto para este contacto.",
-				ERR_SESSION_EXPIRED: "Sesión expirada. Por favor entre.",
-				ERR_USER_CREATION_DISABLED: "El administrador ha inhabilitado la creación de usuarios.",
-				ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso..",
+				ERR_WAPP_DOWNLOAD_MEDIA:
+					"No se pudieron descargar los medios de WhatsApp. Verifique la página de conexiones.",
+				ERR_INVALID_CREDENTIALS: "Error de autenticación. Vuelva a intentarlo.",
+				ERR_SENDING_WAPP_MSG:
+					"Error al enviar el mensaje de WhatsApp. Verifique la página de conexiones.",
+				ERR_DELETE_WAPP_MSG: "No se pudo borrar el mensaje de WhatsApp.",
+				ERR_OTHER_OPEN_TICKET: "Ya hay un ticket abierto para este contacto.",
+				ERR_SESSION_EXPIRED: "Sesión caducada. Inicie sesión.",
+				ERR_USER_CREATION_DISABLED:
+					"La creación de usuarios fue deshabilitada por el administrador.",
+				ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso.",
 				ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
-				ERR_NO_SETTING_FOUND: "No se encontró ninguna configuración con este ID.",
+				ERR_NO_SETTING_FOUND:
+					"No se encontró ninguna configuración con este ID.",
 				ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con este ID.",
-				ERR_NO_TICKET_FOUND: "No se encontraron conversación con esta ID.",
+				ERR_NO_TICKET_FOUND: "No se encontró ningún ticket con este ID.",
 				ERR_NO_USER_FOUND: "No se encontró ningún usuario con este ID.",
 				ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
-				ERR_CREATING_MESSAGE: "Error al crear mensaje en la base de datos.",
-				ERR_CREATING_TICKET: "Error al crear ticket en la base de datos.",
-				ERR_FETCH_WAPP_MSG: "Error al buscar el mensaje en WhatsApp, tal vez sea demasiado antiguo.",
-				ERR_QUEUE_COLOR_ALREADY_EXISTS: "Este color ya está en uso, elija otro.",
-				ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de una fila.",
-				ERR_OUT_OF_HOURS: "¡Fuera del horario de oficina!",
+				ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
+				ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
+				ERR_FETCH_WAPP_MSG:
+					"Error al obtener el mensaje en WhtasApp, tal vez sea demasiado antiguo.",
+				ERR_QUEUE_COLOR_ALREADY_EXISTS:
+					"Este color ya está en uso, elija otro.",
+				ERR_WAPP_GREETING_REQUIRED:
+					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
 			},
 		},
 	},

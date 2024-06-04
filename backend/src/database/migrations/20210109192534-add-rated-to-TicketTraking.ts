@@ -1,4 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
+
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return Promise.all([
@@ -13,6 +14,7 @@ module.exports = {
       })
     ]);
   },
+
   down: (queryInterface: QueryInterface) => {
     return Promise.all([
       queryInterface.removeColumn("TicketTraking", "ratingAt"),

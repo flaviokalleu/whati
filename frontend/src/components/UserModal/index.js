@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
+
 import {
 	Button,
 	Dialog,
@@ -13,20 +14,18 @@ import {
 	CircularProgress,
 	Select,
 	InputLabel,
-	makeStyles,
 	MenuItem,
 	FormControl,
 	TextField,
 	InputAdornment,
 	IconButton
-} from '@material-ui/core';
+  } from '@material-ui/core';
 
-import { 
-	Visibility, 
-	VisibilityOff 
-} from '@material-ui/icons';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 
+import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
+
 
 import { i18n } from "../../translate/i18n";
 
@@ -48,9 +47,11 @@ const useStyles = makeStyles(theme => ({
 			marginRight: theme.spacing(1),
 		},
 	},
+
 	btnWrapper: {
 		position: "relative",
 	},
+
 	buttonProgress: {
 		color: green[500],
 		position: "absolute",
@@ -71,7 +72,7 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		flexWrap: 'wrap',
 	},
-}));
+}));	
 
 const UserSchema = Yup.object().shape({
 	name: Yup.string()
@@ -92,7 +93,6 @@ const UserModal = ({ open, onClose, userId }) => {
 		profile: "user",
 		startWork: "",
 		endWork: "",
-		farewellMessage: ""
 	};
 
 	const { user: loggedInUser } = useContext(AuthContext);
@@ -184,28 +184,28 @@ const UserModal = ({ open, onClose, userId }) => {
 										margin="dense"
 										fullWidth
 									/>
-																		<Field
+									<Field
 										as={TextField}
 										name="password"
 										variant="outlined"
 										margin="dense"
+										fullWidth
 										label={i18n.t("userModal.form.password")}
 										error={touched.password && Boolean(errors.password)}
 										helperText={touched.password && errors.password}
 										type={showPassword ? 'text' : 'password'}
 										InputProps={{
-											endAdornment: (
-												<InputAdornment position="end">
-													<IconButton
-														aria-label="toggle password visibility"
-														onClick={() => setShowPassword((e) => !e)}
-													>
-														{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
-													</IconButton>
-												</InputAdornment>
-											)
+										endAdornment: (
+											<InputAdornment position="end">
+											<IconButton
+												aria-label="toggle password visibility"
+												onClick={() => setShowPassword((e) => !e)}
+											>
+												{showPassword ? <VisibilityOff /> : <Visibility />}
+											</IconButton>
+											</InputAdornment>
+										)
 										}}
-										fullWidth
 									/>
 								</div>
 								<div className={classes.multFieldLine}>
@@ -249,7 +249,6 @@ const UserModal = ({ open, onClose, userId }) => {
 										/>
 									</FormControl>
 								</div>
-
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editQueues"
@@ -262,15 +261,18 @@ const UserModal = ({ open, onClose, userId }) => {
 								/>
 								<Can
 									role={loggedInUser.profile}
-									perform="user-modal:editQueues"
-									yes={() => (!loading &&
+									perform="user-modal:editProfile"
+									yes={() => (
 										<FormControl variant="outlined" margin="dense" className={classes.maxWidth} fullWidth>
-											<InputLabel>{i18n.t("userModal.form.whatsapp")}</InputLabel>
+											<InputLabel>
+												{i18n.t("userModal.form.whatsapp")}
+											</InputLabel>
 											<Field
 												as={Select}
 												value={whatsappId}
 												onChange={(e) => setWhatsappId(e.target.value)}
 												label={i18n.t("userModal.form.whatsapp")}
+
 											>
 												<MenuItem value={''}>&nbsp;</MenuItem>
 												{whatsApps.map((whatsapp) => (
@@ -338,21 +340,6 @@ const UserModal = ({ open, onClose, userId }) => {
 										</form>
 									)}
 								/>
-
-								<Field
-									as={TextField}
-									label={i18n.t("userModal.form.farewellMessage")}
-									type="farewellMessage"
-									multiline
-									rows={4}
-									fullWidth
-									name="farewellMessage"
-									error={touched.farewellMessage && Boolean(errors.farewellMessage)}
-									helperText={touched.farewellMessage && errors.farewellMessage}
-									variant="outlined"
-									margin="dense"
-								/>
-
 							</DialogContent>
 							<DialogActions>
 								<Button

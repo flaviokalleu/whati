@@ -26,12 +26,14 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 import notifySound from "../../assets/chat_notify.mp3";
 import useSound from "use-sound";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     maxHeight: 300,
     maxWidth: 500,
+    padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
@@ -96,7 +98,7 @@ const reducer = (state, action) => {
 export default function ChatPopover() {
   const classes = useStyles();
 
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -113,7 +115,7 @@ export default function ChatPopover() {
     soundAlertRef.current = play;
 
     if (!("Notification" in window)) {
-      toastError("This browser doesn't support notifications");
+      console.log("This browser doesn't support notifications");
     } else {
       Notification.requestPermission();
     }
@@ -134,13 +136,15 @@ export default function ChatPopover() {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-     const companyId = localStorage.getItem("companyId");
-     const socket = socketConnection({ companyId });
-
-     socket.on(`company-${companyId}-chat`, (data) => {
+    const companyId = localStorage.getItem("companyId");
+    const socket = socketConnection({ companyId });
+    
+    socket.on(`company-${companyId}-chat`, (data) => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
-        if (data.newMessage.senderId !== user.id) {
+        const userIds = data.newMessage.chat.users.map(userObj => userObj.userId);
+
+        if (userIds.includes(user.id) && data.newMessage.senderId !== user.id) {
           soundAlertRef.current();
         }
       }
@@ -149,7 +153,7 @@ export default function ChatPopover() {
       }
     });
     return () => {
-       socket.disconnect();
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -220,6 +224,7 @@ export default function ChatPopover() {
         variant="contained"
         color={invisible ? "default" : "inherit"}
         onClick={handleClick}
+        style={{ color: "white" }}
       >
         <Badge color="secondary" variant="dot" invisible={invisible}>
           <ForumIcon />
@@ -275,7 +280,7 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText primary={i18n.t("mainDrawer.appBar.notRegister")} />
             )}
           </List>
         </Paper>

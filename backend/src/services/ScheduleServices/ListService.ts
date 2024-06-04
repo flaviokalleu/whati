@@ -2,6 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import Contact from "../../models/Contact";
 import Schedule from "../../models/Schedule";
 import User from "../../models/User";
+
 interface Request {
   searchParam?: string;
   contactId?: number | string;
@@ -9,11 +10,13 @@ interface Request {
   companyId?: number;
   pageNumber?: string | number;
 }
+
 interface Response {
   schedules: Schedule[];
   count: number;
   hasMore: boolean;
 }
+
 const ListService = async ({
   searchParam,
   contactId = "",
@@ -24,6 +27,7 @@ const ListService = async ({
   let whereCondition = {};
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
+
   if (searchParam) {
     whereCondition = {
       [Op.or]: [
@@ -40,17 +44,32 @@ const ListService = async ({
             "LIKE",
             `%${searchParam.toLowerCase()}%`
           )
-        }
-      ]
-    };
+        },
+      ],
+    }
   }
+
   if (contactId !== "") {
-    whereCondition = { ...whereCondition, contactId };
+    whereCondition = {
+      ...whereCondition,
+      contactId
+    }
   }
+
   if (userId !== "") {
-    whereCondition = { ...whereCondition, userId };
+    whereCondition = {
+      ...whereCondition,
+      userId
+    }
   }
-  whereCondition = { ...whereCondition, companyId: { [Op.eq]: companyId } };
+
+  whereCondition = {
+    ...whereCondition,
+    companyId: {
+      [Op.eq]: companyId
+    }
+  }
+
   const { count, rows: schedules } = await Schedule.findAndCountAll({
     where: whereCondition,
     limit,
@@ -58,10 +77,17 @@ const ListService = async ({
     order: [["createdAt", "DESC"]],
     include: [
       { model: Contact, as: "contact", attributes: ["id", "name"] },
-      { model: User, as: "user", attributes: ["id", "name"] }
+      { model: User, as: "user", attributes: ["id", "name"] },
     ]
   });
+
   const hasMore = count > offset + schedules.length;
-  return { schedules, count, hasMore };
+
+  return {
+    schedules,
+    count,
+    hasMore
+  };
 };
+
 export default ListService;

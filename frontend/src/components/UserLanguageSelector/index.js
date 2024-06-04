@@ -21,14 +21,11 @@ const UserLanguageSelector = () => {
     const handleCloseLanguageMenu = () => {
         setLangueMenuAnchorEl(null);
     };
-    const handleRefreshPage = () => {
-        window.location.reload(false);
-      }
 
     const handleChangeLanguage = async language => {
         try {
             await i18n.changeLanguage(language);
-            await handleRefreshPage();
+            await api.put(`/users/${user.id}`, { language });
         } catch (err) {
             toastError(err);
         }

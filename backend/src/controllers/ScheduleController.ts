@@ -1,12 +1,6 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 
-// Importações relacionadas à mídia do agendamento
-import fs from "fs";
-import path from "path";
-import { head } from "lodash";
-// Fim das importações de mídia do agendamento
-
 import AppError from "../errors/AppError";
 
 import CreateService from "../services/ScheduleServices/CreateService";
@@ -14,10 +8,11 @@ import ListService from "../services/ScheduleServices/ListService";
 import UpdateService from "../services/ScheduleServices/UpdateService";
 import ShowService from "../services/ScheduleServices/ShowService";
 import DeleteService from "../services/ScheduleServices/DeleteService";
-
-// Importações relacionadas à mídia do agendamento
 import Schedule from "../models/Schedule";
-// Fim das importações de mídia do agendamento
+
+import path from "path";
+import fs from "fs";
+import { head } from "lodash";
 
 type IndexQuery = {
   searchParam?: string;
@@ -26,10 +21,7 @@ type IndexQuery = {
   pageNumber?: string | number;
 };
 
-export const index = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const index = async (req: Request, res: Response): Promise<Response> => {
   const { contactId, userId, pageNumber, searchParam } = req.query as IndexQuery;
   const { companyId } = req.user;
 
@@ -38,17 +30,24 @@ export const index = async (
     contactId,
     userId,
     pageNumber,
-    companyId,
+    companyId
   });
 
   return res.json({ schedules, count, hasMore });
 };
 
-export const store = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const { body, sendAt, contactId, userId, daysR, campId, mediaPath, mediaName } = req.body;
+export const store = async (req: Request, res: Response): Promise<Response> => {
+  const {
+    body,
+    sendAt,
+    contactId,
+    userId,
+    ticketUserId,
+    queueId,
+    openTicket,
+    statusTicket,
+    whatsappId
+  } = req.body;
   const { companyId } = req.user;
 
   const schedule = await CreateService({
@@ -57,25 +56,23 @@ export const store = async (
     contactId,
     companyId,
     userId,
-    daysR,
-    campId,
-    mediaPath,
-    mediaName
+    ticketUserId,
+    queueId,
+    openTicket,
+    statusTicket,
+    whatsappId
   });
 
   const io = getIO();
   io.emit("schedule", {
     action: "create",
-    schedule,
+    schedule
   });
 
   return res.status(200).json(schedule);
 };
 
-export const show = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const show = async (req: Request, res: Response): Promise<Response> => {
   const { scheduleId } = req.params;
   const { companyId } = req.user;
 
@@ -96,16 +93,12 @@ export const update = async (
   const scheduleData = req.body;
   const { companyId } = req.user;
 
-  const schedule = await UpdateService({
-    scheduleData,
-    id: scheduleId,
-    companyId,
-  });
+  const schedule = await UpdateService({ scheduleData, id: scheduleId, companyId });
 
   const io = getIO();
   io.emit("schedule", {
     action: "update",
-    schedule,
+    schedule
   });
 
   return res.status(200).json(schedule);
@@ -123,13 +116,12 @@ export const remove = async (
   const io = getIO();
   io.emit("schedule", {
     action: "delete",
-    scheduleId,
+    scheduleId
   });
 
   return res.status(200).json({ message: "Schedule deleted" });
 };
 
-// Envio de mídia no agendamento de mensagens
 export const mediaUpload = async (
   req: Request,
   res: Response
@@ -145,8 +137,8 @@ export const mediaUpload = async (
 
     await schedule.save();
     return res.send({ mensagem: "Arquivo Anexado" });
-  } catch (err: any) {
-    throw new AppError(err.message);
+    } catch (err: any) {
+      throw new AppError(err.message);
   }
 };
 
@@ -167,7 +159,7 @@ export const deleteMedia = async (
     schedule.mediaName = null;
     await schedule.save();
     return res.send({ mensagem: "Arquivo Excluído" });
-  } catch (err: any) {
-    throw new AppError(err.message);
+    } catch (err: any) {
+      throw new AppError(err.message);
   }
 };

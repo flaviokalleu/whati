@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext } from "react";
 
 import MenuItem from "@material-ui/core/MenuItem";
 
@@ -10,36 +10,19 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import toastError from "../../errors/toastError";
 import ForwardMessageModal from "../ForwardMessageModal";
 
-const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
+const MessageOptionsMenu = ({ 
+	message, 
+  	menuOpen, 
+  	handleClose, 
+  	anchorEl, 
+  	setShowSelectCheckbox, 
+  	showSelectCheckBox, 
+  	forwardMessageModalOpen, 
+  	setForwardMessageModalOpen,
+  	selectedMessages,
+ }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const [forwardMessageModalOpen, setForwardMessageModalOpen] = useState(false);
-	// const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-	// const [selectedSchedule, setSelectedSchedule] = useState(null);
-	const isMounted = useRef(true);
-
-	const handleForwardMessage = () => {
-		setForwardMessageModalOpen(true)
-		handleClose();
-	};
-
-	// const handleForwardMessage = () => {
-	// 	//setSelectedSchedule(schedule);
-	// 	handleClose();
-	// 	setScheduleModalOpen(true);
-	// };
-
-	// const handleCloseScheduleModal = () => {
-	// 	setSelectedSchedule(null);
-	// 	setScheduleModalOpen(false);
-	// 	handleClose();
-	// };
-
-	const handleCloseForwardMessageModal = () => {
-		if (isMounted.current) {
-			setForwardMessageModalOpen(false);
-		}
-	};
 
 	const handleDeleteMessage = async () => {
 		try {
@@ -47,6 +30,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 		} catch (err) {
 			toastError(err);
 		}
+	};
+	
+	const handleSetShowSelectCheckbox = () => {
+		setShowSelectCheckbox(!showSelectCheckBox);
+		handleClose();
 	};
 
 	const hanldeReplyMessage = () => {
@@ -58,9 +46,24 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 		setConfirmationOpen(true);
 		handleClose();
 	};
+	
+	const handleForwardModal = () => {
+		setForwardMessageModalOpen(true);
+		handleClose();
+	};
 
 	return (
 		<>
+		 <ForwardMessageModal
+				modalOpen={forwardMessageModalOpen}
+				onClose={(e) => setForwardMessageModalOpen(false)}
+				message={message}
+				onClose={(e) => {
+					setForwardMessageModalOpen(false);
+					setShowSelectCheckbox(false);
+				}}
+				messages={selectedMessages}
+			/>
 			<ConfirmationModal
 				title={i18n.t("messageOptionsMenu.confirmationModal.title")}
 				open={confirmationOpen}
@@ -69,11 +72,6 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 			>
 				{i18n.t("messageOptionsMenu.confirmationModal.message")}
 			</ConfirmationModal>
-			{/* <ForwardModal
-				open={scheduleModalOpen}
-				onClose={handleCloseScheduleModal}
-				message={message}
-			/> */}
 			<Menu
 				anchorEl={anchorEl}
 				getContentAnchorEl={null}
@@ -96,20 +94,10 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 				<MenuItem onClick={hanldeReplyMessage}>
 					{i18n.t("messageOptionsMenu.reply")}
 				</MenuItem>
-
-				<MenuItem onClick={() => handleForwardMessage()}>
-					{i18n.t("messageOptionsMenu.toForward")}
+				<MenuItem onClick={handleSetShowSelectCheckbox}>
+					Selecionar para encaminhar
 				</MenuItem>
-				{/* <MenuItem onClick={() => handleForwardMessage(message)}>
-					{i18n.t("messageOptionsMenu.toForward")}
-				</MenuItem> */}
-
 			</Menu>
-			<ForwardMessageModal
-				modalOpen={forwardMessageModalOpen}
-				onClose={handleCloseForwardMessageModal}
-				message={message}
-			/>
 		</>
 	);
 };

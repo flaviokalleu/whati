@@ -70,20 +70,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  userTag: {
-    position: "absolute",
-    marginRight: 5,
-    right: 5,
-    bottom: 5,
-    background: theme.palette.tabHeaderBackground,
-    color: theme.palette.primary,
-    border:"1px solid #CCC",
-    padding: 1,
-    paddingLeft: 5,
-    paddingRight: 5,
-    borderRadius: 10,
-    fontSize: "1em"
-  },
 }));
 
 const reducer = (state, action) => {
@@ -197,7 +183,8 @@ const TicketsList = ({
     if (!status && !searchParam) return;
     dispatch({
       type: "LOAD_TICKETS",
-      payload: tickets,
+			payload: tickets.filter(ticket => user.profile === "admin" || ticket.queueId || 
+				(showAll && ticket.whatsappId === user.whatsappId)),
     });
   }, [tickets, status, searchParam]);
 

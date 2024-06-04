@@ -1,108 +1,214 @@
+import React, { useState, useEffect, useContext } from "react";
+import { useHistory } from "react-router-dom";
+
 import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
+
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import { useHistory } from "react-router-dom";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { makeStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import api from "../../services/api";
+import Autocomplete, {
+	createFilterOptions,
+} from "@material-ui/lab/Autocomplete";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
 import { i18n } from "../../translate/i18n";
+import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
-import TicketListForwardMessageItem from "../TicketListForwardMessageItem";
+import ContactModal from "../ContactModal";
+import toastError from "../../errors/toastError";
+import { AuthContext } from "../../context/Auth/AuthContext";
+import { Typography } from '@material-ui/core';
 
-const useStyles = makeStyles(theme => ({
-    selectedTicketBackground: {
-        backgroundColor: "#4caf50",
-    }
-}))
-
-const ForwardMessageModal = ({ modalOpen, onClose, message }) => {
-    const classes = useStyles();
-    const history = useHistory();
-    const [tickets, setTickets] = useState([]);
-    const [selectedTicket, setSelectedTicket] = useState(null);
+const ForwardMessageModal = ({ messages, onClose, modalOpen }) => {
+    const [optionsContacts, setOptionsContacts] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [searchParam, setSearchParam] = useState("");
+	const [selectedContact, setSelectedContact] = useState(null);
+	const [newContact, setNewContact] = useState({});
+	const [contactModalOpen, setContactModalOpen] = useState(false);
+	const { user } = useContext(AuthContext);
+	const [sending, setSending] = useState(false);
+	const [messageSending, setMessageSending] = useState('');
 
     useEffect(() => {
-        const loadTickets = () => {
-            try {
-                api.get("/tickets/").then((data => {
-                    setTickets(data.data.tickets);
-                }));
-            } catch (err) {
-                const errorMsg = err.response?.data?.error;
-                if (errorMsg) {
-                    if (i18n.exists(`backendErrors.${errorMsg}`)) {
-                        toast.error(i18n.t(`backendErrors.${errorMsg}`));
-                    } else {
-                        toast.error(err.response.data.error);
-                    }
-                } else {
-                    toast.error("Unknown error");
-                }
-            }
-        }
-        loadTickets()
-    }, [])
+		if (!modalOpen || searchParam.length < 3) {
+			setLoading(false);
+			return;
+		}
+		setLoading(true);
+		const delayDebounceFn = setTimeout(() => {
+			const fetchContacts = async () => {
+				try {
+					const { data } = await api.get("contacts", {
+						params: { searchParam },
+					});
+					console.log('contacts', data.contacts);
+					setOptionsContacts(data.contacts);
+					setLoading(false);
+				} catch (err) {
+					setLoading(false);
+					toastError(err);
+				}
+			};
+
+			fetchContacts();
+		}, 500);
+		return () => clearTimeout(delayDebounceFn);
+	}, [searchParam, modalOpen]);
+
+	const history = useHistory();
+
+	const sleep = (ms) => {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	};
+
+    const handleForwardMessage = async(contactL) => {
+		const responseList = [];
+		for (const message of messages) {
+			setSending(true);
+			try {
+				setMessageSending(message.id);
+				const response = await api.post('/message/forward', {messageId: message.id, contactId: contactL.id});
+				console.log('Enviada mensagem: ', message);
+				responseList.push(response);
+				sleep(900);
+			} catch (error) {
+				toastError(error);
+			}
+		}
+		setSending(false);
+		history.push('/tickets');
+    }
+
+    const handleSelectOption = (e, newValue) => {
+		if (newValue?.number) {
+			setSelectedContact(newValue);
+		} else if (newValue?.name) {
+			setNewContact({ name: newValue.name });
+			setContactModalOpen(true);
+		}
+	};
 
     const handleClose = () => {
-        onClose();
-        setSelectedTicket(null);
-    };
+		onClose();
+		setSearchParam("");
+		setSelectedContact(null);
+		setSending(false);
+	};
 
-    const handleForwardMessage = async data => {
-        data.preventDefault();
-        message.isForwarded = true;
-        await api.post(`/messages/${selectedTicket.id}`, message);
-        history.push(`/tickets/${selectedTicket.uuid}`);
-        handleClose()
-    }
+    const handleCloseContactModal = () => {
+		setContactModalOpen(false);
+	};
 
-    const getData = (val) => {
-        setSelectedTicket(val);
-    }
+    const renderOption = optionL => {
+		if (optionL.number) {
+			return `${optionL.name} - ${optionL.number}`;
+		} else {
+			return `Nenhum contato encontrado com o nome ${optionL.name}`;
+		}
+	};
+
+	const renderOptionLabel = optionL => {
+		if (optionL.number) {
+			return `${optionL.name} - ${optionL.number}`;
+		} else {
+			return `${optionL.name}`;
+		}
+	};
+
+	const filter = createFilterOptions({
+		trim: true,
+	});
+
+	const createAddContactOption = (filterOptions, params) => {
+		const filtered = filter(filterOptions, params);
+
+		if (params.inputValue !== "" && !loading && searchParam.length >= 3) {
+			filtered.push({
+				name: `${params.inputValue}`,
+			});
+		}
+
+		return filtered;
+	};
 
     return (
-        <Dialog open={modalOpen} onClose={handleClose} maxWidth="lg" scroll="paper">
-            <form onSubmit={handleForwardMessage}>
-                <DialogTitle id="form-dialog-title">
-                    {i18n.t("forwardMessageModal.title")}
-                </DialogTitle>
-                <DialogContent>
-                    {tickets.map(ticket => (
-                        <div key={ticket.id}
-                            className={clsx(classes.ticket, {
-                                [classes.selectedTicketBackground]: ticket === selectedTicket
-                            })}
-                        >
-                            {
-                                ticket.status === 'open' ?
-                                    (<TicketListForwardMessageItem ticket={ticket} selectedTicket={selectedTicket} sendData={getData} />) :
-                                    null
-                            }
-                        </div>
-                    ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={handleClose}
-                        color="secondary"
-                        variant="outlined"
-                    >
-                        {i18n.t("transferTicketModal.buttons.cancel")}
-                    </Button>
-                    <ButtonWithSpinner
-                        variant="contained"
-                        type="submit"
-                        color="primary"
-                    >
-                        {i18n.t("forwardMessageModal.buttons.ok")}
-                    </ButtonWithSpinner>
-                </DialogActions>
-            </form>
-        </Dialog>
+        <>
+			<ContactModal
+				open={contactModalOpen}
+				initialValues={newContact}
+				onClose={handleCloseContactModal}
+				onSave={() => console.log('save')}
+			></ContactModal>
+			<Dialog open={modalOpen} onClose={handleClose}>
+				<DialogTitle id="form-dialog-title">
+					Encaminhar mensagem
+				</DialogTitle>
+				<DialogContent dividers>
+					<Autocomplete
+						options={optionsContacts}
+						loading={loading}
+						style={{ width: 300 }}
+						clearOnBlur
+						autoHighlight
+						freeSolo
+						clearOnEscape
+						getOptionLabel={renderOptionLabel}
+						renderOption={renderOption}
+						filterOptions={createAddContactOption}
+						onChange={(e, newValue) => handleSelectOption(e, newValue)}
+						renderInput={params => (
+							<TextField
+								{...params}
+								label={i18n.t("newTicketModal.fieldLabel")}
+								variant="outlined"
+								autoFocus
+								onChange={e => setSearchParam(e.target.value)}
+								onKeyPress={e => {
+									if (loading || !selectedContact) return;
+									else if (e.key === "Enter") {
+										// handleSaveTicket(selectedContact.id);
+									}
+								}}
+								InputProps={{
+									...params.InputProps,
+									endAdornment: (
+										<React.Fragment>
+											{loading ? (
+												<CircularProgress color="inherit" size={20} />
+											) : null}
+											{params.InputProps.endAdornment}
+										</React.Fragment>
+									),
+								}}
+							/>
+						)}
+					/>
+				</DialogContent>
+				<DialogActions>
+					{sending && (
+						<>
+							<CircularProgress color="inherit" size={20} />
+							<Typography variant="body1" color="textSecondary">
+								Enviando {messageSending}...
+							</Typography>
+						</>
+					)}
+					<ButtonWithSpinner
+						variant="contained"
+						type="button"
+						disabled={!selectedContact || sending}
+						onClick={() => handleForwardMessage(selectedContact)}
+						color="primary"
+						loading={loading}
+					>
+						Encaminhar
+					</ButtonWithSpinner>
+				</DialogActions>
+			</Dialog>
+		</>
     );
 };
 

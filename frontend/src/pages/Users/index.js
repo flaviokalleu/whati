@@ -29,8 +29,6 @@ import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { socketConnection } from "../../services/socket";
-import UserStatusIcon from "../../components/UserModal/statusIcon";
-import { WhatsApp } from "@material-ui/icons";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_USERS") {
@@ -190,7 +188,8 @@ const Users = () => {
       <ConfirmationModal
         title={
           deletingUser &&
-          `${i18n.t("users.confirmationModal.deleteTitle")} ${deletingUser.name
+          `${i18n.t("users.confirmationModal.deleteTitle")} ${
+            deletingUser.name
           }?`
         }
         open={confirmModalOpen}
@@ -206,7 +205,7 @@ const Users = () => {
         userId={selectedUser && selectedUser.id}
       />
       <MainHeader>
-        <Title>{i18n.t("users.title")} ({users.length})</Title>
+        <Title>{i18n.t("users.title")}</Title>
         <MainHeaderButtonsWrapper>
           <TextField
             placeholder={i18n.t("contacts.searchPlaceholder")}
@@ -238,27 +237,33 @@ const Users = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">{i18n.t("users.table.id")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.status")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.name")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.email")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.profile")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.whatsapp")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.startWork")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.endWork")}</TableCell>
-              <TableCell align="center">{i18n.t("users.table.actions")}</TableCell>
+            <TableCell align="center">
+                {i18n.t("users.table.name")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("users.table.email")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("users.table.profile")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("users.table.startWork")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("users.table.endWork")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("users.table.actions")}
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell align="center">{user.id}</TableCell>
-                  <TableCell align="center"><UserStatusIcon user={user} /></TableCell>
                   <TableCell align="center">{user.name}</TableCell>
                   <TableCell align="center">{user.email}</TableCell>
                   <TableCell align="center">{user.profile}</TableCell>
-                  <TableCell align="center">{user.whatsapp?.name}</TableCell>
                   <TableCell align="center">{user.startWork}</TableCell>
                   <TableCell align="center">{user.endWork}</TableCell>
                   <TableCell align="center">
@@ -281,7 +286,7 @@ const Users = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton columns={8} />}
+              {loading && <TableRowSkeleton columns={6} />}
             </>
           </TableBody>
         </Table>

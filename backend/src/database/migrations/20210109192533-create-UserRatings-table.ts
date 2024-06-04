@@ -1,4 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
+
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.createTable("UserRatings", {
@@ -24,11 +25,21 @@ module.exports = {
         onDelete: "SET NULL",
         allowNull: true
       },
-      rate: { type: DataTypes.INTEGER, defaultValue: 0 },
-      createdAt: { type: DataTypes.DATE, allowNull: true },
-      updatedAt: { type: DataTypes.DATE, allowNull: true }
+      rate: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+      }
     });
   },
+
   down: (queryInterface: QueryInterface) => {
     return queryInterface.dropTable("UserRatings");
   }

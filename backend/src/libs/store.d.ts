@@ -1,4 +1,5 @@
 import {
+  AnyWASocket,
   BaileysEventEmitter,
   Chat,
   ConnectionState,
@@ -6,12 +7,17 @@ import {
   GroupMetadata,
   PresenceData,
   proto,
-  WASocket
-} from "@whiskeysockets/baileys";
+  WAMessageCursor,
+  WAMessageKey,
+  WALegacySocket
+} from "@adiwajshing/baileys";
 import KeyedDB from "@adiwajshing/keyed-db";
+
 export interface Store {
   chats: KeyedDB<Chat, string>;
-  contacts: { [_: string]: Contact };
+  contacts: {
+    [_: string]: Contact;
+  };
   messages: {
     [_: string]: {
       array: proto.IWebMessageInfo[];
@@ -29,18 +35,52 @@ export interface Store {
       fromJSON: (newItems: proto.IWebMessageInfo[]) => void;
     };
   };
-  groupMetadata: { [_: string]: GroupMetadata };
+  groupMetadata: {
+    [_: string]: GroupMetadata;
+  };
   state: ConnectionState;
-  presences: { [id: string]: { [participant: string]: PresenceData } };
+  presences: {
+    [id: string]: {
+      [participant: string]: PresenceData;
+    };
+  };
   bind: (ev: BaileysEventEmitter) => void;
-  fetchImageUrl: (jid: string, sock: WASocket | undefined) => Promise<string>;
+  loadMessages: (
+    jid: string,
+    count: number,
+    cursor: WAMessageCursor,
+    sock: WALegacySocket | undefined
+  ) => Promise<proto.IWebMessageInfo[]>;
+  loadMessage: (
+    jid: string,
+    id: string,
+    sock: WALegacySocket | undefined
+  ) => Promise<proto.IWebMessageInfo>;
+  mostRecentMessage: (
+    jid: string,
+    sock: WALegacySocket | undefined
+  ) => Promise<proto.IWebMessageInfo>;
+  fetchImageUrl: (
+    jid: string,
+    sock: AnyWASocket | undefined
+  ) => Promise<string>;
   fetchGroupMetadata: (
     jid: string,
-    sock: WASocket | undefined
+    sock: AnyWASocket | undefined
   ) => Promise<GroupMetadata>;
+  fetchBroadcastListInfo: (
+    jid: string,
+    sock: WALegacySocket | undefined
+  ) => Promise<GroupMetadata>;
+  fetchMessageReceipts: (
+    { remoteJid, id }: WAMessageKey,
+    sock: WALegacySocket | undefined
+  ) => Promise<proto.IUserReceipt[]>;
   toJSON: () => {
     chats: KeyedDB<Chat, string>;
-    contacts: { [_: string]: Contact };
+    contacts: {
+      [_: string]: Contact;
+    };
     messages: {
       [_: string]: {
         array: proto.IWebMessageInfo[];
@@ -64,8 +104,12 @@ export interface Store {
   };
   fromJSON: (json: {
     chats: Chat[];
-    contacts: { [id: string]: Contact };
-    messages: { [id: string]: proto.IWebMessageInfo[] };
+    contacts: {
+      [id: string]: Contact;
+    };
+    messages: {
+      [id: string]: proto.IWebMessageInfo[];
+    };
   }) => void;
   writeToFile: (path: string) => void;
   readFromFile: (path: string) => void;

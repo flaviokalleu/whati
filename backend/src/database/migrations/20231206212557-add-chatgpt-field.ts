@@ -1,1 +1,0 @@
-'use strict';module.exports={up:async(queryInterface,Sequelize)=>{await queryInterface.addColumn('Whatsapps','chatGPTEnabled',{type:Sequelize.BOOLEAN,allowNull:false,defaultValue:false});},down:async(queryInterface,Sequelize)=>{await queryInterface.removeColumn('Whatsapps','chatGPTEnabled');}};

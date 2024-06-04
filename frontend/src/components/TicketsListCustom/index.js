@@ -168,9 +168,7 @@ const TicketsListCustom = (props) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [ticketsList, dispatch] = useReducer(reducer, []);
   const { user } = useContext(AuthContext);
-  const { profile, queues, allTicket } = user;
-
-  // console.log(user)
+  const { profile, queues } = user;
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -192,13 +190,12 @@ const TicketsListCustom = (props) => {
     const filteredTickets = tickets.filter(
       (t) => queueIds.indexOf(t.queueId) > -1
     );
-      console.log(showAll)
-    console.log (tickets)
-    // if (profile === "user" && allTicket === "disable") {
-    //   dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-    // } else {
+
+    if (profile === "user") {
+      dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+    } else {
       dispatch({ type: "LOAD_TICKETS", payload: tickets });
-    // }
+    }
   }, [tickets, status, searchParam, queues, profile]);
 
   useEffect(() => {
@@ -221,6 +218,7 @@ const TicketsListCustom = (props) => {
     });
 
     socket.on(`company-${companyId}-ticket`, (data) => {
+      
       if (data.action === "updateUnread") {
         dispatch({
           type: "RESET_UNREAD",
@@ -277,11 +275,11 @@ const TicketsListCustom = (props) => {
   }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues]);
 
   useEffect(() => {
-    const count = ticketsList.filter(ticket => !ticket.isGroup).length;
     if (typeof updateCount === "function") {
-      updateCount(count);
+      updateCount(ticketsList.length);
     }
-  }, [ticketsList, updateCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticketsList]);
 
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
@@ -318,10 +316,8 @@ const TicketsListCustom = (props) => {
             </div>
           ) : (
             <>
-              {ticketsList
-                .filter(ticket => ticket.isGroup.toString() === "false")
-                .map(ticket => (
-                    <TicketListItem ticket={ticket} key={ticket.id} />
+              {ticketsList.map((ticket) => (
+                <TicketListItem ticket={ticket} key={ticket.id} />
               ))}
             </>
           )}

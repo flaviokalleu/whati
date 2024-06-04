@@ -11,46 +11,12 @@ import ChatIcon from '@material-ui/icons/Chat';
 import TicketsManagerTabs from "../../components/TicketsManagerTabs/";
 import Ticket from "../../components/Ticket/";
 import TicketAdvancedLayout from "../../components/TicketAdvancedLayout";
-import logo from "../../assets/logo.png"; 
+import logo from "../../assets/logo.png"; //PLW DESIGN LOGO//
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Adicione sombreamento
-        borderRadius: "10px", // Adicione borda arredondada
-      },
-      icon: {
-        fontSize: "1.5rem", // Ajuste o tamanho do ícone
-      },
-      button: {
-        marginTop: theme.spacing(2), // Adicione espaçamento superior
-      },
-      content: {
-        overflow: "auto",
-        transition: "background-color 0.3s ease", // Adicione uma transição suave
-      },
-      selectTicketButton: {
-        marginTop: theme.spacing(2), // Adicione espaçamento superior
-        backgroundColor: theme.palette.primary.main,
-        color: "#fff", // Cor do texto
-        "&:hover": {
-          backgroundColor: theme.palette.primary.dark, // Cor de fundo no hover
-        },
-      },
-      ticketAdvancedLayout: {
-        padding: theme.spacing(2), // Adicione preenchimento interno
-        borderRadius: "10px", // Adicione borda arredondada
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Adicione sombreamento
-      },
-      logoImage: {
-        margin: "0 auto",
-        width: "70%",
-        borderRadius: "10px", // Adicione borda arredondada
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Adicione sombreamento
-      },
     header: {
     },
     content: {
@@ -62,13 +28,10 @@ const useStyles = makeStyles(theme => ({
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        backgroundColor: theme.palette.boxticket,
-        borderRadius: "10px", // Adicione borda arredondada
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Adicione sombreamento
-      },
+		backgroundColor: theme.palette.boxticket, //DARK MODE PLW DESIGN//
+    },
     placeholderItem: {
     }
-    
 }));
 
 const TicketAdvanced = (props) => {
@@ -99,11 +62,11 @@ const TicketAdvanced = (props) => {
 	const renderPlaceholder = () => {
 		return <Box className={classes.placeholderContainer}>
              {/*<div className={classes.placeholderItem}>{i18n.t("chat.noTicketMessage")}</div>*/}
-			
+			//PLW DESIGN LOGO//
 			<div>
 			<center><img style={{ margin: "0 auto", width: "70%" }} src={logo} alt="logologin" /></center>
 			</div>
-			
+			//PLW DESIGN LOGO//
 			<br />
             <Button onClick={() => setOption(1)} variant="contained" color="primary">
                 Selecionar Ticket

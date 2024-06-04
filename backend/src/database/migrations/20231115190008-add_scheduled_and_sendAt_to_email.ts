@@ -1,17 +1,20 @@
-"use strict";
+'use strict';
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn("Emails", "scheduled", {
+    await queryInterface.addColumn('Emails', 'scheduled', {
       type: Sequelize.BOOLEAN,
-      allowNull: true
+      allowNull: true,
     });
-    await queryInterface.addColumn("Emails", "sendAt", {
+
+    await queryInterface.addColumn('Emails', 'sendAt', {
       type: Sequelize.DATE,
-      allowNull: true
+      allowNull: true,
     });
   },
+
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn("Emails", "scheduled");
-    await queryInterface.removeColumn("Emails", "sendAt");
-  }
+    await queryInterface.removeColumn('Emails', 'scheduled');
+    await queryInterface.removeColumn('Emails', 'sendAt');
+  },
 };

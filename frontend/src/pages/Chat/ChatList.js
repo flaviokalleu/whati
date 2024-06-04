@@ -2,8 +2,6 @@ import React, { useContext, useState } from "react";
 import {
   Chip,
   IconButton,
-  Button,
-  Divider,
   List,
   ListItem,
   ListItemSecondaryAction,
@@ -11,19 +9,16 @@ import {
   makeStyles,
 } from "@material-ui/core";
 
-import{GetApp} from "@material-ui/icons";
-
 import { useHistory, useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useDate } from "../../hooks/useDate";
-
-import ModalImageCors from "../../components/ModalImageCors";
 
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 
 import ConfirmationModal from "../../components/ConfirmationModal";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -34,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100% - 58px)",
     overflow: "hidden",
     borderRadius: 0,
+    backgroundColor: theme.palette.boxlist, //DARK MODE PLW DESIGN//
   },
   chatList: {
     display: "flex",
@@ -46,8 +42,6 @@ const useStyles = makeStyles((theme) => ({
   listItem: {
     cursor: "pointer",
   },
-  lastMessage:{
-  }
 }));
 
 export default function ChatList({
@@ -78,46 +72,6 @@ export default function ChatList({
     if (id !== chat.uuid) {
       history.push(`/chats/${chat.uuid}`);
       handleSelectChat(chat);
-    }
-  };
-
-  const checkMessageMedia = (chat) => {
-    if (chat.mediaType === "image") {
-      return <ModalImageCors imageUrl={chat.mediaUrl} />;
-    }
-    if (chat.mediaType === "audio") {
-      return (
-        <audio controls>
-          <source src={chat.mediaUrl} type="audio/ogg"></source>
-        </audio>
-      );
-    }
-
-    if (chat.mediaType === "video") {
-      return (
-        <video
-          className={classes.chatMedia}
-          src={chat.mediaUrl}
-          controls
-        />
-      );
-    } else {
-      return (
-        <>
-          <div className={classes.downloadMedia}>
-            <Button
-              startIcon={<GetApp />}
-              color="primary"
-              variant="outlined"
-              target="_blank"
-              href={chat.mediaUrl}
-            >
-              Download
-            </Button>
-          </div>
-          <Divider />
-        </>
-      );
     }
   };
 
@@ -154,10 +108,10 @@ export default function ChatList({
       : "";
   };
 
-  const getItemStyle = (chat,classes) => {
+  const getItemStyle = (chat) => {
     return {
       borderLeft: chat.uuid === id ? "6px solid #002d6e" : null,
-      backgroundColor: chat.uuid === id ? classes.lastMessage : null,
+      backgroundColor: chat.uuid === id ? "theme.palette.chatlist" : null,
     };
   };
 
@@ -169,7 +123,7 @@ export default function ChatList({
         onClose={setConfirmModalOpen}
         onConfirm={handleDelete}
       >
-        Esta ação não pode ser revertida, confirmar?
+        {i18n.t("internalChat.deletePrompt")}
       </ConfirmationModal>
       <div className={classes.mainContainer}>
         <div className={classes.chatList}>
@@ -181,7 +135,7 @@ export default function ChatList({
                   onClick={() => goToMessages(chat)}
                   key={key}
                   className={classes.listItem}
-                  style={getItemStyle(chat,classes)}
+                  style={getItemStyle(chat)}
                   button
                 >
                   <ListItemText

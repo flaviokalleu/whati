@@ -1,6 +1,5 @@
 import React from "react"; // { useContext }
 // import { AuthContext } from "../../context/Auth/AuthContext";
-import { i18n } from "../../translate/i18n";
 
 import {
     Button,
@@ -36,7 +35,7 @@ const Filters = ({
     return (
         <Grid item xs={12}>
             <Paper className={classes.customFixedHeightPaperLg} elevation={6}>
-                <Title>{i18n.t("dashboard.title.filter")}</Title>
+                <Title>Filtros</Title>
                 <Grid container spacing={3}>
                     {/* <Grid item xs={12} sm={6} md={3}>
                         <FormControl fullWidth>
@@ -66,7 +65,7 @@ const Filters = ({
                         <TextField
                             fullWidth
                             name="dateStart"
-                            label={i18n.t("dashboard.title.startDate")}
+                            label="Desde"
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -79,7 +78,7 @@ const Filters = ({
                         <TextField
                             fullWidth
                             name="dateEnd"
-                            label={i18n.t("dashboard.title.endDate")}
+                            label="Hasta"
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -99,7 +98,7 @@ const Filters = ({
                                 setDateEndTicket(dateEnd);
                             }}
                         >
-                            {i18n.t("dashboard.title.filter")}
+                            Filtrar
                         </Button>
                     </Grid>
                 </Grid>

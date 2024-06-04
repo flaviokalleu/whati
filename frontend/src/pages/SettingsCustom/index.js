@@ -32,8 +32,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
   },
   tab: {
-    // background: "#f2f5f3" 
-    backgroundColor: theme.mode === 'light' ? "#f2f2f2" : "#7f7f7f",
+    backgroundColor: theme.palette.options,
     borderRadius: 4,
   },
   paper: {
@@ -102,6 +101,35 @@ const SettingsCustom = () => {
   }, []);
 
   const handleTabChange = (event, newValue) => {
+      async function findData() {
+        setLoading(true);
+        try {
+          const companyId = localStorage.getItem("companyId");
+          const company = await find(companyId);
+          const settingList = await getAllSettings();
+          setCompany(company);
+          setSchedules(company.schedules);
+          setSettings(settingList);
+  
+          if (Array.isArray(settingList)) {
+            const scheduleType = settingList.find(
+              (d) => d.key === "scheduleType"
+            );
+            if (scheduleType) {
+              setSchedulesEnabled(scheduleType.value === "company");
+            }
+          }
+  
+          const user = await getCurrentUserInfo();
+          setCurrentUser(user);
+        } catch (e) {
+          toast.error(e);
+        }
+        setLoading(false);
+      }
+      findData();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+
     setTab(newValue);
   };
 
@@ -136,11 +164,11 @@ const SettingsCustom = () => {
           onChange={handleTabChange}
           className={classes.tab}
         >
-          <Tab label="Opções" value={"options"} />
-          {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
-          {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
-          {isSuper() ? <Tab label="Planos" value={"plans"} /> : null}
-          {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
+          <Tab label={i18n.t("settings.settings.tabs.options")} value={"options"} />
+          {schedulesEnabled && <Tab label={i18n.t("settings.settings.tabs.schedules")} value={"schedules"} />}
+          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.companies")} value={"companies"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.plans")} value={"plans"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.settings.tabs.helps")} value={"helps"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel

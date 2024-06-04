@@ -40,19 +40,28 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexWrap: "wrap",
+    backgroundColor: "#fff"
   },
+
+  tabmsg: {
+    backgroundColor: theme.palette.campaigntab,
+  },
+
   textField: {
     marginRight: theme.spacing(1),
     flex: 1,
   },
+
   extraAttr: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
+
   btnWrapper: {
     position: "relative",
   },
+
   buttonProgress: {
     color: green[500],
     position: "absolute",
@@ -61,11 +70,6 @@ const useStyles = makeStyles((theme) => ({
     marginTop: -12,
     marginLeft: -12,
   },
-  tabs: {
-    background: theme.mode === 'light' ? "#f2f2f2" : "#7f7f7f",
-    border: "1px solid #e6e6e6",
-    borderRadius: 2,
-  }
 }));
 
 const CampaignSchema = Yup.object().shape({
@@ -87,6 +91,7 @@ const CampaignModal = ({
   const isMounted = useRef(true);
   const { user } = useContext(AuthContext);
   const { companyId } = user;
+  const [file, setFile] = useState(null);
 
   const initialState = {
     name: "",
@@ -105,6 +110,7 @@ const CampaignModal = ({
     scheduledAt: "",
     whatsappId: "",
     contactListId: "",
+    tagListId: "Nenhuma",
     companyId,
   };
 
@@ -116,11 +122,26 @@ const CampaignModal = ({
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [campaignEditable, setCampaignEditable] = useState(true);
   const attachmentFile = useRef(null);
+  const [tagLists, setTagLists] = useState([]);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/files/", {
+          params: { companyId }
+        });
+
+        setFile(data.files);
+      } catch (err) {
+        toastError(err);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -139,6 +160,20 @@ const CampaignModal = ({
         .get(`/whatsapp`, { params: { companyId, session: 0 } })
         .then(({ data }) => setWhatsapps(data));
 
+      api.get(`/tags`, { params: { companyId } })
+        .then(({ data }) => {
+          const fetchedTags = data.tags;
+          // Perform any necessary data transformation here
+          const formattedTagLists = fetchedTags.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+          }));
+          setTagLists(formattedTagLists);
+        })
+        .catch((error) => {
+          console.error("Error retrieving tags:", error);
+        });
+        
       if (!campaignId) return;
 
       api.get(`/campaigns/${campaignId}`).then(({ data }) => {
@@ -248,7 +283,7 @@ const CampaignModal = ({
         placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
         multiline={true}
         variant="outlined"
-        helperText="Utilize variáveis como {nome}, {numero}, {email} ou defina variáveis personalizadas."
+        helperText="Utilize variáveis como {nome}, {numero}, {email} ou defina variáveis personalziadas."
         disabled={!campaignEditable && campaign.status !== "CANCELADA"}
       />
     );
@@ -430,6 +465,36 @@ const CampaignModal = ({
                       fullWidth
                       className={classes.formControl}
                     >
+                      <InputLabel id="tagList-selection-label">
+                        {i18n.t("campaigns.dialog.form.tagList")}
+                      </InputLabel>
+                      <Field
+                        as={Select}
+                        label={i18n.t("campaigns.dialog.form.tagList")}
+                        placeholder={i18n.t("campaigns.dialog.form.tagList")}
+                        labelId="tagList-selection-label"
+                        id="tagListId"
+                        name="tagListId"
+                        error={touched.tagListId && Boolean(errors.tagListId)}
+                        disabled={!campaignEditable}
+                      >
+                        <MenuItem value="">Nenhuma</MenuItem>
+                        {Array.isArray(tagLists) &&
+                          tagLists.map((tagList) => (
+                            <MenuItem key={tagList.id} value={tagList.id}>
+                              {tagList.name}
+                            </MenuItem>
+                          ))}
+                      </Field>
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12} md={4} item>
+                    <FormControl
+                      variant="outlined"
+                      margin="dense"
+                      fullWidth
+                      className={classes.formControl}
+                    >
                       <InputLabel id="whatsapp-selection-label">
                         {i18n.t("campaigns.dialog.form.whatsapp")}
                       </InputLabel>
@@ -471,20 +536,44 @@ const CampaignModal = ({
                       disabled={!campaignEditable}
                     />
                   </Grid>
+                  <Grid xs={12} md={4} item>
+                  <FormControl
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.FormControl}
+                      fullWidth
+                    >
+                      <InputLabel id="fileListId-selection-label">{i18n.t("campaigns.dialog.form.fileList")}</InputLabel>
+                      <Field
+                        as={Select}
+                        label={i18n.t("campaigns.dialog.form.fileList")}
+                        name="fileListId"
+                        id="fileListId"
+                        placeholder={i18n.t("campaigns.dialog.form.fileList")}
+                        labelId="fileListId-selection-label"
+                        value={values.fileListId || ""}
+                      >
+                        <MenuItem value={""} >{"Nenhum"}</MenuItem>
+                        {file.map(f => (
+                          <MenuItem key={f.id} value={f.id}>
+                            {f.name}
+                          </MenuItem>
+                        ))}
+                      </Field>
+                    </FormControl>
+                  </Grid>
                   <Grid xs={12} item>
                     <Tabs
                       value={messageTab}
                       indicatorColor="primary"
                       textColor="primary"
+                      className={classes.tabmsg}
                       onChange={(e, v) => setMessageTab(v)}
                       variant="fullWidth"
                       centered
-                      className={classes.tabs}
-                    // style={{
-                    //   background: "#f2f2f2",
-                    //   border: "1px solid #e6e6e6",
-                    //   borderRadius: 2,
-                    // }}
+                      style={{
+                        borderRadius: 2,
+                      }}
                     >
                       <Tab label="Msg. 1" index={0} />
                       <Tab label="Msg. 2" index={1} />

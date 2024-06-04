@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useTheme } from "@material-ui/core/styles";
 import {
   makeStyles,
   Paper,
@@ -35,21 +34,19 @@ import moment from "moment";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    padding: "2px"
   },
   mainPaper: {
     width: "100%",
     flex: 1,
-    // padding: theme.spacing(2), //comentado para retirar o scroll do Empresas
+    padding: theme.spacing(2),
   },
   fullWidth: {
     width: "100%",
   },
   tableContainer: {
     width: "100%",
-    // overflowX: "scroll",
-    // ...theme.scrollbarStyles,
-    padding: "2px",
+    overflowX: "scroll",
+    ...theme.scrollbarStyles,
   },
   textfield: {
     width: "100%",
@@ -58,16 +55,16 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "right",
   },
   row: {
-    // paddingTop: theme.spacing(2),
-    // paddingBottom: theme.spacing(2),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
   },
   control: {
-    // paddingRight: theme.spacing(1),
-    // paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
   },
   buttonContainer: {
     textAlign: "right",
-    // padding: theme.spacing(1),
+    padding: theme.spacing(1),
   },
 }));
 
@@ -84,10 +81,9 @@ export function CompanyForm(props) {
     phone: "",
     planId: "",
     status: true,
-    // campaignsEnabled: false,
+    campaignsEnabled: false,
     dueDate: "",
     recurrence: "",
-    password: "",
     ...initialValue,
   });
 
@@ -202,8 +198,8 @@ export function CompanyForm(props) {
       >
         {(values, setValues) => (
           <Form className={classes.fullWidth}>
-            <Grid spacing={1} justifyContent="center" container>
-              <Grid xs={12} sm={6} md={3} item>
+            <Grid spacing={2} justifyContent="flex-end" container>
+              <Grid xs={12} sm={6} md={4} item>
                 <Field
                   as={TextField}
                   label="Nome"
@@ -222,16 +218,6 @@ export function CompanyForm(props) {
                   className={classes.fullWidth}
                   margin="dense"
                   required
-                />
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <Field
-                  as={TextField}
-                  label="Senha"
-                  name="password"
-                  variant="outlined"
-                  className={classes.fullWidth}
-                  margin="dense"
                 />
               </Grid>
               <Grid xs={12} sm={6} md={2} item>
@@ -264,13 +250,13 @@ export function CompanyForm(props) {
                   </Field>
                 </FormControl>
               </Grid>
-              <Grid xs={12} sm={6} md={1} item>
+              <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="status-selection">Ativa</InputLabel>
+                  <InputLabel htmlFor="status-selection">Status</InputLabel>
                   <Field
                     as={Select}
                     id="status-selection"
-                    label="Ativa"
+                    label="Status"
                     labelId="status-selection-label"
                     name="status"
                     margin="dense"
@@ -280,34 +266,7 @@ export function CompanyForm(props) {
                   </Field>
                 </FormControl>
               </Grid>
-              {/* <Grid xs={12} sm={6} md={3} item>
-                <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="payment-method-selection">
-                    Método de Pagamento
-                  </InputLabel>
-                  <Field
-                    as={Select}
-                    id="payment-method-selection"
-                    label="Método de Pagamento"
-                    labelId="payment-method-selection-label"
-                    name="paymentMethod"
-                    margin="dense"
-                  >
-                    <MenuItem value={"pix"}>PIX</MenuItem>
-                  </Field>
-                </FormControl>
-              </Grid> */}
               <Grid xs={12} sm={6} md={2} item>
-                <Field
-                  as={TextField}
-                  label="CPF/CNPJ"
-                  name="document"
-                  variant="outlined"
-                  className={classes.fullWidth}
-                  margin="dense"
-                />
-              </Grid>
-              {/* <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
                   <InputLabel htmlFor="status-selection">Campanhas</InputLabel>
                   <Field
@@ -322,7 +281,7 @@ export function CompanyForm(props) {
                     <MenuItem value={false}>Desabilitadas</MenuItem>
                   </Field>
                 </FormControl>
-              </Grid> */}
+              </Grid>
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl variant="outlined" fullWidth>
                   <Field
@@ -353,10 +312,10 @@ export function CompanyForm(props) {
                     margin="dense"
                   >
                     <MenuItem value="MENSAL">Mensal</MenuItem>
-                    <MenuItem value="BIMESTRAL">Bimestral</MenuItem>
-                    <MenuItem value="TRIMESTRAL">Trimestral</MenuItem>
-                    <MenuItem value="SEMESTRAL">Semestral</MenuItem>
-                    <MenuItem value="ANUAL">Anual</MenuItem>
+                    {/*<MenuItem value="BIMESTRAL">Bimestral</MenuItem>*/}
+                    {/*<MenuItem value="TRIMESTRAL">Trimestral</MenuItem>*/}
+                    {/*<MenuItem value="SEMESTRAL">Semestral</MenuItem>*/}
+                    {/*<MenuItem value="ANUAL">Anual</MenuItem>*/}
                   </Field>
                 </FormControl>
               </Grid>
@@ -438,7 +397,7 @@ export function CompanyForm(props) {
 export function CompaniesManagerGrid(props) {
   const { records, onSelect } = props;
   const classes = useStyles();
-  const { dateToClient, datetimeToClient } = useDate();
+  const { dateToClient } = useDate();
 
   const renderStatus = (row) => {
     return row.status === false ? "Não" : "Sim";
@@ -448,65 +407,58 @@ export function CompaniesManagerGrid(props) {
     return row.planId !== null ? row.plan.name : "-";
   };
 
-  const renderPlanValue = (row) => {
-    return row.planId !== null ? row.plan.amount ? row.plan.amount.toLocaleString('pt-br', { minimumFractionDigits: 2 }) : '00.00' : "-";
+  const renderCampaignsStatus = (row) => {
+    if (
+      has(row, "settings") &&
+      isArray(row.settings) &&
+      row.settings.length > 0
+    ) {
+      const setting = row.settings.find((s) => s.key === "campaignsEnabled");
+      if (setting) {
+        return setting.value === "true" ? "Habilitadas" : "Desabilitadas";
+      }
+    }
+    return "Desabilitadas";
   };
-
-  // const renderCampaignsStatus = (row) => {
-  //   if (
-  //     has(row, "settings") &&
-  //     isArray(row.settings) &&
-  //     row.settings.length > 0
-  //   ) {
-  //     const setting = row.settings.find((s) => s.key === "campaignsEnabled");
-  //     if (setting) {
-  //       return setting.value === "true" ? "Habilitadas" : "Desabilitadas";
-  //     }
-  //   }
-  //   return "Desabilitadas";
-  // };
-
-  const theme = useTheme();
 
   const rowStyle = (record) => {
     if (moment(record.dueDate).isValid()) {
       const now = moment();
       const dueDate = moment(record.dueDate);
       const diff = dueDate.diff(now, "days");
-      if (diff >= 1 && diff <= 5) {
-        return { backgroundColor: "#d2d909" };
+      if (diff === 5) {
+        return { backgroundColor: "#fffead" };
       }
-      if (diff <= 0) {
-        return { backgroundColor: "#ff3b3b" };
+      if (diff >= -3 && diff <= 4) {
+        return { backgroundColor: "#f7cc8f" };
       }
-     else {
-       return { backgroundColor: "#008c5d" };
-     }
-}
-return {};
+      if (diff === -4) {
+        return { backgroundColor: "#fa8c8c" };
+      }
+    }
+    return {};
   };
 
   return (
     <Paper className={classes.tableContainer}>
       <Table
         className={classes.fullWidth}
-        // size="small"
-        padding="none"
+        size="small"
         aria-label="a dense table"
       >
         <TableHead>
           <TableRow>
-            <TableCell align="center" style={{ width: "1%" }}>#</TableCell>
+            <TableCell align="center" style={{ width: "1%" }}>
+              #
+            </TableCell>
             <TableCell align="left">Nome</TableCell>
             <TableCell align="left">E-mail</TableCell>
-            <TableCell align="center">Telefone</TableCell>
-            <TableCell align="center">Plano</TableCell>
-            <TableCell align="center">Valor Plano</TableCell>
-            {/* <TableCell align="center">Campanhas</TableCell> */}
-            <TableCell align="center">Ativa</TableCell>
-            <TableCell align="center">Criada Em</TableCell>
-            <TableCell align="center">Vencimento</TableCell>
-            <TableCell align="center">Ult. Login</TableCell>
+            <TableCell align="left">Telefone</TableCell>
+            <TableCell align="left">Plano</TableCell>
+            <TableCell align="left">Campanhas</TableCell>
+            <TableCell align="left">Status</TableCell>
+            <TableCell align="left">Criada Em</TableCell>
+            <TableCell align="left">Vencimento</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -518,15 +470,17 @@ return {};
                 </IconButton>
               </TableCell>
               <TableCell align="left">{row.name || "-"}</TableCell>
-              <TableCell align="left" size="small">{row.email || "-"}</TableCell>
-              <TableCell align="center">{row.phone || "-"}</TableCell>
-              <TableCell align="center">{renderPlan(row)}</TableCell>
-              <TableCell align="center">$ {renderPlanValue(row)}</TableCell>
-              {/* <TableCell align="center">{renderCampaignsStatus(row)}</TableCell> */}
-              <TableCell align="center">{renderStatus(row)}</TableCell>
-              <TableCell align="center">{dateToClient(row.createdAt)}</TableCell>
-              <TableCell align="center">{dateToClient(row.dueDate)}<br /><span>{row.recurrence}</span></TableCell>
-              <TableCell align="center">{datetimeToClient(row.lastLogin)}</TableCell>
+              <TableCell align="left">{row.email || "-"}</TableCell>
+              <TableCell align="left">{row.phone || "-"}</TableCell>
+              <TableCell align="left">{renderPlan(row)}</TableCell>
+              <TableCell align="left">{renderCampaignsStatus(row)}</TableCell>
+              <TableCell align="left">{renderStatus(row)}</TableCell>
+              <TableCell align="left">{dateToClient(row.createdAt)}</TableCell>
+              <TableCell align="left">
+                {dateToClient(row.dueDate)}
+                <br />
+                <span>{row.recurrence}</span>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -548,12 +502,9 @@ export default function CompaniesManager() {
     phone: "",
     planId: "",
     status: true,
-    // campaignsEnabled: false,
+    campaignsEnabled: false,
     dueDate: "",
     recurrence: "",
-    password: "",
-    document: "",
-    paymentMethod: ""
   });
 
   useEffect(() => {
@@ -616,24 +567,22 @@ export default function CompaniesManager() {
       phone: "",
       planId: "",
       status: true,
-      // campaignsEnabled: false,
+      campaignsEnabled: false,
       dueDate: "",
       recurrence: "",
-      password: "",
-      document: "",
-      paymentMethod: ""
     }));
   };
 
   const handleSelect = (data) => {
-    // let campaignsEnabled = false;
+    let campaignsEnabled = false;
 
-    // const setting = data.settings.find(
-    //   (s) => s.key.indexOf("campaignsEnabled") > -1
-    // );
-    // if (setting) {
-    //   campaignsEnabled = setting.value === "true" || setting.value === "enabled";
-    // }
+    const setting = data.settings.find(
+      (s) => s.key.indexOf("campaignsEnabled") > -1
+    );
+    if (setting) {
+      campaignsEnabled =
+        setting.value === "true" || setting.value === "enabled";
+    }
 
     setRecord((prev) => ({
       ...prev,
@@ -643,12 +592,9 @@ export default function CompaniesManager() {
       email: data.email || "",
       planId: data.planId || "",
       status: data.status === false ? false : true,
-      // campaignsEnabled,
+      campaignsEnabled,
       dueDate: data.dueDate || "",
       recurrence: data.recurrence || "",
-      password: "",
-      document: data.document || "",
-      paymentMethod: data.paymentMethod || "",
     }));
   };
 

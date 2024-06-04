@@ -18,56 +18,92 @@ import {
 import User from "./User";
 import UserQueue from "./UserQueue";
 import Company from "./Company";
+
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
-import Chatbot from "./Chatbot";
+import QueueOption from "./QueueOption";
+import Prompt from "./Prompt";
+import QueueIntegrations from "./QueueIntegrations";
+
 @Table
 class Queue extends Model<Queue> {
   @PrimaryKey
   @AutoIncrement
   @Column
   id: number;
+
   @AllowNull(false)
   @Unique
   @Column
   name: string;
+
   @AllowNull(false)
   @Unique
   @Column
   color: string;
+
   @Default("")
   @Column
   greetingMessage: string;
+
   @Default("")
   @Column
   outOfHoursMessage: string;
-  @Column({ type: DataType.JSONB })
+
+  @Column({
+    type: DataType.JSONB
+  })
   schedules: [];
+
   @CreatedAt
   createdAt: Date;
+
   @UpdatedAt
   updatedAt: Date;
+
   @ForeignKey(() => Company)
   @Column
   companyId: number;
-  @Column
-  typebotToken: string;
-  @Column
-  typebotUrl: string;
-  @Column
-  typebotName: string;
+
   @BelongsTo(() => Company)
   company: Company;
+
   @BelongsToMany(() => Whatsapp, () => WhatsappQueue)
   whatsapps: Array<Whatsapp & { WhatsappQueue: WhatsappQueue }>;
+
   @BelongsToMany(() => User, () => UserQueue)
   users: Array<User & { UserQueue: UserQueue }>;
-  @HasMany(() => Chatbot, {
+
+  @HasMany(() => QueueOption, {
     onDelete: "DELETE",
     onUpdate: "DELETE",
     hooks: true
   })
-  chatbots: Chatbot[];
- 
+  options: QueueOption[];
+
+  @Column
+  orderQueue: number;
+
+
+  @ForeignKey(() => QueueIntegrations)
+  @Column
+  integrationId: number;
+
+  @BelongsTo(() => QueueIntegrations)
+  queueIntegrations: QueueIntegrations;
+
+  @ForeignKey(() => Prompt)
+  @Column
+  promptId: number;
+
+  @BelongsTo(() => Prompt)
+  prompt: Prompt;
+
+  @Column
+  mediaPath: string;
+
+  @Column
+  mediaName: string;
 }
+
 export default Queue;

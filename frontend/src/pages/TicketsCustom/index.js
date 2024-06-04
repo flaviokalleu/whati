@@ -3,19 +3,17 @@ import { useParams } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "../../assets/logo.png"; 
 
 import TicketsManager from "../../components/TicketsManagerTabs/";
 import Ticket from "../../components/Ticket/";
-
+import logo from "../../assets/logo_login.png"; //PLW DESIGN LOGO//
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	chatContainer: {
 		flex: 1,
 		// backgroundColor: "#eee",
-		padding: theme.spacing(4),
-		// padding: "2px",
+		padding: theme.spacing(1), //Aqui ele ajusta espaço na tela de ticket
 		height: `calc(100% - 48px)`,
 		overflowY: "hidden",
 	},
@@ -38,8 +36,7 @@ const useStyles = makeStyles(theme => ({
 		flexDirection: "column",
 	},
 	welcomeMsg: {
-		// backgroundColor: "#eee",
-		background: theme.palette.tabHeaderBackground,
+		backgroundColor: theme.palette.boxticket, //DARK MODE PLW DESIGN//
 		display: "flex",
 		justifyContent: "space-evenly",
 		alignItems: "center",

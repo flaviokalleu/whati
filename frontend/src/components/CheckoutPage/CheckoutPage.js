@@ -25,6 +25,7 @@ import checkoutFormModel from "./FormModel/checkoutFormModel";
 import formInitialValues from "./FormModel/formInitialValues";
 
 import useStyles from "./styles";
+import Invoices from "../../pages/Financeiro";
 
 
 export default function CheckoutPage(props) {
@@ -36,32 +37,31 @@ export default function CheckoutPage(props) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
-  const [invoiceId, ] = useState(props.Invoice.id);
-  const [paymentText, setPaymentText] = useState("");
+  const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
 
-  function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
+function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
 
-    switch (step) {
-      case 0:
-        return <AddressForm formField={formField} values={values} setFieldValue={setFieldValue}  />;
-      case 1:
-        return <PaymentForm 
-        formField={formField} 
-        setFieldValue={setFieldValue} 
-        setActiveStep={setActiveStep} 
-        activeStep={step} 
-        invoiceId={invoiceId}
-        values={values}
-        />;
-      case 2:
-        return <ReviewOrder />;
-      default:
-        return <div>Not Found</div>;
-    }
+  switch (step) {
+    case 0:
+      return <AddressForm formField={formField} values={values} setFieldValue={setFieldValue}  />;
+    case 1:
+      return <PaymentForm 
+      formField={formField} 
+      setFieldValue={setFieldValue} 
+      setActiveStep={setActiveStep} 
+      activeStep={step} 
+      invoiceId={invoiceId}
+      values={values}
+      />;
+    case 2:
+      return <ReviewOrder />;
+    default:
+      return <div>Not Found</div>;
   }
+}
 
 
   async function _submitForm(values, actions) {
@@ -87,14 +87,11 @@ export default function CheckoutPage(props) {
       }
 
       const { data } = await api.post("/subscription", newValues);
-      setDatePayment(data);
-      setPaymentText("Ao realizar o pagamento, atualize a página!");
-      window.open(data.urlMcPg, '_blank');
-      actions.setSubmitting(true);
-      //setActiveStep(activeStep + 1);
+      setDatePayment(data)
+      actions.setSubmitting(false);
+      setActiveStep(activeStep + 1);
       toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
     } catch (err) {
-      actions.setSubmitting(false);
       toastError(err);
     }
   }
@@ -167,13 +164,6 @@ export default function CheckoutPage(props) {
                     )}
                   </div>
                 </div>
-                {paymentText && (
-  <div style={{ backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '8px', marginTop: '10px' }}>
-    <Typography variant="h5" align="center" style={{ color: '#ff5722', fontWeight: 'bold', fontFamily: 'cursive' }}>
-      {paymentText}
-    </Typography>
-  </div>
-)}
               </Form>
             )}
           </Formik>

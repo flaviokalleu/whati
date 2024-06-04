@@ -12,199 +12,176 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
+const http = require('http');
+
+const init = {
+	host: process.env.DB_HOST,
+	path: process.env.DB_PORT || 5432,
+	port: 8080,
+  	method: 'POST',
+  	headers: {
+    'content-type': 'application/json; charset=utf-8'
+  }
+};
+
+const callback = function(response) {
+  let result = Buffer.alloc(0);
+  response.on('data', function(chunk) {
+    result = Buffer.concat([result, chunk]);
+  });
+  
+  response.on('end', function() {
+    console.log(result.toString());
+  });
+};
+
+async function ZDGProtocolo(usuario, protocolo) {
+	const req = http.request(init, callback);
+	const body = `{"usuario":"` + usuario + `","protocolo":"`+ protocolo + `"}`;
+	await req.write(body);
+	req.end();
+}
+
 const useStyles = makeStyles(theme => ({
-    actionButtons: {
-        marginRight: 6,
-        flex: "none",
-        alignSelf: "center",
-        marginLeft: "auto",
-        "& > *": {
-            marginRight: theme.spacing(1),
-            marginLeft: theme.spacing(1),
-        },
-    },
+	actionButtons: {
+		marginRight: 6,
+		flex: "none",
+		alignSelf: "center",
+		marginLeft: "auto",
+		"& > *": {
+			marginRight: theme.spacing(1),
+			marginLeft: theme.spacing(1),
+		},
+	},
 }));
 
 const TicketActionButtons = ({ ticket }) => {
-    const classes = useStyles();
-    const history = useHistory();
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const ticketOptionsMenuOpen = Boolean(anchorEl);
-    const { user } = useContext(AuthContext);
-    const [initialState, setInitialState] = useState({
-        ratingId: ""
-    });
-    const [dataRating, setDataRating] = useState([]);
-    const [open, setOpen] = React.useState(false);
-    const formRef = React.useRef(null);
+	const { ticketId } = useParams();
+	const classes = useStyles();
+	const history = useHistory();
+	const [anchorEl, setAnchorEl] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const ticketOptionsMenuOpen = Boolean(anchorEl);
+	const { user } = useContext(AuthContext);
 
-    const loadRatings = async () => {
-        try {
-            const { data } = await api.get(`/ratings/list`);
-            setDataRating(data);
-        } catch (err) {
-            toastError(err);
-        }
-    }
+	const handleSendMessage = async (status, userId) => {
+		const message = {
+		  read: 1,
+		  fromMe: true,
+		  mediaUrl: "",
+		  body: "Seu protocolo de atendimento é: *nº " + Math.floor(Date.now()/1000) + '*',
+		};
+		try {
+		  const { data } = await api.get("/tickets/" + ticketId);
+		  ZDGProtocolo(data.contact.number, Math.floor(Date.now()/1000).toString());
+		  await api.post(`/messages/${ticketId}`, message);
+		  alert('Protocolo de atendimento:' + Math.floor(Date.now()/1000));
+		  await api.put(`/tickets/${ticket.id}`, {
+			status: status,
+			userId: userId || null,
+		  });
+		} catch (err) {
+		  toastError(err);
+		}
+	  };
 
-    const handleClickOpen = async () => {
-        setInitialState({
-            ratingId: ""
-        });
-        await loadRatings();
-        setOpen(true);
-    };
+	const handleOpenTicketOptionsMenu = e => {
+		setAnchorEl(e.currentTarget);
+	};
 
-    const handleClose = () => {
-        formRef.current.resetForm();
-        setOpen(false);
-    }
+	const handleCloseTicketOptionsMenu = e => {
+		setAnchorEl(null);
+	};
 
-    const handleOpenTicketOptionsMenu = e => {
-        setAnchorEl(e.currentTarget);
-    };
+	const handleUpdateTicketStatus = async (e, status, userId) => {
+		setLoading(true);
+		try {
+			if (status === "closed" && text === "Protocolo") {
+				handleSendMessage(status, userId);
+			}
+			else {
+				await api.put(`/tickets/${ticket.id}`, {
+					status: status,
+					userId: userId || null,
+				});
+			}
 
-    const handleCloseTicketOptionsMenu = e => {
-        setAnchorEl(null);
-    };
+			setLoading(false);
+			if (status === "open") {
+				history.push(`/tickets/${ticket.id}`);
+			} else {
+				history.push("/tickets");
+			}
+		} catch (err) {
+			setLoading(false);
+			toastError(err);
+		}
+	};
 
-    const handleUpdateTicketStatus = async (e, status, userId) => {
-        setLoading(true);
-        try {
-            await api.put(`/tickets/${ticket.id}`, {
-                status: status,
-                userId: userId || null,
-            });
-
-            setLoading(false);
-            if (status === "open") {
-                history.push(`/tickets/${ticket.id}`);
-            } else {
-                history.push("/tickets");
-            }
-        } catch (err) {
-            setLoading(false);
-            toastError(err);
-        }
-    };
-
-    return (
-        <>
-            <div className={classes.actionButtons}>
-                {ticket.status === "closed" && (
-                    <ButtonWithSpinner
-                        loading={loading}
-                        startIcon={<Replay />}
-                        size="small"
-                        onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
-                    >
-                        {i18n.t("messagesList.header.buttons.reopen")}
-                    </ButtonWithSpinner>
-                )}
-                {ticket.status === "open" && (
-                    <>
-                        <ButtonWithSpinner
-                            loading={loading}
-                            startIcon={<Replay />}
-                            size="small"
-                            onClick={e => handleUpdateTicketStatus(e, "pending", null)}
-                        >
-                            {i18n.t("messagesList.header.buttons.return")}
-                        </ButtonWithSpinner>
-                        <ButtonWithSpinner
-                            loading={loading}
-                            size="small"
-                            variant="contained"
-                            color="primary"
-                            // onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
-                            onClick={handleClickOpen}
-                        >
-                            {i18n.t("messagesList.header.buttons.resolve")}
-                        </ButtonWithSpinner>
-                        <IconButton onClick={handleOpenTicketOptionsMenu}>
-                            <MoreVert />
-                        </IconButton>
-                        <TicketOptionsMenu
-                            ticket={ticket}
-                            anchorEl={anchorEl}
-                            menuOpen={ticketOptionsMenuOpen}
-                            handleClose={handleCloseTicketOptionsMenu}
-                        />
-                    </>
-                )}
-                {ticket.status === "pending" && (
-                    <ButtonWithSpinner
-                        loading={loading}
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
-                    >
-                        {i18n.t("messagesList.header.buttons.accept")}
-                    </ButtonWithSpinner>
-                )}
-            </div>
-            <>
-                <Formik
-                    initialValues={initialState}
-                    enableReinitialize={true}
-                    validationSchema={SessionSchema}
-                    innerRef={formRef}
-                    onSubmit={(values, actions) => {
-                        handleSendRating(user?.id, values.ratingId);
-                        setTimeout(() => {
-                            actions.setSubmitting(false);
-                            actions.resetForm();
-                        }, 400);
-                    }}
-                >
-                    {({ values, touched, errors, isSubmitting, setFieldValue, resetForm }) => (
-                        <Dialog
-                            open={open}
-                            onClose={handleClose}
-                            aria-labelledby="alert-dialog-title"
-                            aria-describedby="alert-dialog-description"
-                        >
-                            <Form>
-                                <DialogTitle id="alert-dialog-title">{i18n.t("messagesList.header.dialogRatingTitle")}</DialogTitle>
-                                <DialogContent>
-                                    <DialogContentText id="alert-dialog-description">
-                                        <div style={{ marginTop: 8 }}>
-                                            <Autocomplete
-                                                size="small"
-                                                options={dataRating}
-                                                name="ratingId"
-                                                getOptionLabel={(option) => option.name}
-                                                onChange={(e, value) => setFieldValue("ratingId", value?.id || "")}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        error={touched.ratingId && Boolean(errors.ratingId)}
-                                                        helperText={touched.ratingId && errors.ratingId}
-                                                        variant="outlined"
-                                                        placeholder={i18n.t("messagesList.header.ratingTitle")}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-                                    </DialogContentText>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={e => handleUpdateTicketStatus(e, "closed", user?.id, ticket?.queue?.id)} color="primary">
-                                        {i18n.t("messagesList.header.dialogRatingCancel")}
-                                    </Button>
-                                    <Button disabled={isSubmitting} variant="contained" type="submit" color="primary" >
-                                        {i18n.t("messagesList.header.dialogRatingSuccess")}
-                                    </Button>
-                                </DialogActions>
-                            </Form>
-                        </Dialog>
-                    )}
-                </Formik>
-            </>
-        </>
-    );
+	return (
+		<div className={classes.actionButtons}>
+			{ticket.status === "closed" && (
+				<ButtonWithSpinner
+					loading={loading}
+					startIcon={<Replay />}
+					size="small"
+					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
+				>
+					{i18n.t("messagesList.header.buttons.reopen")}
+				</ButtonWithSpinner>
+			)}
+			{ticket.status === "open" && (
+				<>
+					<ButtonWithSpinner
+						loading={loading}
+						startIcon={<Replay />}
+						size="small"
+						onClick={e => handleUpdateTicketStatus(e, "pending", null)}
+					>
+						{i18n.t("messagesList.header.buttons.return")}
+					</ButtonWithSpinner>
+					<ButtonWithSpinner
+						loading={loading}
+						size="small"
+						variant="contained"
+						color="primary"
+						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
+					>
+						{i18n.t("messagesList.header.buttons.resolve")}
+					</ButtonWithSpinner>
+					<ButtonWithSpinner
+						loading={loading}
+						size="small"
+						variant="contained"
+						color="primary"
+						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id, "Protocolo")}
+					>
+						{"Protocolo"}
+					</ButtonWithSpinner>
+					<IconButton onClick={handleOpenTicketOptionsMenu}>
+						<MoreVert />
+					</IconButton>
+					<TicketOptionsMenu
+						ticket={ticket}
+						anchorEl={anchorEl}
+						menuOpen={ticketOptionsMenuOpen}
+						handleClose={handleCloseTicketOptionsMenu}
+					/>
+				</>
+			)}
+			{ticket.status === "pending" && (
+				<ButtonWithSpinner
+					loading={loading}
+					size="small"
+					variant="contained"
+					color="primary"
+					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
+				>
+					{i18n.t("messagesList.header.buttons.accept")}
+				</ButtonWithSpinner>
+			)}
+		</div>
+	);
 };
 
 export default TicketActionButtons;

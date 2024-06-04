@@ -188,7 +188,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
         <div style={{ display: "none" }}>
           <input
             type="file"
-            accept=".png,.jpg,.jpeg,.mp4,.avi,.mkv"
+            accept=".png,.jpg,.jpeg"
             ref={attachmentFile}
             onChange={(e) => handleAttachmentFile(e)}
           />

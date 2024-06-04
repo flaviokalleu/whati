@@ -177,16 +177,9 @@ const Queues = () => {
         open={queueModalOpen}
         onClose={handleCloseQueueModal}
         queueId={selectedQueue?.id}
-        onEdit={(res) => {
-          if(res) {
-              setTimeout(() => {
-                handleEditQueue(res)
-              }, 500)
-          }
-        }}
       />
       <MainHeader>
-        <Title>{i18n.t("queues.title")} ({queues.length})</Title>
+        <Title>{i18n.t("queues.title")}</Title>
         <MainHeaderButtonsWrapper>
           <Button
             variant="contained"
@@ -201,14 +194,14 @@ const Queues = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-            <TableCell align="center">
-                {i18n.t("ID")}
-              </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.name")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.color")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("queues.table.orderQueue")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.greeting")}
@@ -222,7 +215,6 @@ const Queues = () => {
             <>
               {queues.map((queue) => (
                 <TableRow key={queue.id}>
-                  <TableCell align="center">{queue.id}</TableCell>
                   <TableCell align="center">{queue.name}</TableCell>
                   <TableCell align="center">
                     <div className={classes.customTableCell}>
@@ -234,6 +226,17 @@ const Queues = () => {
                           alignSelf: "center",
                         }}
                       />
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className={classes.customTableCell}>
+                      <Typography
+                        style={{ width: 300, align: "center" }}
+                        noWrap
+                        variant="body2"
+                      >
+                        {queue.orderQueue}
+                      </Typography>
                     </div>
                   </TableCell>
                   <TableCell align="center">

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -12,7 +12,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import AddIcon from '@material-ui/icons/Add';
+
 import usePlans from "../../../hooks/usePlans";
+import useCompanies from "../../../hooks/useCompanies";
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -22,23 +24,21 @@ const useStyles = makeStyles((theme) => ({
       listStyle: 'none',
     },
   },
-
   margin: {
     margin: theme.spacing(1),
   },
+
 
   cardHeader: {
     backgroundColor:
       theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
   },
-
   cardPricing: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'baseline',
     marginBottom: theme.spacing(2),
   },
-
   footer: {
     borderTop: `1px solid ${theme.palette.divider}`,
     marginTop: theme.spacing(8),
@@ -56,7 +56,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     flexDirection: "column",
   },
-
   custom: {
     display: "flex",
     alignItems: "center",
@@ -64,66 +63,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+
 export default function Pricing(props) {
   const {
     setFieldValue,
     setActiveStep,
     activeStep,
   } = props;
-
-  const classes = useStyles();
-  const [usersPlans, setUsersPlans] = React.useState(3);
-  const [connectionsPlans, setConnectionsPlans] = React.useState(3);
-  const [storagePlans, setStoragePlans] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
-  //const [setLoading] = React.useState(false);
-
-  const { getPlanCompany } = usePlans();
-
-  useEffect(() => {
-    async function fetchData() {
-      await loadPlans();
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadPlans = async () => {
-    setLoading(true);
-    try {
-      const companyId = localStorage.getItem("companyId");
-      const _planList = await getPlanCompany(undefined, companyId);
-
-      const planList = _planList.plan;
-
-      const plans = []
-
-      plans.push({
-        title: planList.name,
-        planId: planList.id,
-        price: planList.amount,
-        description: [
-          `${planList.users} Usuários`,
-          `${planList.connections} Conexão`,
-          `${planList.queues} Filas`
-        ],
-        users: planList.users,
-        connections: planList.connections,
-        queues: planList.queues,
-        buttonText: 'SELECIONAR',
-        buttonVariant: 'outlined',
-      })
-
-      // setStoragePlans(data);
-
-      setStoragePlans(plans);
-    } catch (e) {
-      // toast.error("Não foi possível carregar a lista de registros");
-    }
-    setLoading(false);
-  };
-
-  const [customValuePlans, setCustomValuePlans] = React.useState(49.00);
 
   const handleChangeAdd = (event, newValue) => {
     if (newValue < 3) return
@@ -157,12 +103,78 @@ export default function Pricing(props) {
     setCustomValuePlans(customValuePlans - newPrice);
   }
 
+  const { list, finder } = usePlans();
+  const { find } = useCompanies();
+
+  const classes = useStyles();
+  const [usersPlans, setUsersPlans] = React.useState(3);
+  const [companiesPlans, setCompaniesPlans] = useState(0);
+  const [connectionsPlans, setConnectionsPlans] = React.useState(3);
+  const [storagePlans, setStoragePlans] = React.useState([]);
+  const [customValuePlans, setCustomValuePlans] = React.useState(49.00);
+  const [loading, setLoading] = React.useState(false);
+  const companyId = localStorage.getItem("companyId");
+
+  useEffect(() => {
+    async function fetchData() {
+      await loadCompanies();
+    }
+    fetchData();
+  }, [])
+
+  const loadCompanies = async () => {
+    setLoading(true);
+    try {
+      const companiesList = await find(companyId);
+      setCompaniesPlans(companiesList.planId);
+      await loadPlans(companiesList.planId);
+    } catch (e) {
+      console.log(e);
+      // toast.error("Não foi possível carregar a lista de registros");
+    }
+    setLoading(false);
+  };
+  const loadPlans = async (companiesPlans) => {
+    setLoading(true);
+    try {
+      const plansCompanies = await finder(companiesPlans);
+      const plans = []
+
+      //plansCompanies.forEach((plan) => {
+      plans.push({
+        title: plansCompanies.name,
+        planId: plansCompanies.id,
+        price: plansCompanies.value,
+        description: [
+          `${plansCompanies.users} Usuários`,
+          `${plansCompanies.connections} Conexão`,
+          `${plansCompanies.queues} Filas`
+        ],
+        users: plansCompanies.users,
+        connections: plansCompanies.connections,
+        queues: plansCompanies.queues,
+        buttonText: 'SELECIONAR',
+        buttonVariant: 'outlined',
+      })
+
+      // setStoragePlans(data);
+      //});
+      setStoragePlans(plans);
+    } catch (e) {
+      console.log(e);
+      // toast.error("Não foi possível carregar a lista de registros");
+    }
+    setLoading(false);
+  };
+
+
+  const tiers = storagePlans
   return (
     <React.Fragment>
       <Grid container spacing={3}>
-        {storagePlans?.map((tier) => (
+        {tiers.map((tier) => (
           // Enterprise card is full width at sm breakpoint
-          <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 6} md={12}>
+          <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 12} md={12}>
             <Card>
               <CardHeader
                 title={tier.title}
@@ -176,14 +188,10 @@ export default function Pricing(props) {
                 <div className={classes.cardPricing}>
                   <Typography component="h2" variant="h3" color="textPrimary">
                     {
-                      tier.custom ?
-                        <React.Fragment>
-                          ${customValuePlans.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </React.Fragment>
-                        :
-                        <React.Fragment>
-                          ${tier.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </React.Fragment>
+
+                      <React.Fragment>
+                        R${tier.price.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+                      </React.Fragment>
                     }
                   </Typography>
                   <Typography variant="h6" color="textSecondary">
@@ -196,42 +204,6 @@ export default function Pricing(props) {
                       {line}
                     </Typography>
                   ))}
-
-                  {
-                    tier.custom && (
-                      <div className={classes.customCard}>
-                        <div className={classes.custom}>
-                          <Typography component="li" variant="subtitle1" align="center" key={12}>
-
-                            <IconButton aria-label="delete" className={classes.margin} size="small">
-                              <MinimizeIcon fontSize="inherit" onClick={e => handleChangeMin(e, usersPlans - 1)} />
-                            </IconButton>
-                            {usersPlans} Usuários
-
-                            <IconButton aria-label="delete" className={classes.margin} size="small">
-                              <AddIcon fontSize="inherit" onClick={e => handleChangeAdd(e, usersPlans + 1)} />
-                            </IconButton>
-                          </Typography>
-                        </div>
-
-                        <div className={classes.custom}>
-                          <Typography component="li" variant="subtitle1" align="center" key={12}>
-
-                            <IconButton aria-label="delete" className={classes.margin} size="small">
-                              <MinimizeIcon fontSize="inherit" onClick={(e) => handleChangeConnectionsMin(e, connectionsPlans - 1)} />
-                            </IconButton>
-                            {connectionsPlans} Conexão
-
-                            <IconButton aria-label="delete" className={classes.margin} size="small">
-                              <AddIcon fontSize="inherit" onClick={(e) => handleChangeConnectionsAdd(e, connectionsPlans + 1)} />
-                            </IconButton>
-                          </Typography>
-                        </div>
-                      </div>
-
-                    )
-                  }
-
                 </ul>
               </CardContent>
               <CardActions>
@@ -244,12 +216,11 @@ export default function Pricing(props) {
                       setFieldValue("plan", JSON.stringify({
                         users: usersPlans,
                         connections: connectionsPlans,
-                        price: customValuePlans
+                        price: customValuePlans,
                       }));
                     } else {
                       setFieldValue("plan", JSON.stringify(tier));
                     }
-
                     setActiveStep(activeStep + 1);
                   }
                   }

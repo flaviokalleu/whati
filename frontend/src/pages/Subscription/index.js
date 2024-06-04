@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import Paper from "@material-ui/core/Paper";
@@ -10,8 +10,6 @@ import SubscriptionModal from "../../components/SubscriptionModal";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 import MainContainer from "../../components/MainContainer";
-import moment from "moment";
-import { useDate } from "../../hooks/useDate";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
@@ -24,6 +22,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const _formatDate = (date) => {
+  const now = new Date();
+  const past = new Date(date);
+  const diff = Math.abs(now.getTime() - past.getTime());
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  return days;
+}
+
 const Contacts = () => {
   const classes = useStyles();
   const { user } = useContext(AuthContext);
@@ -33,8 +40,7 @@ const Contacts = () => {
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [hasMore,] = useState(false);
-  const [dueDate, setDueDate] = useState("");
-  const { returnDays } = useDate();
+
 
   const handleOpenContactModal = () => {
     setSelectedContactId(null);
@@ -58,13 +64,6 @@ const Contacts = () => {
     }
   };
 
-  useEffect(() => {
-    const currentDueDate = localStorage.getItem("dueDate");
-    if (currentDueDate !== "" && currentDueDate !== "null") {
-      setDueDate(moment(currentDueDate).format("DD/MM/YYYY"));
-    }
-  }, []);
-
   return (
     <MainContainer className={classes.mainContainer}>
       <SubscriptionModal
@@ -87,13 +86,16 @@ const Contacts = () => {
           <div>
             <TextField
               id="outlined-full-width"
-              label="Período de Licença"
-              // defaultValue={`Sua licença vence em ${returnDays(user?.company?.dueDate)} dias!`}
-              defaultValue={returnDays(user?.company?.dueDate) === 0 ? `Sua licença vence em hoje!` : `Sua licença vence em ${returnDays(user?.company?.dueDate)} dias!`}
+              label="Período de teste"
+              defaultValue={`Seu período de teste termina em ${_formatDate(user?.company?.trialExpiration)} dias!`}
               fullWidth
               margin="normal"
-              InputLabelProps={{ shrink: true, }}
-              InputProps={{ readOnly: true, }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              InputProps={{
+                readOnly: true,
+              }}
               variant="outlined"
             />
 
@@ -103,7 +105,7 @@ const Contacts = () => {
             <TextField
               id="outlined-full-width"
               label="Email de cobrança"
-              defaultValue={user?.email}
+              defaultValue={user?.company?.email}
               fullWidth
               margin="normal"
               InputLabelProps={{
